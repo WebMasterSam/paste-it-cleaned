@@ -17,11 +17,13 @@ namespace PasteItCleaned.Cleaners.Office.Word
             return content.ToLower().Contains("<meta name=Generator content=\"Microsoft Word".ToLower());
         }
 
-        public override string Clean(string original, string content)
+        public override string Clean(string content)
         {
-            var cleaned = base.Clean(original, content);
+            var cleaned = content;
 
             // Gérer les versions plus récentes de word
+
+            cleaned = base.Clean(content);
 
             return cleaned;
         }

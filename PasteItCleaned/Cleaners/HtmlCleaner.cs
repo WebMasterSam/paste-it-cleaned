@@ -13,12 +13,14 @@ namespace PasteItCleaned.Cleaners
             return SourceType.Unknown;
         }
 
-        public override string Clean(string original, string content)
+        public override string Clean(string content)
         {
-            var cleaned = base.Clean(original, content);
+            var cleaned = content;
 
             cleaned = this.RemoveComments(cleaned);
             cleaned = this.RemoveScriptTags(cleaned);
+
+            cleaned = base.Clean(content);
 
             return cleaned;
         }

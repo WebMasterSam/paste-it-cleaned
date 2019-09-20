@@ -6,6 +6,7 @@ using PasteItCleaned.Cleaners.Office.Excel;
 using PasteItCleaned.Cleaners.Office.PowerPoint;
 using PasteItCleaned.Cleaners.Office.Word;
 using PasteItCleaned.Cleaners.Web;
+using PasteItCleaned.Helpers;
 
 namespace PasteItCleaned.Controllers
 {
@@ -19,32 +20,35 @@ namespace PasteItCleaned.Controllers
         [HttpPost()]
         public ActionResult<string> Post([FromBody] CleanObject obj)
         {
-            // MultiThread where applicable
-
             var content = "";
-
-            EnsureCleaners();
 
             try
             {
+                EnsureCleaners();
+
                 content = obj.value;
 
-                if (ApiKeyPresent())
+                if (ApiKeyHelper.ApiKeyPresent())
                 {
-                    if (ApiKeyValid())
+                    if (ApiKeyHelper.ApiKeyValid())
                     {
-                        if (ApiKeyFitsWithDomain())
+                        if (ApiKeyHelper.ApiKeyFitsWithDomain())
                         {
-                            return Clean(content);
+                            if (AccountHelper.AccountIsPaid())
+                            {
+                                return Clean(content);
+                            }
+                            else
+                                return ErrorHelper.GetAccountIsUnpaid();
                         }
                         else
-                            return "[PasteItCleaned ERR-012]: The domain where the plugin was used (XXX) is not configure for the account with API key (YYY).";
+                            return ErrorHelper.GetApiKeyDomainNotConfigured();
                     }
                     else
-                        return "[PasteItCleaned ERR-011]: Your API key is invalid (YYY).";
+                        return ErrorHelper.GetApiKeyInvalid();
                 }
 
-                return "[PasteItCleaned ERR-010]: You forgot to add an API key to your script tag.";
+                return ErrorHelper.GetApiKeyAbsent();
             }
             catch (Exception ex)
             {
@@ -54,47 +58,19 @@ namespace PasteItCleaned.Controllers
             }
         }
 
-        private void SaveStat(SourceType type)
-        {
-            // call DB to increase stat: type, date
-        }
-
         private string Clean(string content)
         {
             foreach (BaseCleaner cleaner in Cleaners)
             {
                 if (cleaner.CanClean(content))
                 {
-                    SaveStat(cleaner.GetSourceType());
+                    DbHelper.SaveStat(cleaner.GetSourceType());
 
-                    return cleaner.Clean(content, content);
+                    return cleaner.Clean(content);
                 }
             }
 
             return content;
-        }
-
-        private bool ApiKeyFitsWithDomain()
-        {
-            return true;
-        }
-
-        private bool ApiKeyPresent()
-        {
-            // read api key from headers
-            return true;
-        }
-
-        private bool ApiKeyValid()
-        {
-            // read api key from headers
-            return true;
-        }
-
-        private string GetApiKey()
-        {
-            // read api key from headers
-            return "";
         }
 
         private void EnsureCleaners()

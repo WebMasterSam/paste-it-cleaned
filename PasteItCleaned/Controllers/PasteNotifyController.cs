@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using PasteItCleaned.Cleaners;
+using PasteItCleaned.Helpers;
 
 namespace PasteItCleaned.Controllers
 {
@@ -15,8 +13,29 @@ namespace PasteItCleaned.Controllers
         [HttpPost()]
         public ActionResult<string> Post([FromBody] NotifyObject obj)
         {
-            // read api key from headers
-            // simply add a stat for text only paste
+            try
+            {
+                if (ApiKeyHelper.ApiKeyPresent())
+                {
+                    if (ApiKeyHelper.ApiKeyValid())
+                    {
+                        if (ApiKeyHelper.ApiKeyFitsWithDomain())
+                        {
+                            DbHelper.SaveStat(SourceType.Text);
+                        }
+                        else
+                            return ErrorHelper.GetApiKeyDomainNotConfigured();
+                    }
+                    else
+                        return ErrorHelper.GetApiKeyInvalid();
+                }
+
+                return ErrorHelper.GetApiKeyAbsent();
+            }
+            catch (Exception ex)
+            {
+                // Error handling
+            }
 
             return "";
         }

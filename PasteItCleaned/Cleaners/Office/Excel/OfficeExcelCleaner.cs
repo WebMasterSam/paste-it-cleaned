@@ -17,9 +17,11 @@ namespace PasteItCleaned.Cleaners.Office.Excel
             return content.ToLower().Contains("<meta name=Generator content=\"Microsoft Excel".ToLower());
         }
 
-        public override string Clean(string original, string content)
+        public override string Clean(string content)
         {
-            var cleaned = base.Clean(original, content);
+            var cleaned = content;
+
+            cleaned = base.Clean(content);
 
             return cleaned;
         }

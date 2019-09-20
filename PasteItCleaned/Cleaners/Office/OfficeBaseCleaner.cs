@@ -8,9 +8,9 @@ namespace PasteItCleaned.Cleaners.Office
 {
     public class OfficeBaseCleaner : HtmlCleaner
     {
-        public override string Clean(string original, string content)
+        public override string Clean(string content)
         {
-            var cleaned = base.Clean(original, content);
+            var cleaned = content;
 
             cleaned = this.RemoveTitle(cleaned);
             cleaned = this.RemoveClassnames(cleaned);
@@ -19,6 +19,8 @@ namespace PasteItCleaned.Cleaners.Office
             cleaned = this.RemoveImageVTags(cleaned);
             cleaned = this.RemoveExtraLines(cleaned);
             cleaned = this.FixEntities(cleaned);
+
+            cleaned = base.Clean(content);
 
             return cleaned;
         }

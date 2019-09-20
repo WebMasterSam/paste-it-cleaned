@@ -12,7 +12,7 @@
             return false;
         }
 
-        public virtual string Clean(string original, string content)
+        public virtual string Clean(string content)
         {
             return content;
         }
