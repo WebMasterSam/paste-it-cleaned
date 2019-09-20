@@ -7,21 +7,22 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace PasteItCleaned.Controllers
 {
-    [Route("api/v1/clean")]
+    [Route("api/v1/notify")]
     [ApiController]
-    public class PasteController : ControllerBase
+    public class PasteNotifyController : ControllerBase
     {
-        // POST api/v1/clean
+        // POST api/v1/notify
         [HttpPost()]
-        public ActionResult<string> Post([FromBody] CleanObject obj)
+        public ActionResult<string> Post([FromBody] NotifyObject obj)
         {
             // read api key from headers
+            // simply add a stat for text only paste
 
-            return string.Format("This is an HTML value <b>{0}</b> got from backend !!!", obj.value);
+            return "";
         }
     }
 
-    public class CleanObject
+    public class NotifyObject
     {
         public string value { get; set; }
     }
