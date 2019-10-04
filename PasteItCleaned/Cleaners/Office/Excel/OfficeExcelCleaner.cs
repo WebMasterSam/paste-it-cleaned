@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace PasteItCleaned.Cleaners.Office.Excel
+﻿namespace PasteItCleaned.Cleaners.Office.Excel
 {
     public class OfficeExcelCleaner : OfficeBaseCleaner
     {
@@ -21,7 +16,17 @@ namespace PasteItCleaned.Cleaners.Office.Excel
         {
             var cleaned = content;
 
-            cleaned = base.Clean(content);
+            cleaned = base.SafeExec(base.ParseWithHtmlAgilityPack, cleaned);
+
+            cleaned = base.SafeExec(base.AddInlineStyles, cleaned);
+
+            cleaned = base.SafeExec(this.RemoveUselessAttributes, cleaned);
+            cleaned = base.SafeExec(this.RemoveUselessStyles, cleaned);
+            cleaned = base.SafeExec(base.RemoveUselessTags, cleaned);
+
+            cleaned = base.SafeExec(base.RemoveImageVTags, cleaned);
+
+            cleaned = base.Clean(cleaned);
 
             return cleaned;
         }

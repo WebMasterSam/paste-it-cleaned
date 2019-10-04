@@ -21,7 +21,7 @@ namespace PasteItCleaned.Cleaners.Office.PowerPoint
         {
             var cleaned = content;
 
-            cleaned = base.Clean(content);
+            cleaned = base.Clean(cleaned);
 
             return cleaned;
         }

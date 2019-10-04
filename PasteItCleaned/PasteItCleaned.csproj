@@ -9,8 +9,84 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AngleSharp" Version="0.13.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="tidy\AlignAttrCheck.cs" />
+    <Compile Update="tidy\AnchorCheckTableCheckAttribs.cs" />
+    <Compile Update="tidy\AreaCheckTableCheckAttribs.cs" />
+    <Compile Update="tidy\AttrCheckImpl.cs" />
+    <Compile Update="tidy\Attribute.cs" />
+    <Compile Update="tidy\AttributeTable.cs" />
+    <Compile Update="tidy\AttVal.cs" />
+    <Compile Update="tidy\BoolAttrCheck.cs" />
+    <Compile Update="tidy\CaptionCheckTableCheckAttribs.cs" />
+    <Compile Update="tidy\CharEncoding.cs" />
+    <Compile Update="tidy\CheckAttribsImpl.cs" />
+    <Compile Update="tidy\Clean.cs" />
+    <Compile Update="tidy\ClsStreamInImpl.cs" />
+    <Compile Update="tidy\ContentModel.cs" />
+    <Compile Update="tidy\Dict.cs" />
+    <Compile Update="tidy\DocType.cs" />
+    <Compile Update="tidy\DomAttrImpl.cs" />
+    <Compile Update="tidy\DomAttrMapImpl.cs" />
+    <Compile Update="tidy\DomCdataSectionImpl.cs" />
+    <Compile Update="tidy\DomCharacterDataImpl.cs" />
+    <Compile Update="tidy\DomCommentImpl.cs" />
+    <Compile Update="tidy\DomDocumentImpl.cs" />
+    <Compile Update="tidy\DomDocumentTypeImpl.cs" />
+    <Compile Update="tidy\DomElementImpl.cs" />
+    <Compile Update="tidy\DomNodeImpl.cs" />
+    <Compile Update="tidy\DomNodeListByTagNameImpl.cs" />
+    <Compile Update="tidy\DomNodeListImpl.cs" />
+    <Compile Update="tidy\DomProcessingInstructionImpl.cs" />
+    <Compile Update="tidy\DomTextImpl.cs" />
+    <Compile Update="tidy\Entity.cs" />
+    <Compile Update="tidy\EntityTable.cs" />
+    <Compile Update="tidy\HrCheckTableCheckAttribs.cs" />
+    <Compile Update="tidy\HtmlCheckAttribs.cs" />
+    <Compile Update="tidy\HtmlVersion.cs" />
+    <Compile Update="tidy\IAttrCheck.cs" />
+    <Compile Update="tidy\ICheckAttribs.cs" />
+    <Compile Update="tidy\IdAttrCheck.cs" />
+    <Compile Update="tidy\ImgCheckTableCheckAttribs.cs" />
+    <Compile Update="tidy\InlineStack.cs" />
+    <Compile Update="tidy\IParser.cs" />
+    <Compile Update="tidy\Lexer.cs" />
+    <Compile Update="tidy\LinkCheckTableCheckAttribs.cs" />
+    <Compile Update="tidy\MapCheckTableCheckAttribs.cs" />
+    <Compile Update="tidy\MessageLevel.cs" />
+    <Compile Update="tidy\MutableBoolean.cs" />
+    <Compile Update="tidy\MutableInteger.cs" />
+    <Compile Update="tidy\MutableObject.cs" />
+    <Compile Update="tidy\NameAttrCheck.cs" />
+    <Compile Update="tidy\Node.cs" />
+    <Compile Update="tidy\Out.cs" />
+    <Compile Update="tidy\OutImpl.cs" />
+    <Compile Update="tidy\ParserImpl.cs" />
+    <Compile Update="tidy\PPrint.cs" />
+    <Compile Update="tidy\Report.cs" />
+    <Compile Update="tidy\ScriptAttrCheck.cs" />
+    <Compile Update="tidy\ScriptCheckAttribs.cs" />
+    <Compile Update="tidy\StreamIn.cs" />
+    <Compile Update="tidy\StreamInImpl.cs" />
+    <Compile Update="tidy\Style.cs" />
+    <Compile Update="tidy\StyleCheckTableCheckAttribs.cs" />
+    <Compile Update="tidy\StyleProp.cs" />
+    <Compile Update="tidy\TableCellCheckTableCheckAttribs.cs" />
+    <Compile Update="tidy\TableCheckAttribs.cs" />
+    <Compile Update="tidy\TagTable.cs" />
+    <Compile Update="tidy\Tidy.cs" />
+    <Compile Update="tidy\TidyMessage.cs" />
+    <Compile Update="tidy\TidyMessageCollection.cs" />
+    <Compile Update="tidy\TidyOptions.cs" />
+    <Compile Update="tidy\UrlAttrCheck.cs" />
+    <Compile Update="tidy\ValignAttrCheck.cs" />
+  </ItemGroup>
+
+  <Import Project="..\HtmlAgilityPack.Shared\HtmlAgilityPack.Shared.projitems" Label="Shared" />
 
 </Project>
