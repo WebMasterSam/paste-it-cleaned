@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.IO;
+using System.Text;
+
 using HtmlAgilityPack;
-using System.Xml;
+
 using AngleSharp.Html;
 using AngleSharp.Html.Parser;
-using System.Text;
 
 namespace PasteItCleaned.Cleaners
 {
     public class HtmlCleaner : BaseCleaner
     {
-        private string[] ValideAttributes = { "style", "colspan", "rowspan" };
+        private string[] ValideAttributes = { "style", "colspan", "rowspan", "src" };
 
         //<font size="5"> becomes <h1> <font size="4"> becomes <h2> etc.)
         // replace images with inline image data, resize images if necessary
@@ -32,10 +31,6 @@ namespace PasteItCleaned.Cleaners
             cleaned = base.Clean(cleaned);
 
             cleaned = base.SafeExec(this.RemoveComments, cleaned);
-            //cleaned = base.SafeExec(this.RemoveScriptTags, cleaned);
-            cleaned = base.SafeExec(this.RemoveUselessAttributes, cleaned);
-            //cleaned = base.SafeExec(this.RemoveSpecialCharacters, cleaned);
-            //cleaned = base.SafeExec(this.CreateRealLineReturns, cleaned);
             cleaned = base.SafeExec(this.Compact, cleaned);
             cleaned = base.SafeExec(this.Indent, cleaned);
 
@@ -70,6 +65,7 @@ namespace PasteItCleaned.Cleaners
             }
         }
 
+
         protected string ParseWithHtmlAgilityPack(string content)
         {
             var htmlDoc = new HtmlDocument();
@@ -78,6 +74,7 @@ namespace PasteItCleaned.Cleaners
 
             return htmlDoc.DocumentNode.OuterHtml;
         }
+
 
         protected string RemoveUselessAttributes(string content)
         {
@@ -96,23 +93,24 @@ namespace PasteItCleaned.Cleaners
             foreach (HtmlNode n in node.ChildNodes)
             {
                 if (n.HasChildNodes)
-                {
                     RemoveUselessAttributesNode(n);
-                }
 
                 for (int i = n.Attributes.Count - 1; i >= 0; i--)
                 {
                     var attr = n.Attributes[i];
                     var valid = false;
 
-                    foreach (var att in ValideAttributes)
-                        if (attr.Name.Trim().ToLower() == att) valid = true;
+                    if (!string.IsNullOrWhiteSpace(attr.Value))
+                        foreach (var att in ValideAttributes)
+                            if (attr.Name.Trim().ToLower() == att)
+                                valid = true;
 
                     if (!valid)
                         n.Attributes.Remove(attr);
                 }
             }
         }
+
 
         protected string RemoveUselessStyles(string content)
         {
@@ -128,8 +126,6 @@ namespace PasteItCleaned.Cleaners
 
         private void RemoveUselessStylesNode(HtmlNode node)
         {
-            var patternStyle = @"(?<modifier>[a-zA-Z0-9-]+?)[\s\t]*?:[\s\t]*?(?<value>.*?);";
-
             foreach (HtmlNode n in node.ChildNodes)
             {
                 if (n.HasChildNodes)
@@ -138,72 +134,69 @@ namespace PasteItCleaned.Cleaners
                 for (int i = n.Attributes.Count - 1; i >= 0; i--)
                 {
                     var attr = n.Attributes[i];
-                    var valid = false;
 
-                    foreach (var att in ValideAttributes)
+                    if (attr.Name.Trim().ToLower() == "style")
                     {
-                        if (attr.Name.Trim().ToLower() == "style")
+                        var newStyles = new StringBuilder();
+                        var modifiers = attr.Value.Split(";");
+
+                        foreach (string modifier in modifiers)
                         {
-                            var newStyles = new StringBuilder();
-                            var modifiers = Regex.Matches(attr.Value, patternStyle, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Multiline);
+                            var modifierName = modifier.Split(":")[0];
+                            var modifierValue = modifier.Split(":")[1];
 
-                            foreach (Match modifier in modifiers)
-                            {
-                                var modifierName = modifier.Groups["modifier"].Value;
-                                var modifierValue = modifier.Groups["value"].Value;
-
-                                if (IsModifierValid(modifierName, modifierValue))
-                                    newStyles.AppendFormat("{0}: {1}; ", modifierName, modifierValue);
-                            }
-
-                            attr.Value = newStyles.ToString();
+                            if (IsModifierValid(modifierName, modifierValue))
+                                newStyles.AppendFormat("{0}: {1}; ", modifierName, modifierValue);
                         }
-                    }
 
-                    if (!valid)
-                        n.Attributes.Remove(attr);
+                        attr.Value = newStyles.ToString();
+                    }
                 }
             }
         }
 
 
-
-
-        /*protected string RemoveSpecialCharacters(string content)
+        protected string AddInlineStyles(string content)
         {
-            content = content.Replace("&rsquo;", "'");
-            content = content.Replace("&lsquo;", "'");
-            content = content.Replace("&ndash;", "--");
-            content = content.Replace("&mdash;", "--");
-            content = content.Replace("&hellip;", "...");
-            content = content.Replace("&quot;", "\"");
-            content = content.Replace("&ldquo;", "\"");
-            content = content.Replace("&rdquo;", "\"");
-            content = content.Replace("&bull;", "");
-            content = content.Replace("", "");
+            var htmlDoc = new HtmlDocument();
+            var styles = this.ParseCssClasses(content);
 
-            return content;
-        }*/
+            htmlDoc.LoadHtml(content);
 
-        /*protected string RemoveClassnames(string content)
+            foreach (HtmlNode node in htmlDoc.DocumentNode.ChildNodes)
+                AddInlineStylesNode(styles, node);
+
+            return htmlDoc.DocumentNode.OuterHtml;
+        }
+
+        protected void AddInlineStylesNode(Dictionary<string, Dictionary<string, string>> styles, HtmlNode node)
         {
-            var pattern = @"\s?class=\w+";
+            foreach (HtmlNode n in node.ChildNodes)
+            {
+                if (n.HasChildNodes)
+                    AddInlineStylesNode(styles, n);
 
-            return Regex.Replace(content, pattern, "");
-        }*/
+                var classAttr = this.FindOrCreateAttr(n, "class");
+
+                if (classAttr != null)
+                {
+                    var styleAttr = this.FindOrCreateAttr(n, "style");
+
+                    styleAttr.Value += this.GetInlineStylesForTag(styles, n.Name);
+                    styleAttr.Value += this.GetInlineStylesForClass(styles, classAttr.Value);
+                }
+            }
+        }
+
 
         protected string RemoveUselessTags(string content)
         {
-            var pattern = @"<(meta|link|/?o:|/?style|/?title|/?div|/?std|/?head|/?html|/?body|/?font|/?span|/?script|!\[)[^>]*?>";
+            var pattern = @"<(meta|link|/?o:|/?v:|/?style|/?title|/?div|/?std|/?head|/?html|/?body|/?script|/?col|/?colgroup|!\[)[^>]*?>";
+
+            content = content.Replace("<font", "<span");
+            content = content.Replace("</font>", "</span>");
 
             return Regex.Replace(content, pattern, "", RegexOptions.Singleline);
-        }
-
-        protected string RemoveEmptyParagraphs(string content)
-        {
-            var pattern = @"(<[^>]+>)+(&nbsp;|<br>|<br/>|<br />)(</\w+>)+";
-
-            return Regex.Replace(content, pattern, "<br />", RegexOptions.Singleline);
         }
 
         protected string RemoveComments(string content)
@@ -213,28 +206,30 @@ namespace PasteItCleaned.Cleaners
             return Regex.Replace(content, pattern, "", RegexOptions.Singleline);
         }
 
-        /*protected string RemoveScriptTags(string content)
+
+
+
+        private HtmlAttribute FindOrCreateAttr(HtmlNode n, string name)
         {
-            var pattern = "<script.*?>.*?</script>";
+            if (!(n.Name.StartsWith("#")))
+            {
+                for (int i = n.Attributes.Count - 1; i >= 0; i--)
+                {
+                    var attr = n.Attributes[i];
 
-            return Regex.Replace(content, pattern, "", RegexOptions.Singleline);
-        }*/
+                    if (attr.Name.Trim().ToLower() == name.Trim().ToLower())
+                        return attr;
+                }
 
+                n.Attributes.Add(name, "");
 
-        protected string AddInlineStyles(string content)
-        {
-            var styles = this.ParseCssClasses(content);
-            var patternClassnames = "class=['\"]?(?<name>[\\.a-zA-Z0-9-_]+?)['\"]?[\\s>]";
-            var classNames = Regex.Matches(content, patternClassnames, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Multiline);
+                return this.FindOrCreateAttr(n, name);
+            }
 
-            foreach (Match className in classNames)
-                content = content.Replace(className.Value, this.GetInlineStyles(styles, className.Groups["name"].Value));
-
-            return content;
+            return null;
         }
 
-
-        private string GetInlineStyles(Dictionary<string, Dictionary<string, string>> styles, string className)
+        private string GetInlineStylesForClass(Dictionary<string, Dictionary<string, string>> styles, string className)
         {
             var inlineStyles = new StringBuilder();
 
@@ -243,13 +238,28 @@ namespace PasteItCleaned.Cleaners
                     foreach (var modifier in classe.Value)
                         inlineStyles.AppendFormat("{0}: {1}; ", modifier.Key, modifier.Value);
 
-            return string.Format("style=\"{0}\"", inlineStyles.ToString().Trim());
+            return inlineStyles.ToString().Trim();
+        }
+
+        private string GetInlineStylesForTag(Dictionary<string, Dictionary<string, string>> styles, string tagName)
+        {
+            var inlineStyles = new StringBuilder();
+
+            foreach (var classe in styles)
+                if (classe.Key == tagName.ToLower().Trim())
+                    foreach (var modifier in classe.Value)
+                        inlineStyles.AppendFormat("{0}: {1}; ", modifier.Key, modifier.Value);
+
+            return inlineStyles.ToString().Trim();
         }
 
         private bool IsModifierValid(string name, string value)
         {
             if (name.ToLower().StartsWith("mso-")) return false;
             if (name.ToLower() == "color" && value.ToLower() == "windowtext") return false;
+            if (name.ToLower().StartsWith("margin")) return false;
+            if (name.ToLower().StartsWith("page-break")) return false;
+            if (name.ToLower().StartsWith("tab-stops")) return false;
 
             return true;
         }

@@ -25,7 +25,7 @@ namespace PasteItCleaned.Cleaners
             {
                 return act.Invoke(content);
             }
-            catch
+            catch (Exception ex)
             {
                 return content;
             }

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace PasteItCleaned.Cleaners.Office
 {
@@ -13,21 +8,38 @@ namespace PasteItCleaned.Cleaners.Office
         {
             var cleaned = content;
 
-            //cleaned = this.RemoveUselessTags(cleaned);
-            //cleaned = this.RemoveImageVTags(cleaned);
+            cleaned = base.SafeExec(base.ParseWithHtmlAgilityPack, cleaned);
 
-            cleaned = base.SafeExec(this.RemoveEmptyParagraphs, cleaned);
+            cleaned = base.SafeExec(this.RemoveUselessStyles, cleaned);
+            cleaned = base.SafeExec(base.AddInlineStyles, cleaned);
+            cleaned = base.SafeExec(this.RemoveUselessAttributes, cleaned);
+            cleaned = base.SafeExec(base.RemoveUselessTags, cleaned);
+
+            //cleaned = base.SafeExec(this.RemoveEmptyParagraphs, cleaned);
 
             cleaned = base.Clean(cleaned);
 
             return cleaned;
         }
 
-        protected string RemoveImageVTags(string content)
-        {
-            var pattern = @"\s+v:\w+=""[^""]+""";
+        // Gérer les versions plus/moins récentes de Office
 
-            return Regex.Replace(content, pattern, "");
-        }
+
+
+        /* 
+         Configs :
+         remove classnames for web only
+         remove span tags and leave text
+         images : remove | convert to inline voir commentaire plus bas
+         tags : remove empty
+         remove whitespace tags
+         remove iframes
+         attribute tags : remove all | remove empty
+         links : remove
+         tables : remove | leave text only
+
+         embed external images (file:/// are always embed, but http:// are not embeded by default)
+         ramener la config via objet json dans le callback, et traiter les images coté client
+        */
     }
 }

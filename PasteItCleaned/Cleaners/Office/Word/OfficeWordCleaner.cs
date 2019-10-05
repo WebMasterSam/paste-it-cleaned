@@ -21,25 +21,9 @@ namespace PasteItCleaned.Cleaners.Office.Word
         {
             var cleaned = content;
 
-            // Gérer les versions plus récentes de word
-
             cleaned = base.Clean(cleaned);
 
             return cleaned;
         }
-
-
-        /* 
-         Configs :
-         remove classnames
-         remove span tags and leave text
-         images : remove | convert to inline
-         tags : remove empty
-         remove whitespace tags
-         remove iframes
-         attribute tags : remove all | remove empty
-         links : remove
-         tables : remove | leave text only
-         */
     }
 }

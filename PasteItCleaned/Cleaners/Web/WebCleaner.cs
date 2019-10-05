@@ -25,5 +25,20 @@ namespace PasteItCleaned.Cleaners.Web
 
             return cleaned;
         }
+
+
+
+        /* 
+         Configs :
+         remove classnames
+         remove span tags and leave text
+         images : remove | convert to inline
+         tags : remove empty
+         remove whitespace tags
+         remove iframes
+         attribute tags : remove all | remove empty
+         links : remove
+         tables : remove | leave text only
+         */
     }
 }

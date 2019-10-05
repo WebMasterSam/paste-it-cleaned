@@ -16,16 +16,6 @@
         {
             var cleaned = content;
 
-            cleaned = base.SafeExec(base.ParseWithHtmlAgilityPack, cleaned);
-
-            cleaned = base.SafeExec(base.AddInlineStyles, cleaned);
-
-            cleaned = base.SafeExec(this.RemoveUselessAttributes, cleaned);
-            cleaned = base.SafeExec(this.RemoveUselessStyles, cleaned);
-            cleaned = base.SafeExec(base.RemoveUselessTags, cleaned);
-
-            cleaned = base.SafeExec(base.RemoveImageVTags, cleaned);
-
             cleaned = base.Clean(cleaned);
 
             return cleaned;
