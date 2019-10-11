@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace PasteItCleaned.Cleaners.Office.Word
+﻿namespace PasteItCleaned.Cleaners.Office.Word
 {
     public class OfficeWordCleaner : OfficeBaseCleaner
     {
@@ -19,11 +14,7 @@ namespace PasteItCleaned.Cleaners.Office.Word
 
         public override string Clean(string content)
         {
-            var cleaned = content;
-
-            cleaned = base.Clean(cleaned);
-
-            return cleaned;
+            return base.Clean(content);
         }
     }
 }

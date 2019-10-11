@@ -3,6 +3,7 @@
     public enum SourceType
     {
         Text = 0,
+        Image = 1,
         Word = 10,
         Excel = 11,
         PowerPoint = 12,

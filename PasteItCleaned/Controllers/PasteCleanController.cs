@@ -54,7 +54,7 @@ namespace PasteItCleaned.Controllers
             }
             catch (Exception ex)
             {
-                // Error handling
+                ErrorHelper.LogError(ex);
 
                 return content;
             }
@@ -66,7 +66,9 @@ namespace PasteItCleaned.Controllers
             {
                 if (cleaner.CanClean(content))
                 {
-                    DbHelper.SaveStat(cleaner.GetSourceType());
+                    var clientId = Guid.Empty;
+
+                    try { DbHelper.InsertHit(clientId, cleaner.GetSourceType()); } catch { }
 
                     return cleaner.Clean(content);
                 }

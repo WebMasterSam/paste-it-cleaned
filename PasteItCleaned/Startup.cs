@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-
+using PasteItCleaned.Helpers;
 
 namespace PasteItCleaned
 {
@@ -12,6 +12,8 @@ namespace PasteItCleaned
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+
+            ConfigHelper.SetConfigurationInstance(configuration);
         }
 
         public IConfiguration Configuration { get; }

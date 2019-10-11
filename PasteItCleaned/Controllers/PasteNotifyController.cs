@@ -21,7 +21,9 @@ namespace PasteItCleaned.Controllers
                     {
                         if (ApiKeyHelper.ApiKeyFitsWithDomain())
                         {
-                            DbHelper.SaveStat(SourceType.Text);
+                            var clientId = Guid.Empty;
+
+                            DbHelper.InsertHit(clientId, obj.pasteType.Trim().ToLower() == "image" ? SourceType.Image : SourceType.Text);
                         }
                         else
                             return ErrorHelper.GetApiKeyDomainNotConfigured();
@@ -34,7 +36,7 @@ namespace PasteItCleaned.Controllers
             }
             catch (Exception ex)
             {
-                // Error handling
+                ErrorHelper.LogError(ex);
             }
 
             return "";
@@ -43,6 +45,6 @@ namespace PasteItCleaned.Controllers
 
     public class NotifyObject
     {
-        public string value { get; set; }
+        public string pasteType { get; set; }
     }
 }

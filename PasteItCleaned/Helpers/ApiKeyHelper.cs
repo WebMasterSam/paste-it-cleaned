@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PasteItCleaned.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,9 +27,14 @@ namespace PasteItCleaned.Helpers
 
         public static string GetApiKeyFromHeaders()
         {
+            //System.Web.HttpContext.Request.Headers["myHeaderKeyName"]
             // read api key from headers
             return "";
         }
 
+        public static ApiKey GetApiKeyFromDb(string apiKey)
+        {
+            return DbHelper.SelectApiKey(apiKey);
+        }
     }
 }

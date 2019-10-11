@@ -1,8 +1,4 @@
-﻿using PasteItCleaned.Cleaners;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System;
 
 namespace PasteItCleaned.Helpers
 {
@@ -11,6 +7,15 @@ namespace PasteItCleaned.Helpers
         private const string ProjectPrefix = "PasteItCleaned";
         private const string ErrorFormat = "[{0} ERR-{1}]";
         private const string MessageFormat = "{0}: {1}";
+
+        public static void LogError(Exception ex)
+        {
+            try
+            {
+                DbHelper.InsertError(ex);
+            }
+            catch { }
+        }
 
         public static string GetApiKeyDomainNotConfigured()
         {
