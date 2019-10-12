@@ -15,21 +15,27 @@ namespace PasteItCleaned.Controllers
         {
             try
             {
-                if (ApiKeyHelper.ApiKeyPresent())
-                {
-                    if (ApiKeyHelper.ApiKeyValid())
-                    {
-                        if (ApiKeyHelper.ApiKeyFitsWithDomain())
-                        {
-                            var clientId = Guid.Empty;
+                var apiKey = ApiKeyHelper.GetApiKeyFromHeaders(this.HttpContext);
 
-                            DbHelper.InsertHit(clientId, obj.pasteType.Trim().ToLower() == "image" ? SourceType.Image : SourceType.Text);
+                if (ApiKeyHelper.ApiKeyPresent(apiKey))
+                {
+                    var objApiKey = ApiKeyHelper.GetApiKeyFromDb(apiKey);
+                    var domain = this.HttpContext.Request.Host.Host.ToLower().Trim();
+
+                    if (ApiKeyHelper.ApiKeyValid(objApiKey))
+                    {
+                        if (ApiKeyHelper.ApiKeyFitsWithDomain(objApiKey, domain))
+                        {
+                            var pasteType = obj.pasteType.Trim().ToLower() == "image" ? SourceType.Image : SourceType.Text;
+
+                            AccountHelper.DecreaseBalance(objApiKey.ClientId, pasteType);
+                            DbHelper.InsertHit(objApiKey.ClientId, pasteType);
                         }
                         else
-                            return ErrorHelper.GetApiKeyDomainNotConfigured();
+                            return ErrorHelper.GetApiKeyDomainNotConfigured(apiKey, domain);
                     }
                     else
-                        return ErrorHelper.GetApiKeyInvalid();
+                        return ErrorHelper.GetApiKeyInvalid(apiKey);
                 }
 
                 return ErrorHelper.GetApiKeyAbsent();

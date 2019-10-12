@@ -27,27 +27,32 @@ namespace PasteItCleaned.Controllers
             try
             {
                 EnsureCleaners();
-
+                
                 content = obj.value;
 
-                if (ApiKeyHelper.ApiKeyPresent())
+                var apiKey = ApiKeyHelper.GetApiKeyFromHeaders(this.HttpContext);
+
+                if (ApiKeyHelper.ApiKeyPresent(apiKey))
                 {
-                    if (ApiKeyHelper.ApiKeyValid())
+                    var objApiKey = ApiKeyHelper.GetApiKeyFromDb(apiKey);
+                    var domain = this.HttpContext.Request.Host.Host.ToLower().Trim();
+
+                    if (ApiKeyHelper.ApiKeyValid(objApiKey))
                     {
-                        if (ApiKeyHelper.ApiKeyFitsWithDomain())
+                        if (ApiKeyHelper.ApiKeyFitsWithDomain(objApiKey, domain))
                         {
-                            if (AccountHelper.AccountIsPaid())
+                            if (AccountHelper.BalanceIsSufficient(objApiKey.ClientId))
                             {
-                                return Clean(content);
+                                return Clean(content, objApiKey.ClientId);
                             }
                             else
                                 return ErrorHelper.GetAccountIsUnpaid();
                         }
                         else
-                            return ErrorHelper.GetApiKeyDomainNotConfigured();
+                            return ErrorHelper.GetApiKeyDomainNotConfigured(apiKey, domain);
                     }
                     else
-                        return ErrorHelper.GetApiKeyInvalid();
+                        return ErrorHelper.GetApiKeyInvalid(apiKey);
                 }
 
                 return ErrorHelper.GetApiKeyAbsent();
@@ -60,17 +65,19 @@ namespace PasteItCleaned.Controllers
             }
         }
 
-        private string Clean(string content)
+        private string Clean(string content, Guid clientId)
         {
             foreach (BaseCleaner cleaner in Cleaners)
             {
                 if (cleaner.CanClean(content))
                 {
-                    var clientId = Guid.Empty;
+                    var config = CleanerConfigHelper.GetConfigFromHeaders(this.HttpContext);
+                    var configObj = CleanerConfigHelper.GetConfigFromDb(clientId, config);
 
-                    try { DbHelper.InsertHit(clientId, cleaner.GetSourceType()); } catch { }
+                    try { DbHelper.InsertHit(clientId, cleaner.GetSourceType()); } catch (Exception ex) { ErrorHelper.LogError(ex); }
+                    try { AccountHelper.DecreaseBalance(clientId, cleaner.GetSourceType()); } catch (Exception ex) { ErrorHelper.LogError(ex); }
 
-                    return cleaner.Clean(content);
+                    return cleaner.Clean(content, configObj);
                 }
             }
 

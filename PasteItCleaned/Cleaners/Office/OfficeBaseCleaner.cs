@@ -1,10 +1,11 @@
-﻿using System.Text.RegularExpressions;
+﻿using PasteItCleaned.Entities;
+using System.Text.RegularExpressions;
 
 namespace PasteItCleaned.Cleaners.Office
 {
     public class OfficeBaseCleaner : HtmlCleaner
     {
-        public override string Clean(string content)
+        public override string Clean(string content, Config config)
         {
             var cleaned = content;
 
@@ -17,7 +18,7 @@ namespace PasteItCleaned.Cleaners.Office
 
             //cleaned = base.SafeExec(this.RemoveEmptyParagraphs, cleaned);
 
-            cleaned = base.Clean(cleaned);
+            cleaned = base.Clean(cleaned, config);
 
             return cleaned;
         }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PasteItCleaned.Entities;
+using System;
 
 namespace PasteItCleaned.Cleaners
 {
@@ -14,7 +15,7 @@ namespace PasteItCleaned.Cleaners
             return false;
         }
 
-        public virtual string Clean(string content)
+        public virtual string Clean(string content, Config config)
         {
             return content;
         }

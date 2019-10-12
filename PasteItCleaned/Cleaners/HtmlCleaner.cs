@@ -8,6 +8,7 @@ using HtmlAgilityPack;
 
 using AngleSharp.Html;
 using AngleSharp.Html.Parser;
+using PasteItCleaned.Entities;
 
 namespace PasteItCleaned.Cleaners
 {
@@ -24,11 +25,11 @@ namespace PasteItCleaned.Cleaners
             return SourceType.Unknown;
         }
 
-        public override string Clean(string content)
+        public override string Clean(string content, Config config)
         {
             var cleaned = content;
 
-            cleaned = base.Clean(cleaned);
+            cleaned = base.Clean(cleaned, config);
 
             cleaned = base.SafeExec(this.RemoveComments, cleaned);
             cleaned = base.SafeExec(this.Compact, cleaned);
@@ -188,6 +189,13 @@ namespace PasteItCleaned.Cleaners
             }
         }
 
+
+        protected string RemoveIframes(string content)
+        {
+            var pattern = @"<(iframe|!\[)[^>]*?>";
+
+            return Regex.Replace(content, pattern, "", RegexOptions.Singleline);
+        }
 
         protected string RemoveUselessTags(string content)
         {

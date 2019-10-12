@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PasteItCleaned.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,11 +18,14 @@ namespace PasteItCleaned.Cleaners.Web
             return true;
         }
 
-        public override string Clean(string content)
+        public override string Clean(string content, Config config)
         {
             var cleaned = content;
 
-            cleaned = base.Clean(cleaned);
+            if (config.GetConfigValue("removeIframes", true))
+                cleaned = base.SafeExec(base.RemoveIframes, cleaned);
+
+            cleaned = base.Clean(cleaned, config);
 
             return cleaned;
         }

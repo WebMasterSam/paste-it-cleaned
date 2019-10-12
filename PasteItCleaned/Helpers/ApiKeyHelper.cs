@@ -1,35 +1,42 @@
-﻿using PasteItCleaned.Entities;
+﻿using Microsoft.AspNetCore.Http;
+using PasteItCleaned.Entities;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Helpers
 {
     public static class ApiKeyHelper
     {
-        public static bool ApiKeyFitsWithDomain()
+        public static bool ApiKeyPresent(string apiKey)
         {
-            return true;
+            return !string.IsNullOrWhiteSpace(apiKey);
         }
 
-        public static bool ApiKeyPresent()
+        public static bool ApiKeyValid(ApiKey apiKey)
         {
-            // read api key from headers
-            return true;
+            if (apiKey != null)
+                if (apiKey.ExpiresOn.Date < DateTime.UtcNow.Date)
+                    return true;
+
+            return false;
         }
 
-        public static bool ApiKeyValid()
+        public static bool ApiKeyFitsWithDomain(ApiKey apiKey, string domain)
         {
-            // read api key from headers
-            return true;
+            if (domain == "localhost" || domain == "127.0.0.1")
+                return true;
+
+            if (apiKey != null)
+                if (apiKey.Domains.Contains(domain.Replace("www.", "")))
+                    return true;
+
+            return false;
         }
 
-        public static string GetApiKeyFromHeaders()
+        public static string GetApiKeyFromHeaders(HttpContext context)
         {
-            //System.Web.HttpContext.Request.Headers["myHeaderKeyName"]
-            // read api key from headers
-            return "";
+            var apiKey = context.Request.Headers["ApiKey"];
+
+            return apiKey.Count > 0 ? apiKey[0] : "";
         }
 
         public static ApiKey GetApiKeyFromDb(string apiKey)

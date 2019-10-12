@@ -15,5 +15,10 @@ namespace PasteItCleaned.Helpers
         {
             return _config.GetValue<string>(jsonPath.Replace(".", ":"));
         }
+
+        public static decimal GetAppSettingDecimal(string jsonPath)
+        {
+            return _config.GetValue<decimal>(jsonPath.Replace(".", ":"));
+        }
     }
 }

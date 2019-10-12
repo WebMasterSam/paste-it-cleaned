@@ -7,6 +7,7 @@ namespace PasteItCleaned.Helpers
         private const string ProjectPrefix = "PasteItCleaned";
         private const string ErrorFormat = "[{0} ERR-{1}]";
         private const string MessageFormat = "{0}: {1}";
+        private const string MessageTag = "<p style='padding: 5px 10px; font-weight: bold; font-size: 14px; background-color: yellow;'>{0}</p>";
 
         public static void LogError(Exception ex)
         {
@@ -17,14 +18,14 @@ namespace PasteItCleaned.Helpers
             catch { }
         }
 
-        public static string GetApiKeyDomainNotConfigured()
+        public static string GetApiKeyDomainNotConfigured(string apiKey, string domain)
         {
-            return Error(12, "The domain where the plugin was used (XXX) is not configure for the account with API key (YYY).");
+            return Error(12, string.Format("The domain where the plugin was used ({0}) is not configure for the account with API key ({1}).", domain, apiKey));
         }
 
-        public static string GetApiKeyInvalid()
+        public static string GetApiKeyInvalid(string apiKey)
         {
-            return Error(11, "Your API key is invalid (YYY).");
+            return Error(11, string.Format("Your API key is invalid ({0}).", apiKey));
         }
 
         public static string GetApiKeyAbsent()
@@ -44,7 +45,7 @@ namespace PasteItCleaned.Helpers
 
         private static string Error(int number, string message)
         {
-            return string.Format(MessageFormat, Code(number), message);
+            return string.Format(MessageTag, string.Format(MessageFormat, Code(number), message));
         }
     }
 }
