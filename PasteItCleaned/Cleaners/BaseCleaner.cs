@@ -1,4 +1,5 @@
 ﻿using PasteItCleaned.Entities;
+using PasteItCleaned.Helpers;
 using System;
 
 namespace PasteItCleaned.Cleaners
@@ -28,6 +29,7 @@ namespace PasteItCleaned.Cleaners
             }
             catch (Exception ex)
             {
+                ErrorHelper.LogError(ex);
                 return content;
             }
         }

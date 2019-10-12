@@ -1,6 +1,8 @@
 ﻿using System;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using PasteItCleaned.Cleaners;
+using PasteItCleaned.Controllers.Entities;
 using PasteItCleaned.Helpers;
 
 namespace PasteItCleaned.Controllers
@@ -11,7 +13,7 @@ namespace PasteItCleaned.Controllers
     {
         // POST api/v1/notify
         [HttpPost()]
-        public ActionResult<string> Post([FromBody] NotifyObject obj)
+        public ActionResult Post([FromBody] NotifyObject obj)
         {
             try
             {
@@ -27,25 +29,29 @@ namespace PasteItCleaned.Controllers
                         if (ApiKeyHelper.ApiKeyFitsWithDomain(objApiKey, domain))
                         {
                             var pasteType = obj.pasteType.Trim().ToLower() == "image" ? SourceType.Image : SourceType.Text;
+                            var ip = HttpContext.Features.Get<IHttpConnectionFeature>()?.RemoteIpAddress.ToString();
+                            var referer = Request.Headers["Referer"].ToString();
 
                             AccountHelper.DecreaseBalance(objApiKey.ClientId, pasteType);
-                            DbHelper.InsertHit(objApiKey.ClientId, pasteType);
+                            DbHelper.InsertHit(objApiKey.ClientId, pasteType, ip, referer);
+
+                            return Ok(new Success("", false));
                         }
                         else
-                            return ErrorHelper.GetApiKeyDomainNotConfigured(apiKey, domain);
+                            return Ok(new Error(ErrorHelper.GetApiKeyDomainNotConfigured(apiKey, domain)));
                     }
                     else
-                        return ErrorHelper.GetApiKeyInvalid(apiKey);
+                        return Ok(new Error(ErrorHelper.GetApiKeyInvalid(apiKey)));
                 }
 
-                return ErrorHelper.GetApiKeyAbsent();
+                return Ok(new Error(ErrorHelper.GetApiKeyAbsent()));
             }
             catch (Exception ex)
             {
                 ErrorHelper.LogError(ex);
             }
 
-            return "";
+            return Ok(new Success("", false));
         }
     }
 

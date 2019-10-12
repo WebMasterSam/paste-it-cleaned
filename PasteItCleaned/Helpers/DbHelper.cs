@@ -20,11 +20,11 @@ namespace PasteItCleaned.Helpers
             DbHelper.SaveError(ex);
         }
 
-        public static void InsertHit(Guid clientId, SourceType type)
+        public static void InsertHit(Guid clientId, SourceType type, string ip, string referer)
         {
             var price = AccountHelper.GetHitPrice(clientId, type);
 
-            DbHelper.SaveHit(clientId, type, price);
+            DbHelper.SaveHit(clientId, type, price, ip, referer);
             DbHelper.SaveHitDaily(clientId, type, price);
         }
 
@@ -67,21 +67,23 @@ namespace PasteItCleaned.Helpers
         }
 
 
-        private static void SaveHit(Guid clientId, SourceType type, decimal price)
+        private static void SaveHit(Guid clientId, SourceType type, decimal price, string ip, string referer)
         {
             using (var client = DbHelper.GetAmazonClient())
             {
                 var tablesHit = ConfigHelper.GetAppSetting("Amazon.DynamoDB.Tables.Hit");
-                var key = string.Format("{0}-{1}", clientId, type);
 
                 var insertHit = new PutItemRequest
                 {
                     TableName = tablesHit,
                     Item = new Dictionary<string, AttributeValue>
                     {
-                        { "key", new AttributeValue { S = key }},
-                        { "timestamp", new AttributeValue { S = DateTime.Now.ToUniversalTime().ToString("o") }},
-                        { "price", new AttributeValue { N = price.ToString(System.Globalization.CultureInfo.InvariantCulture) }}
+                        { "ClientId", new AttributeValue { S = clientId.ToString() }},
+                        { "Timestamp", new AttributeValue { S = DateTime.Now.ToUniversalTime().ToString("o") }},
+                        { "Price", new AttributeValue { N = price.ToString(System.Globalization.CultureInfo.InvariantCulture) }},
+                        { "Type", new AttributeValue { S = type.ToString() }},
+                        { "IP", new AttributeValue { S = ip }},
+                        { "Referer", new AttributeValue { S = referer }}
                     }
                 };
 
@@ -94,11 +96,10 @@ namespace PasteItCleaned.Helpers
             using (var client = DbHelper.GetAmazonClient())
             {
                 var tablesHitDaily = ConfigHelper.GetAppSetting("Amazon.DynamoDB.Tables.HitDaily");
-                var key = string.Format("{0}-{1}", clientId, type);
                 var dbKey = new Dictionary<string, AttributeValue>
                 {
-                    { "key", new AttributeValue { S = key } },
-                    { "date", new AttributeValue { S = DateTime.Today.ToUniversalTime().ToString("o") } }
+                    { "ClientId", new AttributeValue { S = clientId.ToString() }},
+                    { "Date", new AttributeValue { S = DateTime.Today.ToUniversalTime().ToString("o") } }
                 };
 
                 var selectHit = new GetItemRequest
@@ -117,18 +118,30 @@ namespace PasteItCleaned.Helpers
 
                     if (item != null && item.Count > 0)
                     {
-                        var count = Convert.ToInt64(item["count"].N);
-                        var totalPrice = decimal.Parse(item["price"].N, System.Globalization.CultureInfo.InvariantCulture);
+                        var counts = item["Counts"].M;
+                        var totalPrice = decimal.Parse(item["Price"].N, System.Globalization.CultureInfo.InvariantCulture);
+                        var countFound = false;
+
+                        foreach (var count in counts)
+                            if (count.Key.ToLower() == type.ToString().ToLower())
+                                countFound = true;
+
+                        if (!countFound)
+                            counts.Add( type.ToString(), new AttributeValue { N = "1" } );
+
+                        foreach (var count in counts)
+                            if (count.Key.ToLower() == type.ToString().ToLower())
+                                count.Value.N = (int.Parse(count.Value.N) + 1).ToString();
 
                         var updateHit = new PutItemRequest
                         {
                             TableName = tablesHitDaily,
                             Item = new Dictionary<string, AttributeValue>
                             {
-                                { "key", new AttributeValue { S = key } },
-                                { "date", new AttributeValue { S = DateTime.Today.ToUniversalTime().ToString("o") } },
-                                { "count", new AttributeValue { N = (count + 1).ToString("N0") } },
-                                { "price", new AttributeValue { N = (totalPrice + price).ToString(System.Globalization.CultureInfo.InvariantCulture) }}
+                                { "ClientId", new AttributeValue { S = clientId.ToString() }},
+                                { "Date", new AttributeValue { S = DateTime.Today.ToUniversalTime().ToString("o") } },
+                                { "Price", new AttributeValue { N = (totalPrice + price).ToString(System.Globalization.CultureInfo.InvariantCulture) }},
+                                { "Counts", new AttributeValue { M = counts }}
                             }
                         };
                         
@@ -141,10 +154,14 @@ namespace PasteItCleaned.Helpers
                             TableName = tablesHitDaily,
                             Item = new Dictionary<string, AttributeValue>
                             {
-                                { "key", new AttributeValue { S = key }},
-                                { "date", new AttributeValue { S = DateTime.Today.ToUniversalTime().ToString("o") }},
-                                { "count", new AttributeValue { N = "1" }},
-                                { "price", new AttributeValue { N = price.ToString(System.Globalization.CultureInfo.InvariantCulture) }}
+                                { "ClientId", new AttributeValue { S = clientId.ToString() }},
+                                { "Date", new AttributeValue { S = DateTime.Today.ToUniversalTime().ToString("o") }},
+                                { "Price", new AttributeValue { N = price.ToString(System.Globalization.CultureInfo.InvariantCulture) }},
+                                { "Counts", new AttributeValue { M = new Dictionary<string, AttributeValue>
+                                    {
+                                        {  type.ToString(), new AttributeValue { N = "1" } }
+                                    }
+                                }}
                             }
                         };
 
@@ -165,9 +182,9 @@ namespace PasteItCleaned.Helpers
                     TableName = tableError,
                     Item = new Dictionary<string, AttributeValue>
                     {
-                        { "timestamp", new AttributeValue { S = DateTime.Now.ToUniversalTime().ToString("o") }},
-                        { "message", new AttributeValue { S = ex.Message }},
-                        { "stackTrace", new AttributeValue { S = ex.StackTrace }}
+                        { "Timestamp", new AttributeValue { S = DateTime.Now.ToUniversalTime().ToString("o") }},
+                        { "Message", new AttributeValue { S = ex.Message }},
+                        { "StackTrace", new AttributeValue { S = ex.StackTrace }}
                     }
                 };
 
@@ -293,6 +310,7 @@ namespace PasteItCleaned.Helpers
                             var office = GetMapNode(config.M, "office");
                             var web = GetMapNode(config.M, "web");
 
+                            obj.Name = config.M["name"].S;
                             obj.Common = new Dictionary<string, bool>();
                             obj.Office = new Dictionary<string, bool>();
                             obj.Web = new Dictionary<string, bool>();

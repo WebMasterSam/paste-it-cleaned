@@ -1,4 +1,6 @@
-﻿namespace PasteItCleaned.Cleaners.Office.Word
+﻿using PasteItCleaned.Entities;
+
+namespace PasteItCleaned.Cleaners.Office.Word
 {
     public class OfficeWordCleaner : OfficeBaseCleaner
     {
@@ -12,9 +14,9 @@
             return content.ToLower().Contains("<meta name=Generator content=\"Microsoft Word".ToLower());
         }
 
-        public override string Clean(string content)
+        public override string Clean(string content, Config config)
         {
-            return base.Clean(content);
+            return base.Clean(content, config);
         }
     }
 }

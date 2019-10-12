@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using PasteItCleaned.Entities;
 
 namespace PasteItCleaned.Cleaners.Office.PowerPoint
 {
@@ -17,13 +14,9 @@ namespace PasteItCleaned.Cleaners.Office.PowerPoint
             return content.ToLower().Contains("<meta name=Generator content=\"Microsoft Power".ToLower());
         }
 
-        public override string Clean(string content)
+        public override string Clean(string content, Config config)
         {
-            var cleaned = content;
-
-            cleaned = base.Clean(cleaned);
-
-            return cleaned;
+            return base.Clean(content, config);
         }
     }
 }

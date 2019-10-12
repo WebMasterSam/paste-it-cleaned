@@ -16,8 +16,8 @@ namespace PasteItCleaned.Helpers
         public static Config GetConfigFromDb(Guid clientId, string config)
         {
             var client = DbHelper.SelectClient(clientId);
-            var configObj = client.Configs.Find((c) => { return config.ToLower().Trim() == c.ToString().ToLower().Trim(); });
-            var configDefaultObj = client.Configs.Find((c) => { return config.ToLower().Trim() == "default"; });
+            var configObj = client.Configs.Find((c) => { return c.Name.ToLower().Trim() == config.ToLower().Trim(); });
+            var configDefaultObj = client.Configs.Find((c) => { return c.Name.ToLower().Trim() == "default"; });
 
             return configObj != null ? configObj : configDefaultObj;
         }

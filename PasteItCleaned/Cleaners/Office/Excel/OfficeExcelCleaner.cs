@@ -1,4 +1,6 @@
-﻿namespace PasteItCleaned.Cleaners.Office.Excel
+﻿using PasteItCleaned.Entities;
+
+namespace PasteItCleaned.Cleaners.Office.Excel
 {
     public class OfficeExcelCleaner : OfficeBaseCleaner
     {
@@ -12,13 +14,9 @@
             return content.ToLower().Contains("<meta name=Generator content=\"Microsoft Excel".ToLower());
         }
 
-        public override string Clean(string content)
+        public override string Clean(string content, Config config)
         {
-            var cleaned = content;
-
-            cleaned = base.Clean(cleaned);
-
-            return cleaned;
+            return base.Clean(content, config);
         }
     }
 }

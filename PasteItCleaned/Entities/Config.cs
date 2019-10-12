@@ -16,8 +16,8 @@ namespace PasteItCleaned.Entities
         public bool GetConfigValue(string name, bool defaultValue)
         {
             var common = GetConfigValue(this.Common, name);
-            var office = GetConfigValue(this.Common, name);
-            var web = GetConfigValue(this.Common, name);
+            var office = GetConfigValue(this.Office, name);
+            var web = GetConfigValue(this.Web, name);
 
             if (common.HasValue)
                 return common.Value;
@@ -35,7 +35,7 @@ namespace PasteItCleaned.Entities
         {
             var value = (bool?)null;
 
-            foreach (var ke in this.Common)
+            foreach (var ke in dic)
                 if (ke.Key.ToLower().Trim() == name.ToLower().Trim())
                     value = ke.Value;
 

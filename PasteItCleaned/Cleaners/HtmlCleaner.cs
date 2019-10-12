@@ -14,7 +14,7 @@ namespace PasteItCleaned.Cleaners
 {
     public class HtmlCleaner : BaseCleaner
     {
-        private string[] ValideAttributes = { "style", "colspan", "rowspan", "src" };
+        private string[] ValideAttributes = { "style", "colspan", "rowspan", "src", "class", "href", "target", "border", "cellspacing", "cellpadding", "valign", "align" };
 
         //<font size="5"> becomes <h1> <font size="4"> becomes <h2> etc.)
         // replace images with inline image data, resize images if necessary
@@ -31,19 +31,39 @@ namespace PasteItCleaned.Cleaners
 
             cleaned = base.Clean(cleaned, config);
 
+            //if (config.GetConfigValue("embedExternalImages", false))
+
+            //if (config.GetConfigValue("removeEmptyTags", true))
+
+            //if (config.GetConfigValue("removeSpanTags", true))
+
+            //cleaned = base.SafeExec(this.RemoveEmptyParagraphs, cleaned);
+
+            cleaned = base.SafeExec(this.RemoveUselessTags, cleaned);
             cleaned = base.SafeExec(this.RemoveComments, cleaned);
             cleaned = base.SafeExec(this.Compact, cleaned);
             cleaned = base.SafeExec(this.Indent, cleaned);
+            cleaned = base.SafeExec(this.RemoveSurroundingTags, cleaned);
 
-            return cleaned;
+            return cleaned.Trim();
         }
+
+
+
+
+        /* 
+         embed external images (file:/// are always embed, but http:// are not embeded by default)
+         ramener la config via objet json dans le callback, et traiter les images coté client
+        */
+
+
 
         protected string Compact(string content)
         {
+            content = content.Replace("\n", " ");
+            content = content.Replace("\t", " ");
+            content = content.Replace("\r", " ");
             content = content.Replace("  ", " ");
-            content = content.Replace("\n", "");
-            content = content.Replace("\t", "");
-            content = content.Replace("\r", "");
             content = content.Trim();
 
             return content;
@@ -105,6 +125,41 @@ namespace PasteItCleaned.Cleaners
                         foreach (var att in ValideAttributes)
                             if (attr.Name.Trim().ToLower() == att)
                                 valid = true;
+
+                    if (!valid)
+                        n.Attributes.Remove(attr);
+                }
+            }
+        }
+
+
+        protected string RemoveClassAttributes(string content)
+        {
+            var htmlDoc = new HtmlDocument();
+
+            htmlDoc.LoadHtml(content);
+
+            foreach (HtmlNode node in htmlDoc.DocumentNode.ChildNodes)
+                RemoveClassAttributesNode(node);
+
+            return htmlDoc.DocumentNode.OuterHtml;
+        }
+
+        private void RemoveClassAttributesNode(HtmlNode node)
+        {
+            foreach (HtmlNode n in node.ChildNodes)
+            {
+                if (n.HasChildNodes)
+                    RemoveClassAttributesNode(n);
+
+                for (int i = n.Attributes.Count - 1; i >= 0; i--)
+                {
+                    var attr = n.Attributes[i];
+                    var valid = true;
+
+                    if (!string.IsNullOrWhiteSpace(attr.Value))
+                        if (attr.Name.Trim().ToLower() == "class")
+                            valid = false;
 
                     if (!valid)
                         n.Attributes.Remove(attr);
@@ -185,6 +240,7 @@ namespace PasteItCleaned.Cleaners
 
                     styleAttr.Value += this.GetInlineStylesForTag(styles, n.Name);
                     styleAttr.Value += this.GetInlineStylesForClass(styles, classAttr.Value);
+                    styleAttr.Value += this.GetInlineStylesForTagClass(styles, n.Name, classAttr.Value);
                 }
             }
         }
@@ -199,10 +255,17 @@ namespace PasteItCleaned.Cleaners
 
         protected string RemoveUselessTags(string content)
         {
-            var pattern = @"<(meta|link|/?o:|/?v:|/?style|/?title|/?div|/?std|/?head|/?html|/?body|/?script|/?col|/?colgroup|!\[)[^>]*?>";
+            var pattern = @"<(meta|link|/?o:|/?v:|/?style|/?title|/?div|/?std|/?head|/?html|/?body|/?script|/?col|/?colgroup|/?form|/?input|/?textarea|/?select|!\[)[^>]*?>";
 
             content = content.Replace("<font", "<span");
             content = content.Replace("</font>", "</span>");
+
+            return Regex.Replace(content, pattern, "", RegexOptions.Singleline);
+        }
+
+        protected string RemoveSurroundingTags(string content)
+        {
+            var pattern = @"<(/?head|/?html|/?body|!\[)[^>]*?>";
 
             return Regex.Replace(content, pattern, "", RegexOptions.Singleline);
         }
@@ -237,14 +300,28 @@ namespace PasteItCleaned.Cleaners
             return null;
         }
 
+        private string GetInlineStylesForTagClass(Dictionary<string, Dictionary<string, string>> styles, string tagName, string className)
+        {
+            var inlineStyles = new StringBuilder();
+
+            foreach (var classeComplete in styles)
+                foreach (var classe in classeComplete.Key.Split(','))
+                    if (classe.ToLower().Trim() == tagName.ToLower().Trim() + "." + className.ToLower().Trim())
+                        foreach (var modifier in classeComplete.Value)
+                            inlineStyles.AppendFormat("{0}: {1}; ", modifier.Key, modifier.Value);
+
+            return inlineStyles.ToString().Trim();
+        }
+
         private string GetInlineStylesForClass(Dictionary<string, Dictionary<string, string>> styles, string className)
         {
             var inlineStyles = new StringBuilder();
 
-            foreach (var classe in styles)
-                if (classe.Key == "." + className.ToLower().Trim())
-                    foreach (var modifier in classe.Value)
-                        inlineStyles.AppendFormat("{0}: {1}; ", modifier.Key, modifier.Value);
+            foreach (var classeComplete in styles)
+                foreach (var classe in classeComplete.Key.Split(','))
+                    if (classe.ToLower().Trim() == "." + className.ToLower().Trim())
+                        foreach (var modifier in classeComplete.Value)
+                            inlineStyles.AppendFormat("{0}: {1}; ", modifier.Key, modifier.Value);
 
             return inlineStyles.ToString().Trim();
         }
@@ -253,10 +330,11 @@ namespace PasteItCleaned.Cleaners
         {
             var inlineStyles = new StringBuilder();
 
-            foreach (var classe in styles)
-                if (classe.Key == tagName.ToLower().Trim())
-                    foreach (var modifier in classe.Value)
-                        inlineStyles.AppendFormat("{0}: {1}; ", modifier.Key, modifier.Value);
+            foreach (var classeComplete in styles)
+                foreach (var classe in classeComplete.Key.Split(','))
+                    if (classe.ToLower().Trim() == tagName.ToLower().Trim())
+                        foreach (var modifier in classeComplete.Value)
+                            inlineStyles.AppendFormat("{0}: {1}; ", modifier.Key, modifier.Value);
 
             return inlineStyles.ToString().Trim();
         }
@@ -268,6 +346,8 @@ namespace PasteItCleaned.Cleaners
             if (name.ToLower().StartsWith("margin")) return false;
             if (name.ToLower().StartsWith("page-break")) return false;
             if (name.ToLower().StartsWith("tab-stops")) return false;
+            if (name.ToLower().StartsWith("letter-spacing")) return false;
+            if (name.ToLower().StartsWith("text-indent")) return false;
 
             return true;
         }
@@ -276,7 +356,7 @@ namespace PasteItCleaned.Cleaners
         {
             var allClasses = new Dictionary<string, Dictionary<string, string>>();
             var patternStyles = @"<style>.*?<\!--(?<styles>.*?)-->.*?</style>";
-            var patternClass = @"(?<name>[a-zA-Z0-9-@#\.]+?)[\s\t]*?{(?<class>.*?)}";
+            var patternClass = @"(?<name>[a-zA-Z0-9-@#\. ,]+?)[\s\t]*?{(?<class>.*?)}";
             var patternStyle = @"(?<modifier>[a-zA-Z0-9-]+?)[\s\t]*?:[\s\t]*?(?<value>.*?);";
             var comments = Regex.Matches(content, patternStyles, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Multiline);
 
@@ -296,12 +376,22 @@ namespace PasteItCleaned.Cleaners
                         var modifierName = modifier.Groups["modifier"].Value;
                         var modifierValue = modifier.Groups["value"].Value;
 
-                        AddClassToList(allClasses, className, modifierName, modifierValue);
+                        AddClassToList(allClasses, className, modifierName, CleanModifierValue(modifierValue));
                     }
                 }
             }
 
             return allClasses;
+        }
+
+        private string CleanModifierValue(string modifierValue)
+        {
+            modifierValue = modifierValue.Replace(".0pt", "pt");
+            modifierValue = modifierValue.Replace(".0px", "px");
+            modifierValue = modifierValue.Replace(".0rm", "rm");
+            modifierValue = modifierValue.Replace(".0rem", "rem");
+
+            return modifierValue;
         }
 
         private void AddClassToList(Dictionary<string, Dictionary<string, string>> allClasses, string className, string modifierName, string modifierValue)

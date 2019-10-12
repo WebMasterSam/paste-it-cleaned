@@ -1,8 +1,4 @@
 ﻿using PasteItCleaned.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Cleaners.Web
 {
@@ -25,24 +21,18 @@ namespace PasteItCleaned.Cleaners.Web
             if (config.GetConfigValue("removeIframes", true))
                 cleaned = base.SafeExec(base.RemoveIframes, cleaned);
 
+            if (config.GetConfigValue("removeTagAttributes", true))
+                cleaned = base.SafeExec(this.RemoveUselessAttributes, cleaned);
+
+            if (config.GetConfigValue("removeClassNames", true))
+            {
+                cleaned = base.SafeExec(base.AddInlineStyles, cleaned);
+                cleaned = base.SafeExec(this.RemoveClassAttributes, cleaned);
+            }
+
             cleaned = base.Clean(cleaned, config);
 
             return cleaned;
         }
-
-
-
-        /* 
-         Configs :
-         remove classnames
-         remove span tags and leave text
-         images : remove | convert to inline
-         tags : remove empty
-         remove whitespace tags
-         remove iframes
-         attribute tags : remove all | remove empty
-         links : remove
-         tables : remove | leave text only
-         */
     }
 }
