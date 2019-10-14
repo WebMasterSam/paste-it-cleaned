@@ -1,4 +1,5 @@
-﻿using PasteItCleaned.Entities;
+﻿using HtmlAgilityPack;
+using PasteItCleaned.Entities;
 using PasteItCleaned.Helpers;
 using System;
 
@@ -31,6 +32,32 @@ namespace PasteItCleaned.Cleaners
             {
                 ErrorHelper.LogError(ex);
                 return content;
+            }
+        }
+
+        protected HtmlDocument SafeExec(Func<HtmlDocument, HtmlDocument> act, HtmlDocument content)
+        {
+            try
+            {
+                return act.Invoke(content);
+            }
+            catch (Exception ex)
+            {
+                ErrorHelper.LogError(ex);
+                return content;
+            }
+        }
+
+        protected HtmlDocument SafeExec(Func<string, HtmlDocument> act, string content)
+        {
+            try
+            {
+                return act.Invoke(content);
+            }
+            catch (Exception ex)
+            {
+                ErrorHelper.LogError(ex);
+                return null;
             }
         }
     }
