@@ -15,17 +15,200 @@ namespace PasteItCleaned.Helpers
         private static Hashtable _tables = new Hashtable();
 
 
+        public static ApiKey GetApiKey(string apiKey)
+        {
+            using (var client = DbHelper.GetAmazonClient())
+            {
+                var tableApiKey = ConfigHelper.GetAppSetting("Amazon.DynamoDB.Tables.ApiKey");
+                var key = apiKey;
+                var dbKey = new Dictionary<string, AttributeValue>
+                {
+                    { "apikey", new AttributeValue { S = key } }
+                };
+
+                var selectApiKey = new GetItemRequest
+                {
+                    TableName = tableApiKey,
+                    Key = dbKey
+                };
+
+                var asyncGet = client.GetItemAsync(selectApiKey);
+
+                asyncGet.Wait(1000);
+
+                if (asyncGet.IsCompletedSuccessfully)
+                {
+                    var item = asyncGet.Result.Item;
+
+                    if (item != null && item.Count > 0)
+                    {
+                        var apiKeyObj = new ApiKey();
+
+                        apiKeyObj.Key = item["apikey"].S;
+                        apiKeyObj.ClientId = new Guid(item["clientId"].S);
+                        apiKeyObj.ExpiresOn = DateTime.Parse(item["expiresOn"].S);
+                        apiKeyObj.Domains = new List<string>();
+
+                        foreach (var domain in item["domains"].L)
+                            apiKeyObj.Domains.Add(domain.S);
+
+                        return apiKeyObj;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public static Client GetClient(Guid clientId)
+        {
+            using (var client = DbHelper.GetAmazonClient())
+            {
+                var tableClient = ConfigHelper.GetAppSetting("Amazon.DynamoDB.Tables.Client");
+                var key = clientId.ToString();
+                var dbKey = new Dictionary<string, AttributeValue>
+                {
+                    { "clientid", new AttributeValue { S = key } }
+                };
+
+                var selectClient = new GetItemRequest
+                {
+                    TableName = tableClient,
+                    Key = dbKey
+                };
+
+                var asyncGet = client.GetItemAsync(selectClient);
+
+                asyncGet.Wait(1000);
+
+                if (asyncGet.IsCompletedSuccessfully)
+                {
+                    var item = asyncGet.Result.Item;
+
+                    if (item != null && item.Count > 0)
+                    {
+                        var clientObj = new Client();
+                        var billing = item["billing"].M;
+                        var billingBalance = GetMapNode(billing, "balance");
+                        var business = item["business"].M;
+                        var businessContact = GetMapNode(business, "contact");
+                        var contact = item["contact"].M;
+
+                        clientObj.ClientId = new Guid(item["clientid"].S);
+
+                        clientObj.Contact = new Contact();
+                        clientObj.Contact.FirstName = contact["firstName"].S;
+                        clientObj.Contact.LastName = contact["lastName"].S;
+                        clientObj.Contact.PhoneNumber = contact["phoneNumber"].S;
+
+                        clientObj.Business = new Business();
+                        clientObj.Business.Name = business["name"].S;
+
+                        clientObj.Business.Contact = new Contact();
+                        clientObj.Business.Contact.FirstName = contact["firstName"].S;
+                        clientObj.Business.Contact.LastName = contact["lastName"].S;
+                        clientObj.Business.Contact.Address = businessContact.M["address"].S;
+                        clientObj.Business.Contact.City = businessContact.M["city"].S;
+                        clientObj.Business.Contact.Country = businessContact.M["country"].S;
+                        clientObj.Business.Contact.PhoneNumber = businessContact.M["phoneNumber"].S;
+                        clientObj.Business.Contact.State = businessContact.M["state"].S;
+
+                        clientObj.ApiKeys = new List<string>();
+                        foreach (var apiKey in item["apiKeys"].SS)
+                            clientObj.ApiKeys.Add(apiKey);
+
+                        clientObj.Billing = new Billing();
+                        clientObj.Billing.Balance = decimal.Parse(billingBalance.N, System.Globalization.CultureInfo.InvariantCulture);
+                        clientObj.Billing.Contact = new Contact();
+                        clientObj.Billing.Contact.FirstName = contact["firstName"].S;
+                        clientObj.Billing.Contact.LastName = contact["lastName"].S;
+                        clientObj.Billing.Contact.PhoneNumber = contact["phoneNumber"].S;
+
+                        clientObj.Configs = new List<Config>();
+                        foreach (var config in item["configs"].L)
+                        {
+                            var obj = new Config();
+                            var common = GetMapNode(config.M, "common");
+                            var office = GetMapNode(config.M, "office");
+                            var web = GetMapNode(config.M, "web");
+
+                            obj.Name = config.M["name"].S;
+                            obj.Common = new Dictionary<string, bool>();
+                            obj.Office = new Dictionary<string, bool>();
+                            obj.Web = new Dictionary<string, bool>();
+
+                            foreach (var i in common.M)
+                                obj.Common.Add(i.Key, i.Value.BOOL);
+
+                            foreach (var i in office.M)
+                                obj.Office.Add(i.Key, i.Value.BOOL);
+
+                            foreach (var i in web.M)
+                                obj.Web.Add(i.Key, i.Value.BOOL);
+
+                            clientObj.Configs.Add(obj);
+                        }
+
+                        return clientObj;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public static DateTime GetHitHash(Guid clientId, string hash)
+        {
+            using (var client = DbHelper.GetAmazonClient())
+            {
+                var tablesHitHash = ConfigHelper.GetAppSetting("Amazon.DynamoDB.Tables.HitHash");
+                var dbKey = new Dictionary<string, AttributeValue>
+                {
+                    { "ClientId", new AttributeValue { S = clientId.ToString() }},
+                    { "Hash", new AttributeValue { S = hash } }
+                };
+
+                var selectHitHash = new GetItemRequest
+                {
+                    TableName = tablesHitHash,
+                    Key = dbKey
+                };
+
+                var asyncGet = client.GetItemAsync(selectHitHash);
+
+                asyncGet.Wait(1000);
+
+                if (asyncGet.IsCompletedSuccessfully)
+                {
+                    var item = asyncGet.Result.Item;
+
+                    if (item != null && item.Count > 0)
+                    {
+                        var timestamp = item["Timestamp"].S;
+
+                        return DateTime.Parse(timestamp);
+                    }
+                }
+
+                return DateTime.MinValue;
+            }
+        }
+
+
         public static void InsertError(Exception ex)
         {
             DbHelper.SaveError(ex);
         }
 
-        public static void InsertHit(Guid clientId, SourceType type, string ip, string referer)
+        public static void InsertHit(Guid clientId, SourceType type, string ip, string referer, decimal price)
         {
-            var price = AccountHelper.GetHitPrice(clientId, type);
-
             DbHelper.SaveHit(clientId, type, price, ip, referer);
             DbHelper.SaveHitDaily(clientId, type, price);
+        }
+
+        public static void InsertHitHash(Guid clientId, string hash)
+        {
+            DbHelper.SaveHitHash(clientId, hash);
         }
 
         public static ApiKey SelectApiKey(string apiKey)
@@ -171,6 +354,27 @@ namespace PasteItCleaned.Helpers
             }
         }
 
+        private static void SaveHitHash(Guid clientId, string hash)
+        {
+            using (var client = DbHelper.GetAmazonClient())
+            {
+                var tablesHitHash = ConfigHelper.GetAppSetting("Amazon.DynamoDB.Tables.HitHash");
+
+                var insertHitHash = new PutItemRequest
+                {
+                    TableName = tablesHitHash,
+                    Item = new Dictionary<string, AttributeValue>
+                    {
+                        { "ClientId", new AttributeValue { S = clientId.ToString() }},
+                        { "Hash", new AttributeValue { S = hash }},
+                        { "Timestamp", new AttributeValue { S = DateTime.Now.ToUniversalTime().ToString("o") }}
+                    }
+                };
+
+                client.PutItemAsync(insertHitHash);
+            }
+        }
+
         private static void SaveError(Exception ex)
         {
             using (var client = DbHelper.GetAmazonClient())
@@ -192,148 +396,6 @@ namespace PasteItCleaned.Helpers
             }
         }
 
-
-        private static ApiKey GetApiKey(string apiKey)
-        {
-            using (var client = DbHelper.GetAmazonClient())
-            {
-                var tableApiKey = ConfigHelper.GetAppSetting("Amazon.DynamoDB.Tables.ApiKey");
-                var key = apiKey;
-                var dbKey = new Dictionary<string, AttributeValue>
-                {
-                    { "apikey", new AttributeValue { S = key } }
-                };
-
-                var selectApiKey = new GetItemRequest
-                {
-                    TableName = tableApiKey,
-                    Key = dbKey
-                };
-
-                var asyncGet = client.GetItemAsync(selectApiKey);
-
-                asyncGet.Wait(1000);
-
-                if (asyncGet.IsCompletedSuccessfully)
-                {
-                    var item = asyncGet.Result.Item;
-
-                    if (item != null && item.Count > 0)
-                    {
-                        var apiKeyObj = new ApiKey();
-
-                        apiKeyObj.Key = item["apikey"].S;
-                        apiKeyObj.ClientId = new Guid(item["clientId"].S);
-                        apiKeyObj.ExpiresOn = DateTime.Parse(item["expiresOn"].S);
-                        apiKeyObj.Domains = new List<string>();
-
-                        foreach (var domain in item["domains"].L)
-                            apiKeyObj.Domains.Add(domain.S);
-
-                        return apiKeyObj;
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        private static Client GetClient(Guid clientId)
-        {
-            using (var client = DbHelper.GetAmazonClient())
-            {
-                var tableClient = ConfigHelper.GetAppSetting("Amazon.DynamoDB.Tables.Client");
-                var key = clientId.ToString();
-                var dbKey = new Dictionary<string, AttributeValue>
-                {
-                    { "clientid", new AttributeValue { S = key } }
-                };
-
-                var selectClient = new GetItemRequest
-                {
-                    TableName = tableClient,
-                    Key = dbKey
-                };
-
-                var asyncGet = client.GetItemAsync(selectClient);
-
-                asyncGet.Wait(1000);
-
-                if (asyncGet.IsCompletedSuccessfully)
-                {
-                    var item = asyncGet.Result.Item;
-
-                    if (item != null && item.Count > 0)
-                    {
-                        var clientObj = new Client();
-                        var billing = item["billing"].M;
-                        var billingBalance = GetMapNode(billing, "balance");
-                        var business = item["business"].M;
-                        var businessContact = GetMapNode(business, "contact");
-                        var contact = item["contact"].M;
-
-                        clientObj.ClientId = new Guid(item["clientid"].S);
-
-                        clientObj.Contact = new Contact();
-                        clientObj.Contact.FirstName = contact["firstName"].S;
-                        clientObj.Contact.LastName = contact["lastName"].S;
-                        clientObj.Contact.PhoneNumber = contact["phoneNumber"].S;
-
-                        clientObj.Business = new Business();
-                        clientObj.Business.Name = business["name"].S;
-
-                        clientObj.Business.Contact = new Contact();
-                        clientObj.Business.Contact.FirstName = contact["firstName"].S;
-                        clientObj.Business.Contact.LastName = contact["lastName"].S;
-                        clientObj.Business.Contact.Address = businessContact.M["address"].S;
-                        clientObj.Business.Contact.City = businessContact.M["city"].S;
-                        clientObj.Business.Contact.Country = businessContact.M["country"].S;
-                        clientObj.Business.Contact.PhoneNumber = businessContact.M["phoneNumber"].S;
-                        clientObj.Business.Contact.State = businessContact.M["state"].S;
-
-                        clientObj.ApiKeys = new List<string>();
-                        foreach (var apiKey in item["apiKeys"].SS)
-                            clientObj.ApiKeys.Add(apiKey);
-
-                        clientObj.Billing = new Billing();
-                        clientObj.Billing.Balance = decimal.Parse(billingBalance.N, System.Globalization.CultureInfo.InvariantCulture);
-                        clientObj.Billing.Contact = new Contact();
-                        clientObj.Billing.Contact.FirstName = contact["firstName"].S;
-                        clientObj.Billing.Contact.LastName = contact["lastName"].S;
-                        clientObj.Billing.Contact.PhoneNumber = contact["phoneNumber"].S;
-
-                        clientObj.Configs = new List<Config>();
-                        foreach (var config in item["configs"].L)
-                        {
-                            var obj = new Config();
-                            var common = GetMapNode(config.M, "common");
-                            var office = GetMapNode(config.M, "office");
-                            var web = GetMapNode(config.M, "web");
-
-                            obj.Name = config.M["name"].S;
-                            obj.Common = new Dictionary<string, bool>();
-                            obj.Office = new Dictionary<string, bool>();
-                            obj.Web = new Dictionary<string, bool>();
-
-                            foreach (var i in common.M)
-                                obj.Common.Add(i.Key, i.Value.BOOL);
-
-                            foreach (var i in office.M)
-                                obj.Office.Add(i.Key, i.Value.BOOL);
-
-                            foreach (var i in web.M)
-                                obj.Web.Add(i.Key, i.Value.BOOL);
-
-                            clientObj.Configs.Add(obj);
-                        }
-
-                        return clientObj;
-                    }
-                }
-            }
-
-            return null;
-        }
 
         private static AttributeValue GetMapNode(Dictionary<string, AttributeValue> map, string node)
         {

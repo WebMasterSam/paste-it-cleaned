@@ -15,9 +15,15 @@ namespace PasteItCleaned.Controllers
         [HttpPost()]
         public ActionResult Post([FromBody] NotifyObject obj)
         {
+            var hash = "";
+            var pasteType = "";
+
             try
             {
                 var apiKey = ApiKeyHelper.GetApiKeyFromHeaders(this.HttpContext);
+
+                hash = obj.hash;
+                pasteType = obj.pasteType;
 
                 if (ApiKeyHelper.ApiKeyPresent(apiKey))
                 {
@@ -28,12 +34,20 @@ namespace PasteItCleaned.Controllers
                     {
                         if (ApiKeyHelper.ApiKeyFitsWithDomain(objApiKey, domain))
                         {
-                            var pasteType = obj.pasteType.Trim().ToLower() == "image" ? SourceType.Image : SourceType.Text;
+                            var pasteTypeObj = obj.pasteType.Trim().ToLower() == "image" ? SourceType.Image : SourceType.Text;
                             var ip = HttpContext.Features.Get<IHttpConnectionFeature>()?.RemoteIpAddress.ToString();
                             var referer = Request.Headers["Referer"].ToString();
+                            var hitHash = DbHelper.GetHitHash(objApiKey.ClientId, hash);
+                            var price = 0.0M;
 
-                            AccountHelper.DecreaseBalance(objApiKey.ClientId, pasteType);
-                            DbHelper.InsertHit(objApiKey.ClientId, pasteType, ip, referer);
+                            if (hitHash.Date < DateTime.UtcNow.Date)
+                            {
+                                price = AccountHelper.GetHitPrice(objApiKey.ClientId, pasteTypeObj);
+                                AccountHelper.DecreaseBalance(objApiKey.ClientId, pasteTypeObj, price);
+                                DbHelper.InsertHitHash(objApiKey.ClientId, hash);
+                            }
+
+                            DbHelper.InsertHit(objApiKey.ClientId, pasteTypeObj, ip, referer, price);
 
                             return Ok(new Success("", false));
                         }
@@ -57,6 +71,7 @@ namespace PasteItCleaned.Controllers
 
     public class NotifyObject
     {
+        public string hash { get; set; }
         public string pasteType { get; set; }
     }
 }

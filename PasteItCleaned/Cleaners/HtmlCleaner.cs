@@ -15,7 +15,6 @@ namespace PasteItCleaned.Cleaners
     {
         private string[] ValideAttributes = { "style", "colspan", "rowspan", "src", "class", "href", "target", "border", "cellspacing", "cellpadding", "valign", "align" };
 
-        //<font size="5"> becomes <h1> <font size="4"> becomes <h2> etc.)
         // replace images with inline image data, resize images if necessary
         //remove <a name=...> code as these are usually useless.
 
@@ -24,11 +23,11 @@ namespace PasteItCleaned.Cleaners
             return SourceType.Unknown;
         }
 
-        public override string Clean(string content, Config config)
+        public override string Clean(string html, string rtf, Config config)
         {
-            var cleaned = content;
+            var cleaned = html;
 
-            cleaned = base.Clean(cleaned, config);
+            cleaned = base.Clean(cleaned, rtf, config);
 
             //if (config.GetConfigValue("embedExternalImages", false))
 
@@ -44,8 +43,8 @@ namespace PasteItCleaned.Cleaners
             */
 
 
-            cleaned = base.SafeExec(this.RemoveUselessTags, cleaned);
             cleaned = base.SafeExec(this.RemoveComments, cleaned);
+            cleaned = base.SafeExec(this.RemoveUselessTags, cleaned);
             cleaned = base.SafeExec(this.Compact, cleaned);
             cleaned = base.SafeExec(this.Indent, cleaned);
             cleaned = base.SafeExec(this.RemoveSurroundingTags, cleaned);
@@ -84,26 +83,41 @@ namespace PasteItCleaned.Cleaners
         }
 
 
-        protected string ParseWithHtmlAgilityPack(string content)
+        protected HtmlDocument ParseWithHtmlAgilityPack(string content)
         {
             var htmlDoc = new HtmlDocument();
 
             htmlDoc.LoadHtml(content);
 
-            return htmlDoc.DocumentNode.OuterHtml;
+            return htmlDoc;
+        }
+
+        protected HtmlDocument ParseWithRtfPipe(string content)
+        {
+            var htmlDoc = new HtmlDocument();
+
+            if (!string.IsNullOrWhiteSpace(content))
+            {
+                var rtf = RtfPipe.Rtf.ToHtml(new RtfPipe.RtfSource(new StringReader(content)));
+
+                htmlDoc.LoadHtml(rtf);
+            }
+
+            return htmlDoc;
+        }
+
+        protected string GetOuterHtml(HtmlDocument doc)
+        {
+            return doc.DocumentNode.OuterHtml;
         }
 
 
-        protected string RemoveUselessAttributes(string content)
+        protected HtmlDocument RemoveUselessAttributes(HtmlDocs docs)
         {
-            var htmlDoc = new HtmlDocument();
-
-            htmlDoc.LoadHtml(content);
-
-            foreach (HtmlNode node in htmlDoc.DocumentNode.ChildNodes)
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
                 RemoveUselessAttributesNode(node);
 
-            return htmlDoc.DocumentNode.OuterHtml;
+            return docs.Html;
         }
 
         private void RemoveUselessAttributesNode(HtmlNode node)
@@ -130,16 +144,12 @@ namespace PasteItCleaned.Cleaners
         }
 
 
-        protected string RemoveClassAttributes(string content)
+        protected HtmlDocument RemoveClassAttributes(HtmlDocs docs)
         {
-            var htmlDoc = new HtmlDocument();
-
-            htmlDoc.LoadHtml(content);
-
-            foreach (HtmlNode node in htmlDoc.DocumentNode.ChildNodes)
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
                 RemoveClassAttributesNode(node);
 
-            return htmlDoc.DocumentNode.OuterHtml;
+            return docs.Html;
         }
 
         private void RemoveClassAttributesNode(HtmlNode node)
@@ -165,16 +175,12 @@ namespace PasteItCleaned.Cleaners
         }
 
 
-        protected string RemoveUselessStyles(string content)
+        protected HtmlDocument RemoveUselessStyles(HtmlDocs docs)
         {
-            var htmlDoc = new HtmlDocument();
-
-            htmlDoc.LoadHtml(content);
-
-            foreach (HtmlNode node in htmlDoc.DocumentNode.ChildNodes)
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
                 RemoveUselessStylesNode(node);
 
-            return htmlDoc.DocumentNode.OuterHtml;
+            return docs.Html;
         }
 
         private void RemoveUselessStylesNode(HtmlNode node)
@@ -212,17 +218,15 @@ namespace PasteItCleaned.Cleaners
         }
 
 
-        protected string AddInlineStyles(string content)
+        protected HtmlDocument AddInlineStyles(HtmlDocs docs)
         {
-            var htmlDoc = new HtmlDocument();
+            var content = this.GetOuterHtml(docs.Html);
             var styles = this.ParseCssClasses(content);
 
-            htmlDoc.LoadHtml(content);
-
-            foreach (HtmlNode node in htmlDoc.DocumentNode.ChildNodes)
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
                 AddInlineStylesNode(styles, node);
 
-            return htmlDoc.DocumentNode.OuterHtml;
+            return docs.Html;
         }
 
         protected void AddInlineStylesNode(Dictionary<string, Dictionary<string, string>> styles, HtmlNode node)
@@ -260,20 +264,99 @@ namespace PasteItCleaned.Cleaners
         }
 
 
-        protected string ConvertBulletLists(string content)
+        protected HtmlDocument ConvertAttributesToStyles(HtmlDocs docs)
         {
-            var htmlDoc = new HtmlDocument();
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+                ConvertAttributesToStylesNode(node);
 
-            htmlDoc.LoadHtml(content);
+            return docs.Html;
+        }
 
-            foreach (HtmlNode node in htmlDoc.DocumentNode.ChildNodes)
+        protected void ConvertAttributesToStylesNode(HtmlNode node)
+        {
+            foreach (HtmlNode n in node.ChildNodes)
+            {
+                if (n.HasChildNodes)
+                    ConvertAttributesToStylesNode(n);
+
+                var widthAttr = this.FindOrCreateAttr(n, "width");
+                var heightAttr = this.FindOrCreateAttr(n, "height");
+
+                if (widthAttr != null && heightAttr != null)
+                {
+                    var styleAttr = this.FindOrCreateAttr(n, "style");
+
+                    if (!string.IsNullOrWhiteSpace(widthAttr.Value))
+                        styleAttr.Value += string.Format("width: {0}; ", widthAttr.Value);
+
+                    if (!string.IsNullOrWhiteSpace(heightAttr.Value))
+                        styleAttr.Value += string.Format("height: {0}; ", heightAttr.Value);
+                }
+            }
+        }
+
+
+        protected HtmlDocument AddVShapesTags(HtmlDocs docs)
+        {
+            var vShapes = this.GetVShapesNodes(docs.Html);
+
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+                AddVShapesTagsNode(vShapes, node);
+
+            return docs.Html;
+        }
+
+        protected void AddVShapesTagsNode(Dictionary<string, HtmlNode> vShapes, HtmlNode node)
+        {
+            foreach (HtmlNode n in node.ChildNodes)
+            {
+                if (n.HasChildNodes)
+                    AddVShapesTagsNode(vShapes, n);
+
+                if (n.Name.ToLower().Trim() == "img")
+                {
+                    var vShapesAttr = this.FindOrCreateAttr(n, "v:shapes");
+
+                    if (!string.IsNullOrWhiteSpace(vShapesAttr.Value))
+                    {
+                        if (vShapes.ContainsKey(vShapesAttr.Value))
+                        {
+                            var vShapeNode = vShapes[vShapesAttr.Value];
+
+                            if (vShapeNode.ChildNodes.Count > 0)
+                            {
+                                foreach (var no in vShapeNode.ChildNodes)
+                                {
+                                    if (no.Name.ToLower().Trim() == "v:imagedata")
+                                    {
+                                        var oHrefAttr = this.FindOrCreateAttr(no, "o:href");
+
+                                        if (!string.IsNullOrWhiteSpace(oHrefAttr.Value))
+                                        {
+                                            var srcAttr = this.FindOrCreateAttr(n, "src");
+
+                                            srcAttr.Value = oHrefAttr.Value;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        protected HtmlDocument ConvertBulletLists(HtmlDocs docs)
+        {
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
                 ConvertBulletListsNodeConvertP(node);
 
             for (int i = 0; i < 10; i++)
-                foreach (HtmlNode node in htmlDoc.DocumentNode.ChildNodes)
+                foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
                     ConvertBulletListsNodeCreateUlOl(node);
 
-            return htmlDoc.DocumentNode.OuterHtml;
+            return docs.Html;
         }
 
         protected void ConvertBulletListsNodeConvertP(HtmlNode node)
@@ -423,47 +506,47 @@ namespace PasteItCleaned.Cleaners
         }
 
 
-        //protected string AddInlineStyleMarginTableP(string content)
-        //{
-        //    var htmlDoc = new HtmlDocument();
+        protected HtmlDocument ConvertFontHeaders(HtmlDocs docs)
+        {
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+                ConvertFontHeadersNode(node);
 
-        //    htmlDoc.LoadHtml(content);
+            return docs.Html;
+        }
 
-        //    foreach (HtmlNode node in htmlDoc.DocumentNode.ChildNodes)
-        //        AddInlineStyleMarginTablePNode(node);
+        protected void ConvertFontHeadersNode(HtmlNode node)
+        {
+            var childNodes = new List<HtmlNode>();
 
-        //    return htmlDoc.DocumentNode.OuterHtml;
-        //}
+            foreach (HtmlNode n in node.ChildNodes)
+                childNodes.Add(n);
 
-        //protected void AddInlineStyleMarginTablePNode(HtmlNode node)
-        //{
-        //    foreach (HtmlNode n in node.ChildNodes)
-        //    {
-        //        if (n.HasChildNodes)
-        //            AddInlineStyleMarginTablePNode(n);
+            foreach (HtmlNode n in childNodes)
+            {
+                if (n.HasChildNodes)
+                    ConvertFontHeadersNode(n);
 
-        //        if (n.Name.ToLower() == "p")
-        //        {
-        //            var styleAttr = this.FindOrCreateAttr(n, "style");
-        //            var nearestTable = this.FindNearestParent(n, "table");
+                if (n.Name.ToLower() == "font")
+                {
+                    var sizeAttr = this.FindOrCreateAttr(n, "size");
 
-        //            if (nearestTable != null)
-        //            {
-        //                var nearestTableStyles = this.FindOrCreateAttr(nearestTable, "style");
-        //                var modifiers = this.ParseCssModifiers(nearestTableStyles.Value);
-        //                var marginTop = this.GetValue(modifiers, "mso-para-margin-top", this.GetValue(modifiers, "mso-para-margin", "inherit"));
-        //                var marginLeft = this.GetValue(modifiers, "mso-para-margin-left", this.GetValue(modifiers, "mso-para-margin", "inherit"));
-        //                var marginRight = this.GetValue(modifiers, "mso-para-margin-right", this.GetValue(modifiers, "mso-para-margin", "inherit"));
-        //                var marginBottom = this.GetValue(modifiers, "mso-para-margin-bottom", this.GetValue(modifiers, "mso-para-margin", "inherit"));
-        //                var margin = string.Format("{0} {1} {2} {3}", marginTop, marginRight, marginBottom, marginLeft);
+                    if (sizeAttr.Value == "5")
+                        n.ParentNode.ReplaceChild(HtmlNode.CreateNode(n.OuterHtml.Replace("<font", "<h1").Replace("</font>", "</h1>")), n);
 
-        //                styleAttr.Value = string.Format("margin: {0}; {1}", margin, styleAttr.Value);
+                    if (sizeAttr.Value == "4")
+                        n.ParentNode.ReplaceChild(HtmlNode.CreateNode(n.OuterHtml.Replace("<font", "<h2").Replace("</font>", "</h2>")), n);
 
-        //                break;
-        //            }
-        //        }
-        //    }
-        //}
+                    if (sizeAttr.Value == "3")
+                        n.ParentNode.ReplaceChild(HtmlNode.CreateNode(n.OuterHtml.Replace("<font", "<h3").Replace("</font>", "</h3>")), n);
+
+                    if (sizeAttr.Value == "2")
+                        n.ParentNode.ReplaceChild(HtmlNode.CreateNode(n.OuterHtml.Replace("<font", "<h4").Replace("</font>", "</h4>")), n);
+
+                    if (sizeAttr.Value == "1")
+                        n.ParentNode.ReplaceChild(HtmlNode.CreateNode(n.OuterHtml.Replace("<font", "<h5").Replace("</font>", "</h5>")), n);
+                }
+            }
+        }
 
 
         protected string RemoveIframes(string content)
@@ -497,10 +580,55 @@ namespace PasteItCleaned.Cleaners
             return Regex.Replace(content, pattern, "", RegexOptions.Singleline);
         }
 
+        protected string RemoveVmlComments(string content)
+        {
+            content = content.Replace("<!--[if gte vml 1]>", "");
+            content = content.Replace("<![endif]--><![if !vml]>", "<![if !vml]>");
+            content = content.Replace("<![if !vml]>", "");
+            content = content.Replace("<![endif]>", "");
+
+            return content;
+        }
 
 
 
-        protected HtmlNode FindNearestParent(HtmlNode node, string tagName)
+        private Dictionary<string, HtmlNode> GetVShapesNodes(HtmlDocument htmlDoc)
+        {
+            var vShapes = new Dictionary<string, HtmlNode>();
+
+            foreach (HtmlNode n in htmlDoc.DocumentNode.ChildNodes)
+            {
+                var nodes = this.GetVShapesNodes(n);
+
+                foreach (var no in nodes)
+                    vShapes.Add(no.Key, no.Value);
+            }
+
+            return vShapes;
+        }
+
+        private Dictionary<string, HtmlNode> GetVShapesNodes(HtmlNode node)
+        {
+            var vShapes = new Dictionary<string, HtmlNode>();
+
+            if (node.HasChildNodes)
+            {
+                foreach (HtmlNode n in node.ChildNodes)
+                {
+                    var nodes = this.GetVShapesNodes(n);
+
+                    foreach (var no in nodes)
+                        vShapes.Add(no.Key, no.Value);
+                }
+            }
+
+            if (node.Name.Trim().ToLower() == "v:shape")
+                vShapes.Add(node.Attributes["id"].Value.ToLower().Trim(), node);
+
+            return vShapes;
+        }
+
+        private HtmlNode FindNearestParent(HtmlNode node, string tagName)
         {
             if (node.Name.ToLower() == tagName.ToLower())
                 return node;

@@ -14,25 +14,26 @@ namespace PasteItCleaned.Cleaners.Web
             return true;
         }
 
-        public override string Clean(string content, Config config)
+        public override string Clean(string html, string rtf, Config config)
         {
-            var cleaned = content;
+            var cleaned = html;
 
             if (config.GetConfigValue("removeIframes", true))
                 cleaned = base.SafeExec(base.RemoveIframes, cleaned);
 
+            var htmlDoc = base.ParseWithHtmlAgilityPack(cleaned);
+            var rtfDoc = base.ParseWithRtfPipe(rtf);
+
             if (config.GetConfigValue("removeTagAttributes", true))
-                cleaned = base.SafeExec(this.RemoveUselessAttributes, cleaned);
+                htmlDoc = base.SafeExec(this.RemoveUselessAttributes, htmlDoc, rtfDoc);
 
             if (config.GetConfigValue("removeClassNames", true))
             {
-                cleaned = base.SafeExec(base.AddInlineStyles, cleaned);
-                cleaned = base.SafeExec(this.RemoveClassAttributes, cleaned);
+                htmlDoc = base.SafeExec(base.AddInlineStyles, htmlDoc, rtfDoc);
+                htmlDoc = base.SafeExec(this.RemoveClassAttributes, htmlDoc, rtfDoc);
             }
 
-            cleaned = base.Clean(cleaned, config);
-
-            return cleaned;
+            return base.Clean(base.GetOuterHtml(htmlDoc), rtf, config);
         }
     }
 }

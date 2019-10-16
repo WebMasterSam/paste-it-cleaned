@@ -1,6 +1,8 @@
 ﻿using HtmlAgilityPack;
+
 using PasteItCleaned.Entities;
 using PasteItCleaned.Helpers;
+
 using System;
 
 namespace PasteItCleaned.Cleaners
@@ -17,9 +19,9 @@ namespace PasteItCleaned.Cleaners
             return false;
         }
 
-        public virtual string Clean(string content, Config config)
+        public virtual string Clean(string html, string rtf, Config config)
         {
-            return content;
+            return html;
         }
 
         protected string SafeExec(Func<string, string> act, string content)
@@ -35,29 +37,16 @@ namespace PasteItCleaned.Cleaners
             }
         }
 
-        protected HtmlDocument SafeExec(Func<HtmlDocument, HtmlDocument> act, HtmlDocument content)
+        protected HtmlDocument SafeExec(Func<HtmlDocs, HtmlDocument> act, HtmlDocument html, HtmlDocument rtf)
         {
             try
             {
-                return act.Invoke(content);
+                return act.Invoke(new HtmlDocs(html, rtf));
             }
             catch (Exception ex)
             {
                 ErrorHelper.LogError(ex);
-                return content;
-            }
-        }
-
-        protected HtmlDocument SafeExec(Func<string, HtmlDocument> act, string content)
-        {
-            try
-            {
-                return act.Invoke(content);
-            }
-            catch (Exception ex)
-            {
-                ErrorHelper.LogError(ex);
-                return null;
+                return html;
             }
         }
     }

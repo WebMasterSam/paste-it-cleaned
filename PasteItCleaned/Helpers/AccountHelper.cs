@@ -12,10 +12,8 @@ namespace PasteItCleaned.Helpers
             return client.Billing.Balance > 0;
         }
 
-        public static void DecreaseBalance(Guid clientId, SourceType type)
+        public static void DecreaseBalance(Guid clientId, SourceType type, decimal decreaseBy)
         {
-            var decreaseBy = AccountHelper.GetHitPrice(clientId, type);
-
             DbHelper.DecreaseClientBalance(clientId, decreaseBy);
         }
 

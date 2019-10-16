@@ -24,13 +24,19 @@ namespace PasteItCleaned.Controllers
         [HttpPost()]
         public ActionResult Post([FromBody] CleanObject obj)
         {
-            var content = "";
+            var hash = "";
+            var html = "";
+            var rtf = "";
+            var keepStyles = false;
 
             try
             {
                 EnsureCleaners();
-                
-                content = obj.value;
+
+                hash = obj.hash;
+                html = obj.html;
+                rtf = obj.rtf;
+                keepStyles = obj.keepStyles;
 
                 var apiKey = ApiKeyHelper.GetApiKeyFromHeaders(this.HttpContext);
                 
@@ -51,7 +57,7 @@ namespace PasteItCleaned.Controllers
                                 var ip = HttpContext.Features.Get<IHttpConnectionFeature>()?.RemoteIpAddress.ToString();
                                 var referer = Request.Headers["Referer"].ToString();
 
-                                return Ok(new Success(Clean(content, objApiKey.ClientId, configObj, ip, referer), embedImages));
+                                return Ok(new Success(Clean(html, rtf, objApiKey.ClientId, configObj, ip, referer, hash, keepStyles), embedImages));
                             }
                             else
                                 return Ok(new Error(ErrorHelper.GetAccountIsUnpaid()));
@@ -69,24 +75,40 @@ namespace PasteItCleaned.Controllers
             {
                 ErrorHelper.LogError(ex);
 
-                return Ok(new Success(content, false));
+                return Ok(new Success(html, false));
             }
         }
 
-        private string Clean(string content, Guid clientId, Config config, string ip, string referer)
+        private string Clean(string html, string rtf, Guid clientId, Config config, string ip, string referer, string hash, bool keepStyles)
         {
             foreach (BaseCleaner cleaner in Cleaners)
             {
-                if (cleaner.CanClean(content))
+                if (cleaner.CanClean(html))
                 {
-                    try { DbHelper.InsertHit(clientId, cleaner.GetSourceType(), ip, referer); } catch (Exception ex) { ErrorHelper.LogError(ex); }
-                    try { AccountHelper.DecreaseBalance(clientId, cleaner.GetSourceType()); } catch (Exception ex) { ErrorHelper.LogError(ex); }
+                    var hitHash = DbHelper.GetHitHash(clientId, hash);
+                    var price = 0.0M;
 
-                    return cleaner.Clean(content, config);
+                    try
+                    { 
+                        if (hitHash.Date < DateTime.UtcNow.Date)
+                        {
+                            price = AccountHelper.GetHitPrice(clientId, cleaner.GetSourceType());
+                            AccountHelper.DecreaseBalance(clientId, cleaner.GetSourceType(), price);
+                            DbHelper.InsertHitHash(clientId, hash);
+                        }
+
+                        DbHelper.InsertHit(clientId, cleaner.GetSourceType(), ip, referer, price);
+                    }
+                    catch (Exception ex)
+                    {
+                        ErrorHelper.LogError(ex);
+                    }
+
+                    return cleaner.Clean(html, rtf, config);
                 }
             }
 
-            return content;
+            return html;
         }
 
         private void EnsureCleaners()
@@ -103,6 +125,9 @@ namespace PasteItCleaned.Controllers
 
     public class CleanObject
     {
-        public string value { get; set; }
+        public string hash { get; set; }
+        public string html { get; set; }
+        public string rtf { get; set; }
+        public bool keepStyles { get; set; }
     }
 }
