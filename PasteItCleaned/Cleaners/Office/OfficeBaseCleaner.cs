@@ -27,6 +27,3 @@ namespace PasteItCleaned.Cleaners.Office
         }
     }
 }
-
-
-//return 0 <= t.indexOf("\\pngblip") ? Fo.value("image/png") : 0 <= t.indexOf("\\jpegblip") ? Fo.value("image/jpeg") : Fo.error("errors.imageimport.unsupported")

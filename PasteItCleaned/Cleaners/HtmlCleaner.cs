@@ -8,6 +8,7 @@ using AngleSharp.Html.Parser;
 using HtmlAgilityPack;
 
 using PasteItCleaned.Entities;
+using PasteItCleaned.Helpers;
 
 namespace PasteItCleaned.Cleaners
 {
@@ -15,7 +16,6 @@ namespace PasteItCleaned.Cleaners
     {
         private string[] ValideAttributes = { "style", "colspan", "rowspan", "src", "class", "href", "target", "border", "cellspacing", "cellpadding", "valign", "align" };
 
-        // replace images with inline image data, resize images if necessary
         //remove <a name=...> code as these are usually useless.
 
         public override SourceType GetSourceType()
@@ -25,11 +25,13 @@ namespace PasteItCleaned.Cleaners
 
         public override string Clean(string html, string rtf, Config config)
         {
-            var cleaned = html;
+            var htmlDoc = this.ParseWithHtmlAgilityPack(html);
+            var rtfDoc = this.ParseWithRtfPipe(rtf);
 
-            cleaned = base.Clean(cleaned, rtf, config);
+            htmlDoc = base.SafeExec(this.EmbedInternalImages, htmlDoc, rtfDoc);
 
-            //if (config.GetConfigValue("embedExternalImages", false))
+            if (config.GetConfigValue("embedExternalImages", false))
+                htmlDoc = base.SafeExec(this.EmbedExternalImages, htmlDoc, rtfDoc);
 
             //if (config.GetConfigValue("removeEmptyTags", true))
 
@@ -37,17 +39,21 @@ namespace PasteItCleaned.Cleaners
 
             //cleaned = base.SafeExec(this.RemoveEmptyParagraphs, cleaned);
 
+            // replace images with inline image data, resize images if necessary
             /* 
              embed external images (file:/// are always embed, but http:// are not embeded by default)
              ramener la config via objet json dans le callback, et traiter les images coté client
             */
 
+            var cleaned = this.GetOuterHtml(htmlDoc);
 
             cleaned = base.SafeExec(this.RemoveComments, cleaned);
             cleaned = base.SafeExec(this.RemoveUselessTags, cleaned);
             cleaned = base.SafeExec(this.Compact, cleaned);
             cleaned = base.SafeExec(this.Indent, cleaned);
             cleaned = base.SafeExec(this.RemoveSurroundingTags, cleaned);
+
+            cleaned = base.Clean(cleaned, rtf, config);
 
             return cleaned.Trim();
         }
@@ -229,7 +235,7 @@ namespace PasteItCleaned.Cleaners
             return docs.Html;
         }
 
-        protected void AddInlineStylesNode(Dictionary<string, Dictionary<string, string>> styles, HtmlNode node)
+        private void AddInlineStylesNode(Dictionary<string, Dictionary<string, string>> styles, HtmlNode node)
         {
             foreach (HtmlNode n in node.ChildNodes)
             {
@@ -272,7 +278,7 @@ namespace PasteItCleaned.Cleaners
             return docs.Html;
         }
 
-        protected void ConvertAttributesToStylesNode(HtmlNode node)
+        private void ConvertAttributesToStylesNode(HtmlNode node)
         {
             foreach (HtmlNode n in node.ChildNodes)
             {
@@ -286,11 +292,14 @@ namespace PasteItCleaned.Cleaners
                 {
                     var styleAttr = this.FindOrCreateAttr(n, "style");
 
-                    if (!string.IsNullOrWhiteSpace(widthAttr.Value))
-                        styleAttr.Value += string.Format("width: {0}; ", widthAttr.Value);
+                    if (n.Name.ToLower() != "td")
+                    {
+                        if (!string.IsNullOrWhiteSpace(widthAttr.Value))
+                            styleAttr.Value += string.Format("width: {0}; ", this.GetSize(widthAttr.Value));
 
-                    if (!string.IsNullOrWhiteSpace(heightAttr.Value))
-                        styleAttr.Value += string.Format("height: {0}; ", heightAttr.Value);
+                        if (!string.IsNullOrWhiteSpace(heightAttr.Value))
+                            styleAttr.Value += string.Format("height: {0}; ", this.GetSize(heightAttr.Value));
+                    }
                 }
             }
         }
@@ -306,7 +315,7 @@ namespace PasteItCleaned.Cleaners
             return docs.Html;
         }
 
-        protected void AddVShapesTagsNode(Dictionary<string, HtmlNode> vShapes, HtmlNode node)
+        private void AddVShapesTagsNode(Dictionary<string, HtmlNode> vShapes, HtmlNode node)
         {
             foreach (HtmlNode n in node.ChildNodes)
             {
@@ -347,6 +356,66 @@ namespace PasteItCleaned.Cleaners
         }
 
 
+        protected HtmlDocument EmbedInternalImages(HtmlDocs docs)
+        {
+            var rtfImages = this.GetRtfImages(docs.Rtf);
+            var imgIndex = 0;
+
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+                EmbedInternalImagesNode(rtfImages, node, ref imgIndex);
+
+            return docs.Html;
+        }
+
+        private void EmbedInternalImagesNode(List<string> rtfImages, HtmlNode node, ref int imgIndex)
+        {
+            foreach (HtmlNode n in node.ChildNodes)
+            {
+                if (n.HasChildNodes)
+                    EmbedInternalImagesNode(rtfImages, n, ref imgIndex);
+
+                if (n.Name.ToLower().Trim() == "img")
+                {
+                    var srcAttr = this.FindOrCreateAttr(n, "src");
+                    var widthAttr = this.FindOrCreateAttr(n, "width");
+                    var heightAttr = this.FindOrCreateAttr(n, "height");
+
+                    if (srcAttr.Value.ToLower().StartsWith("file://"))
+                        if (rtfImages.Count >= imgIndex + 1)
+                            srcAttr.Value = ImageHelper.ConvertToPngDataUri(rtfImages[imgIndex++], widthAttr.Value, heightAttr.Value);
+                }
+            }
+        }
+
+
+        protected HtmlDocument EmbedExternalImages(HtmlDocs docs)
+        {
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+                EmbedExternalImagesNode(node);
+
+            return docs.Html;
+        }
+
+        private void EmbedExternalImagesNode(HtmlNode node)
+        {
+            foreach (HtmlNode n in node.ChildNodes)
+            {
+                if (n.HasChildNodes)
+                    EmbedExternalImagesNode(n);
+
+                if (n.Name.ToLower().Trim() == "img")
+                {
+                    var srcAttr = this.FindOrCreateAttr(n, "src");
+
+                    if (srcAttr.Value.ToLower().StartsWith("http://") || srcAttr.Value.ToLower().StartsWith("https://"))
+                    {
+                        
+                    }
+                }
+            }
+        }
+
+
         protected HtmlDocument ConvertBulletLists(HtmlDocs docs)
         {
             foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
@@ -359,7 +428,7 @@ namespace PasteItCleaned.Cleaners
             return docs.Html;
         }
 
-        protected void ConvertBulletListsNodeConvertP(HtmlNode node)
+        private void ConvertBulletListsNodeConvertP(HtmlNode node)
         {
             var childNodes = new List<HtmlNode>();
 
@@ -416,7 +485,7 @@ namespace PasteItCleaned.Cleaners
             }
         }
 
-        protected void ConvertBulletListsNodeCreateUlOl(HtmlNode node)
+        private void ConvertBulletListsNodeCreateUlOl(HtmlNode node)
         {
             var childNodes = new List<HtmlNode>();
             
@@ -514,7 +583,7 @@ namespace PasteItCleaned.Cleaners
             return docs.Html;
         }
 
-        protected void ConvertFontHeadersNode(HtmlNode node)
+        private void ConvertFontHeadersNode(HtmlNode node)
         {
             var childNodes = new List<HtmlNode>();
 
@@ -588,6 +657,56 @@ namespace PasteItCleaned.Cleaners
             content = content.Replace("<![endif]>", "");
 
             return content;
+        }
+
+
+        private List<string> GetRtfImages(HtmlDocument htmlDoc)
+        {
+            var rtfImages = new List<string>();
+
+            foreach (HtmlNode n in htmlDoc.DocumentNode.ChildNodes)
+            {
+                var nodes = this.GetRtfImages(n);
+
+                foreach (var no in nodes)
+                    rtfImages.Add(no);
+            }
+
+            return rtfImages;
+        }
+
+        private List<string> GetRtfImages(HtmlNode node)
+        {
+            var rtfImages = new List<string>();
+
+            if (node.HasChildNodes)
+            {
+                foreach (HtmlNode n in node.ChildNodes)
+                {
+                    var nodes = this.GetRtfImages(n);
+
+                    foreach (var no in nodes)
+                        rtfImages.Add(no);
+                }
+            }
+
+            if (node.Name.Trim().ToLower() == "img")
+                rtfImages.Add(this.FindOrCreateAttr(node, "src").Value);
+
+            return rtfImages;
+        }
+
+        private string GetSize(string size)
+        {
+            if (!string.IsNullOrWhiteSpace(size))
+            {
+                var numerics = new List<char>("0123456789".ToCharArray());
+
+                if (numerics.Contains(size.ToCharArray()[size.Length - 1]))
+                    return string.Format("{0}px", size);
+            }
+
+            return size;
         }
 
 
