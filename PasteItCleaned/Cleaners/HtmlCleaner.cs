@@ -3,8 +3,6 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Text;
 
-using AngleSharp.Html;
-using AngleSharp.Html.Parser;
 using HtmlAgilityPack;
 
 using PasteItCleaned.Entities;
@@ -16,44 +14,39 @@ namespace PasteItCleaned.Cleaners
     {
         private string[] ValideAttributes = { "style", "colspan", "rowspan", "src", "class", "href", "target", "border", "cellspacing", "cellpadding", "valign", "align" };
 
-        //remove <a name=...> code as these are usually useless.
-
         public override SourceType GetSourceType()
         {
             return SourceType.Unknown;
         }
 
-        public override string Clean(string html, string rtf, Config config)
+        public override string Clean(string html, string rtf, Config config, bool keepStyles)
         {
             var htmlDoc = this.ParseWithHtmlAgilityPack(html);
             var rtfDoc = this.ParseWithRtfPipe(rtf);
 
-            htmlDoc = base.SafeExec(this.EmbedInternalImages, htmlDoc, rtfDoc);
+            htmlDoc = base.SafeExec(this.RemoveLocalAnchors, htmlDoc, rtfDoc);
 
-            if (config.GetConfigValue("embedExternalImages", false))
-                htmlDoc = base.SafeExec(this.EmbedExternalImages, htmlDoc, rtfDoc);
+            if (!keepStyles)
+                htmlDoc = base.SafeExec(this.RemoveAllStyles, htmlDoc, rtfDoc);
 
             //if (config.GetConfigValue("removeEmptyTags", true))
 
             //if (config.GetConfigValue("removeSpanTags", true))
 
-            //cleaned = base.SafeExec(this.RemoveEmptyParagraphs, cleaned);
-
-            // replace images with inline image data, resize images if necessary
-            /* 
-             embed external images (file:/// are always embed, but http:// are not embeded by default)
-             ramener la config via objet json dans le callback, et traiter les images coté client
-            */
 
             var cleaned = this.GetOuterHtml(htmlDoc);
+
+            if (!keepStyles) {
+                cleaned = base.SafeExec(this.RemoveStyleTags, cleaned);
+                cleaned = base.SafeExec(this.CompactSpaces, cleaned);
+            }
 
             cleaned = base.SafeExec(this.RemoveComments, cleaned);
             cleaned = base.SafeExec(this.RemoveUselessTags, cleaned);
             cleaned = base.SafeExec(this.Compact, cleaned);
-            cleaned = base.SafeExec(this.Indent, cleaned);
             cleaned = base.SafeExec(this.RemoveSurroundingTags, cleaned);
 
-            cleaned = base.Clean(cleaned, rtf, config);
+            cleaned = base.Clean(cleaned, rtf, config, keepStyles);
 
             return cleaned.Trim();
         }
@@ -71,21 +64,13 @@ namespace PasteItCleaned.Cleaners
             return content;
         }
 
-        protected string Indent(string content)
+        protected string CompactSpaces(string content)
         {
-            var parser = new HtmlParser();
-            var document = parser.ParseDocument(content);
+            content = content.Replace("&nbsp;", " ");
+            content = content.Replace("  ", " ");
+            content = content.Trim();
 
-            using (var writer = new StringWriter())
-            {
-                document.ToHtml(writer, new PrettyMarkupFormatter()
-                {
-                    Indentation = "\t",
-                    NewLine = "\n"
-                });
-
-                return writer.ToString();
-            }
+            return content;
         }
 
 
@@ -218,6 +203,49 @@ namespace PasteItCleaned.Cleaners
                         }
 
                         attr.Value = newStyles.ToString();
+                    }
+                }
+            }
+        }
+
+
+        protected HtmlDocument RemoveAllStyles(HtmlDocs docs)
+        {
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+                RemoveAllStylesNode(node);
+
+            return docs.Html;
+        }
+
+        private void RemoveAllStylesNode(HtmlNode node)
+        {
+            foreach (HtmlNode n in node.ChildNodes)
+            {
+                if (n.HasChildNodes)
+                    RemoveAllStylesNode(n);
+
+                for (int i = n.Attributes.Count - 1; i >= 0; i--)
+                {
+                    var attr = n.Attributes[i];
+
+                    if (attr.Name.Trim().ToLower() == "style")
+                    {
+                        var attrValue = attr.Value;
+
+                        attr.Value = "";
+
+                        if (n.Name.ToLower() == "td" || n.Name.ToLower() == "table" || n.Name.ToLower() == "tr")
+                        {
+                            var modifiers = this.ParseCssModifiers(attrValue);
+                            var width = this.GetValue(modifiers, "width", "");
+                            var height = this.GetValue(modifiers, "height", "");
+
+                            if (!string.IsNullOrWhiteSpace(width))
+                                attr.Value += string.Format("width: {0};", width);
+
+                            if (!string.IsNullOrWhiteSpace(height))
+                                attr.Value += string.Format("height: {0};", height);
+                        }
                     }
                 }
             }
@@ -377,12 +405,12 @@ namespace PasteItCleaned.Cleaners
                 if (n.Name.ToLower().Trim() == "img")
                 {
                     var srcAttr = this.FindOrCreateAttr(n, "src");
-                    var widthAttr = this.FindOrCreateAttr(n, "width");
-                    var heightAttr = this.FindOrCreateAttr(n, "height");
+                    var width = this.GetNodeWidthValue(n);
+                    var height = this.GetNodeHeightValue(n);
 
                     if (srcAttr.Value.ToLower().StartsWith("file://"))
                         if (rtfImages.Count >= imgIndex + 1)
-                            srcAttr.Value = ImageHelper.ConvertToPngDataUri(rtfImages[imgIndex++], widthAttr.Value, heightAttr.Value);
+                            srcAttr.Value = ImageHelper.ConvertToPngDataUri(rtfImages[imgIndex++], width, height);
                 }
             }
         }
@@ -406,11 +434,11 @@ namespace PasteItCleaned.Cleaners
                 if (n.Name.ToLower().Trim() == "img")
                 {
                     var srcAttr = this.FindOrCreateAttr(n, "src");
+                    var width = this.GetNodeWidthValue(n);
+                    var height = this.GetNodeHeightValue(n);
 
                     if (srcAttr.Value.ToLower().StartsWith("http://") || srcAttr.Value.ToLower().StartsWith("https://"))
-                    {
-                        
-                    }
+                        srcAttr.Value = ImageHelper.GetDataUri(srcAttr.Value, width, height);
                 }
             }
         }
@@ -618,6 +646,37 @@ namespace PasteItCleaned.Cleaners
         }
 
 
+        protected HtmlDocument RemoveLocalAnchors(HtmlDocs docs)
+        {
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+                RemoveLocalAnchorsNode(node);
+
+            return docs.Html;
+        }
+
+        private void RemoveLocalAnchorsNode(HtmlNode node)
+        {
+            var childNodes = new List<HtmlNode>();
+
+            foreach (HtmlNode n in node.ChildNodes)
+                childNodes.Add(n);
+
+            foreach (HtmlNode n in childNodes)
+            {
+                if (n.HasChildNodes)
+                    RemoveLocalAnchorsNode(n);
+
+                if (n.Name.ToLower() == "a")
+                {
+                    var nameAttr = this.FindOrCreateAttr(n, "name");
+
+                    if (!string.IsNullOrWhiteSpace(nameAttr.Value))
+                        n.ParentNode.ReplaceChild(HtmlNode.CreateNode(n.InnerHtml), n);
+                }
+            }
+        }
+
+
         protected string RemoveIframes(string content)
         {
             var pattern = @"<(iframe|!\[)[^>]*?>";
@@ -631,6 +690,13 @@ namespace PasteItCleaned.Cleaners
 
             content = content.Replace("<font", "<span");
             content = content.Replace("</font>", "</span>");
+
+            return Regex.Replace(content, pattern, "", RegexOptions.Singleline);
+        }
+
+        protected string RemoveStyleTags(string content)
+        {
+            var pattern = @"<(/?i|/?b|/?u|/?strong|/?em|/?span|/?font|/?pre|/?code|/?blockquote)(^>|[\s\t].+?)*?/?>";
 
             return Regex.Replace(content, pattern, "", RegexOptions.Singleline);
         }
@@ -710,6 +776,39 @@ namespace PasteItCleaned.Cleaners
         }
 
 
+        private string GetNodeWidthValue(HtmlNode n)
+        {
+            var styleAttr = this.FindOrCreateAttr(n, "style");
+            var widthAttr = this.FindOrCreateAttr(n, "width");
+
+            if (!string.IsNullOrWhiteSpace(widthAttr.Value))
+                return widthAttr.Value;
+
+            var modifiers = this.ParseCssModifiers(styleAttr.Value);
+
+            foreach (var modifier in modifiers)
+                if (modifier.Key.ToLower().Trim() == "width")
+                    return modifier.Value;
+
+            return "";
+        }
+
+        private string GetNodeHeightValue(HtmlNode n)
+        {
+            var styleAttr = this.FindOrCreateAttr(n, "style");
+            var heightAttr = this.FindOrCreateAttr(n, "height");
+
+            if (!string.IsNullOrWhiteSpace(heightAttr.Value))
+                return heightAttr.Value;
+
+            var modifiers = this.ParseCssModifiers(styleAttr.Value);
+
+            foreach (var modifier in modifiers)
+                if (modifier.Key.ToLower().Trim() == "height")
+                    return modifier.Value;
+
+            return "";
+        }
 
         private Dictionary<string, HtmlNode> GetVShapesNodes(HtmlDocument htmlDoc)
         {
@@ -849,15 +948,17 @@ namespace PasteItCleaned.Cleaners
 
         private Dictionary<string, Dictionary<string, string>> ParseCssClasses(string content)
         {
+            content = Regex.Replace(content, "\\/\\*.+?\\*\\/", "", RegexOptions.Multiline | RegexOptions.Singleline | RegexOptions.IgnoreCase);
+
             var allClasses = new Dictionary<string, Dictionary<string, string>>();
-            var patternStyles = @"<style.*?>.*?<\!--(?<styles>.*?)-->.*?</style>";
+            var patternStyles = @"<style.*?>(?<styles>.*?)</style>";
             var patternClass = @"(?<name>[a-zA-Z0-9-@#\. ,:]+?)[\s\t]*?{(?<class>.*?)}";
             var patternStyle = @"(?<modifier>[a-zA-Z0-9-]+?)[\s\t]*?:[\s\t]*?(?<value>.*?);";
             var comments = Regex.Matches(content, patternStyles, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Multiline);
 
             foreach (Match comment in comments)
             {
-                var styles = comment.Groups["styles"].Value;
+                var styles = comment.Groups["styles"].Value.Replace("<!--", "").Replace("-->", "");
                 var classes = Regex.Matches(styles, patternClass, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Multiline);
 
                 foreach (Match classe in classes)

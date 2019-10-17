@@ -19,7 +19,7 @@ namespace PasteItCleaned.Cleaners
             return false;
         }
 
-        public virtual string Clean(string html, string rtf, Config config)
+        public virtual string Clean(string html, string rtf, Config config, bool keepStyles)
         {
             return html;
         }

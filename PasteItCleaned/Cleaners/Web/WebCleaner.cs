@@ -14,7 +14,7 @@ namespace PasteItCleaned.Cleaners.Web
             return true;
         }
 
-        public override string Clean(string html, string rtf, Config config)
+        public override string Clean(string html, string rtf, Config config, bool keepStyles)
         {
             var cleaned = html;
 
@@ -23,6 +23,9 @@ namespace PasteItCleaned.Cleaners.Web
 
             var htmlDoc = base.ParseWithHtmlAgilityPack(cleaned);
             var rtfDoc = base.ParseWithRtfPipe(rtf);
+
+            if (config.GetConfigValue("embedExternalImages", false))
+                htmlDoc = base.SafeExec(this.EmbedExternalImages, htmlDoc, rtfDoc);
 
             if (config.GetConfigValue("removeTagAttributes", true))
                 htmlDoc = base.SafeExec(this.RemoveUselessAttributes, htmlDoc, rtfDoc);
@@ -33,7 +36,7 @@ namespace PasteItCleaned.Cleaners.Web
                 htmlDoc = base.SafeExec(this.RemoveClassAttributes, htmlDoc, rtfDoc);
             }
 
-            return base.Clean(base.GetOuterHtml(htmlDoc), rtf, config);
+            return base.Clean(base.GetOuterHtml(htmlDoc), rtf, config, keepStyles);
         }
     }
 }

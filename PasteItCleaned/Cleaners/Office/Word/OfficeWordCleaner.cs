@@ -14,9 +14,9 @@ namespace PasteItCleaned.Cleaners.Office.Word
             return content.ToLower().Contains("<meta name=Generator content=\"Microsoft Word".ToLower());
         }
 
-        public override string Clean(string html, string rtf, Config config)
+        public override string Clean(string html, string rtf, Config config, bool keepStyles)
         {
-            return base.Clean(html, rtf, config);
+            return base.Clean(html, rtf, config, keepStyles);
         }
     }
 }

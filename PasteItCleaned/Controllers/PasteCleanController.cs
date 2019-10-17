@@ -104,7 +104,7 @@ namespace PasteItCleaned.Controllers
                         ErrorHelper.LogError(ex);
                     }
 
-                    return cleaner.Clean(html, rtf, config);
+                    return cleaner.Clean(html, rtf, config, keepStyles);
                 }
             }
 
