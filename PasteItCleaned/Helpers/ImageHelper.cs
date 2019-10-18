@@ -40,25 +40,32 @@ namespace PasteItCleaned.Helpers
 
         public static string ConvertToPngDataUri(string dataUri, string width, string height)
         {
-            if (dataUri.ToLower().StartsWith("data:windows/metafile;base64"))
+            try
             {
-                var base64 = dataUri.Substring(29);
-                var bytes = Convert.FromBase64String(base64);
-                var metafileOriginal = ConvertToMetafile(bytes);
-                var pngOriginal = ConvertToPng(GetBytes(metafileOriginal));
-                var pngResized = (Image)null;
-
-                if (!string.IsNullOrWhiteSpace(width) && !string.IsNullOrWhiteSpace(height))
+                if (dataUri.ToLower().StartsWith("data:windows/metafile;base64"))
                 {
-                    var widthPx = int.Parse(width.Replace("px", ""));
-                    var heightPx = int.Parse(height.Replace("px", ""));
+                    var base64 = dataUri.Substring(29);
+                    var bytes = Convert.FromBase64String(base64);
+                    var metafileOriginal = ConvertToMetafile(bytes);
+                    var pngOriginal = ConvertToPng(GetBytes(metafileOriginal));
+                    var pngResized = (Image)null;
 
-                    pngResized = ResizeImage(pngOriginal, widthPx, heightPx);
+                    if (!string.IsNullOrWhiteSpace(width) && !string.IsNullOrWhiteSpace(height))
+                    {
+                        var widthPx = int.Parse(width.Replace("px", ""));
+                        var heightPx = int.Parse(height.Replace("px", ""));
+
+                        pngResized = ResizeImage(pngOriginal, widthPx, heightPx);
+                    }
+
+                    var pngBase64 = GetBase64(pngResized != null ? pngResized : pngOriginal);
+
+                    return string.Format("data:image/png;base64,{0}", pngBase64);
                 }
-
-                var pngBase64 = GetBase64(pngResized != null ? pngResized : pngOriginal);
-
-                return string.Format("data:image/png;base64,{0}", pngBase64);
+            }
+            catch (Exception ex)
+            {
+                ErrorHelper.LogError(ex);
             }
 
             return dataUri;
@@ -76,7 +83,12 @@ namespace PasteItCleaned.Helpers
 
         public static string GetBase64(Image img)
         {
-            return Convert.ToBase64String(GetBytes(img));
+            return GetBase64(GetBytes(img));
+        }
+
+        public static string GetBase64(byte[] bytes)
+        {
+            return Convert.ToBase64String(bytes);
         }
 
         public static Stream GetStream(Image img)

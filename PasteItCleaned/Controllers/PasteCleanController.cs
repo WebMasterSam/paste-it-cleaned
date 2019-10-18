@@ -14,7 +14,7 @@ using PasteItCleaned.Helpers;
 
 namespace PasteItCleaned.Controllers
 {
-    [Route("api/v1/clean")]
+    [Route("v1/clean")]
     [ApiController]
     public class PasteCleanController : ControllerBase
     {
@@ -43,7 +43,7 @@ namespace PasteItCleaned.Controllers
                 if (ApiKeyHelper.ApiKeyPresent(apiKey))
                 {
                     var objApiKey = ApiKeyHelper.GetApiKeyFromDb(apiKey);
-                    var domain = this.HttpContext.Request.Host.Host.ToLower().Trim();
+                    var domain = HostHelper.GetHostFromHeaders(this.HttpContext);
 
                     if (ApiKeyHelper.ApiKeyValid(objApiKey))
                     {
@@ -53,7 +53,7 @@ namespace PasteItCleaned.Controllers
                             {
                                 var config = CleanerConfigHelper.GetConfigFromHeaders(this.HttpContext);
                                 var configObj = CleanerConfigHelper.GetConfigFromDb(objApiKey.ClientId, config);
-                                var embedImages = configObj != null ? configObj.GetConfigValue("embedExternalImages", false) : false;
+                                var embedImages = configObj != null ? configObj.GetConfigValue("EmbedExternalImages", false) : false;
                                 var ip = HttpContext.Features.Get<IHttpConnectionFeature>()?.RemoteIpAddress.ToString();
                                 var referer = Request.Headers["Referer"].ToString();
 

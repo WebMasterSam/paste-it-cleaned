@@ -23,7 +23,7 @@ namespace PasteItCleaned.Helpers
                 var key = apiKey;
                 var dbKey = new Dictionary<string, AttributeValue>
                 {
-                    { "apikey", new AttributeValue { S = key } }
+                    { "ApiKey", new AttributeValue { S = key } }
                 };
 
                 var selectApiKey = new GetItemRequest
@@ -44,12 +44,12 @@ namespace PasteItCleaned.Helpers
                     {
                         var apiKeyObj = new ApiKey();
 
-                        apiKeyObj.Key = item["apikey"].S;
-                        apiKeyObj.ClientId = new Guid(item["clientId"].S);
-                        apiKeyObj.ExpiresOn = DateTime.Parse(item["expiresOn"].S);
+                        apiKeyObj.Key = item["ApiKey"].S;
+                        apiKeyObj.ClientId = new Guid(item["ClientId"].S);
+                        apiKeyObj.ExpiresOn = DateTime.Parse(item["ExpiresOn"].S);
                         apiKeyObj.Domains = new List<string>();
 
-                        foreach (var domain in item["domains"].L)
+                        foreach (var domain in item["Domains"].L)
                             apiKeyObj.Domains.Add(domain.S);
 
                         return apiKeyObj;
@@ -68,7 +68,7 @@ namespace PasteItCleaned.Helpers
                 var key = clientId.ToString();
                 var dbKey = new Dictionary<string, AttributeValue>
                 {
-                    { "clientid", new AttributeValue { S = key } }
+                    { "ClientId", new AttributeValue { S = key } }
                 };
 
                 var selectClient = new GetItemRequest
@@ -88,51 +88,51 @@ namespace PasteItCleaned.Helpers
                     if (item != null && item.Count > 0)
                     {
                         var clientObj = new Client();
-                        var billing = item["billing"].M;
-                        var billingBalance = GetMapNode(billing, "balance");
-                        var business = item["business"].M;
-                        var businessContact = GetMapNode(business, "contact");
-                        var contact = item["contact"].M;
+                        var billing = item["Billing"].M;
+                        var billingBalance = GetMapNode(billing, "Balance");
+                        var business = item["Business"].M;
+                        var businessContact = GetMapNode(business, "Contact");
+                        var contact = item["Contact"].M;
 
-                        clientObj.ClientId = new Guid(item["clientid"].S);
+                        clientObj.ClientId = new Guid(item["ClientId"].S);
 
                         clientObj.Contact = new Contact();
-                        clientObj.Contact.FirstName = contact["firstName"].S;
-                        clientObj.Contact.LastName = contact["lastName"].S;
-                        clientObj.Contact.PhoneNumber = contact["phoneNumber"].S;
+                        clientObj.Contact.FirstName = contact["FirstName"].S;
+                        clientObj.Contact.LastName = contact["LastName"].S;
+                        clientObj.Contact.PhoneNumber = contact["PhoneNumber"].S;
 
                         clientObj.Business = new Business();
-                        clientObj.Business.Name = business["name"].S;
+                        clientObj.Business.Name = business["Name"].S;
 
                         clientObj.Business.Contact = new Contact();
-                        clientObj.Business.Contact.FirstName = contact["firstName"].S;
-                        clientObj.Business.Contact.LastName = contact["lastName"].S;
-                        clientObj.Business.Contact.Address = businessContact.M["address"].S;
-                        clientObj.Business.Contact.City = businessContact.M["city"].S;
-                        clientObj.Business.Contact.Country = businessContact.M["country"].S;
-                        clientObj.Business.Contact.PhoneNumber = businessContact.M["phoneNumber"].S;
-                        clientObj.Business.Contact.State = businessContact.M["state"].S;
+                        clientObj.Business.Contact.FirstName = contact["FirstName"].S;
+                        clientObj.Business.Contact.LastName = contact["LastName"].S;
+                        clientObj.Business.Contact.Address = businessContact.M["Address"].S;
+                        clientObj.Business.Contact.City = businessContact.M["City"].S;
+                        clientObj.Business.Contact.Country = businessContact.M["Country"].S;
+                        clientObj.Business.Contact.PhoneNumber = businessContact.M["PhoneNumber"].S;
+                        clientObj.Business.Contact.State = businessContact.M["State"].S;
 
                         clientObj.ApiKeys = new List<string>();
-                        foreach (var apiKey in item["apiKeys"].SS)
+                        foreach (var apiKey in item["ApiKeys"].SS)
                             clientObj.ApiKeys.Add(apiKey);
 
                         clientObj.Billing = new Billing();
                         clientObj.Billing.Balance = decimal.Parse(billingBalance.N, System.Globalization.CultureInfo.InvariantCulture);
                         clientObj.Billing.Contact = new Contact();
-                        clientObj.Billing.Contact.FirstName = contact["firstName"].S;
-                        clientObj.Billing.Contact.LastName = contact["lastName"].S;
-                        clientObj.Billing.Contact.PhoneNumber = contact["phoneNumber"].S;
+                        clientObj.Billing.Contact.FirstName = contact["FirstName"].S;
+                        clientObj.Billing.Contact.LastName = contact["LastName"].S;
+                        clientObj.Billing.Contact.PhoneNumber = contact["PhoneNumber"].S;
 
                         clientObj.Configs = new List<Config>();
-                        foreach (var config in item["configs"].L)
+                        foreach (var config in item["Configs"].L)
                         {
                             var obj = new Config();
-                            var common = GetMapNode(config.M, "common");
-                            var office = GetMapNode(config.M, "office");
-                            var web = GetMapNode(config.M, "web");
+                            var common = GetMapNode(config.M, "Common");
+                            var office = GetMapNode(config.M, "Office");
+                            var web = GetMapNode(config.M, "Web");
 
-                            obj.Name = config.M["name"].S;
+                            obj.Name = config.M["Name"].S;
                             obj.Common = new Dictionary<string, bool>();
                             obj.Office = new Dictionary<string, bool>();
                             obj.Web = new Dictionary<string, bool>();
@@ -230,7 +230,7 @@ namespace PasteItCleaned.Helpers
                 var key = clientId.ToString();
                 var dbKey = new Dictionary<string, AttributeValue>
                 {
-                    { "clientid", new AttributeValue { S = key } }
+                    { "ClientId", new AttributeValue { S = key } }
                 };
 
                 UpdateItemRequest updateClientBalance = new UpdateItemRequest()
@@ -241,7 +241,7 @@ namespace PasteItCleaned.Helpers
                     {
                         { ":decreaseBy", new AttributeValue { N = decreaseBy.ToString(System.Globalization.CultureInfo.InvariantCulture) } }
                     },
-                    UpdateExpression = "SET billing.balance = billing.balance - :decreaseBy",
+                    UpdateExpression = "SET Billing.Balance = Billing.Balance - :decreaseBy",
                     ReturnValues = "NONE"
                 };
 

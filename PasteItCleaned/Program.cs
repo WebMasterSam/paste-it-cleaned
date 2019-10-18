@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using System.Text;
 
 namespace PasteItCleaned
 {
@@ -7,6 +8,7 @@ namespace PasteItCleaned
     {
         public static void Main(string[] args)
         {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             CreateWebHostBuilder(args).Build().Run();
         }
 

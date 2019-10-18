@@ -8,6 +8,6 @@
         }
 
         public string Content { get; set; }
-        public bool Exception { get { return true; } }
+        public string Exception { get { return "editor.alert.failure"; } }
     }
 }

@@ -16,6 +16,9 @@ namespace PasteItCleaned.Helpers
                 DbHelper.InsertError(ex);
             }
             catch { }
+
+            if (ex.InnerException != null)
+                LogError(ex.InnerException);
         }
 
         public static string GetApiKeyDomainNotConfigured(string apiKey, string domain)

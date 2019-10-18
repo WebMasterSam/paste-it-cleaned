@@ -14,7 +14,7 @@ namespace PasteItCleaned.Helpers
         public static bool ApiKeyValid(ApiKey apiKey)
         {
             if (apiKey != null)
-                if (apiKey.ExpiresOn.Date < DateTime.UtcNow.Date)
+                if (apiKey.ExpiresOn.Date > DateTime.UtcNow.Date)
                     return true;
 
             return false;

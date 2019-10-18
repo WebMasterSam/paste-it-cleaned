@@ -18,19 +18,19 @@ namespace PasteItCleaned.Cleaners.Web
         {
             var cleaned = html;
 
-            if (config.GetConfigValue("removeIframes", true))
+            if (config.GetConfigValue("RemoveIframes", true))
                 cleaned = base.SafeExec(base.RemoveIframes, cleaned);
 
             var htmlDoc = base.ParseWithHtmlAgilityPack(cleaned);
             var rtfDoc = base.ParseWithRtfPipe(rtf);
 
-            if (config.GetConfigValue("embedExternalImages", false))
+            if (config.GetConfigValue("EmbedExternalImages", false))
                 htmlDoc = base.SafeExec(this.EmbedExternalImages, htmlDoc, rtfDoc);
 
-            if (config.GetConfigValue("removeTagAttributes", true))
+            if (config.GetConfigValue("RemoveTagAttributes", true))
                 htmlDoc = base.SafeExec(this.RemoveUselessAttributes, htmlDoc, rtfDoc);
 
-            if (config.GetConfigValue("removeClassNames", true))
+            if (config.GetConfigValue("RemoveClassNames", true))
             {
                 htmlDoc = base.SafeExec(base.AddInlineStyles, htmlDoc, rtfDoc);
                 htmlDoc = base.SafeExec(this.RemoveClassAttributes, htmlDoc, rtfDoc);

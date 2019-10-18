@@ -7,7 +7,7 @@ using PasteItCleaned.Helpers;
 
 namespace PasteItCleaned.Controllers
 {
-    [Route("api/v1/notify")]
+    [Route("v1/notify")]
     [ApiController]
     public class PasteNotifyController : ControllerBase
     {
@@ -28,7 +28,7 @@ namespace PasteItCleaned.Controllers
                 if (ApiKeyHelper.ApiKeyPresent(apiKey))
                 {
                     var objApiKey = ApiKeyHelper.GetApiKeyFromDb(apiKey);
-                    var domain = this.HttpContext.Request.Host.Host.ToLower().Trim();
+                    var domain = HostHelper.GetHostFromHeaders(this.HttpContext);
 
                     if (ApiKeyHelper.ApiKeyValid(objApiKey))
                     {
