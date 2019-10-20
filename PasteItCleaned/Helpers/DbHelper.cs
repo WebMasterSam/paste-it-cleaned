@@ -34,7 +34,7 @@ namespace PasteItCleaned.Helpers
 
                 var asyncGet = client.GetItemAsync(selectApiKey);
 
-                asyncGet.Wait(1000);
+                asyncGet.Wait(5000);
 
                 if (asyncGet.IsCompletedSuccessfully)
                 {
@@ -79,7 +79,7 @@ namespace PasteItCleaned.Helpers
 
                 var asyncGet = client.GetItemAsync(selectClient);
 
-                asyncGet.Wait(1000);
+                asyncGet.Wait(5000);
 
                 if (asyncGet.IsCompletedSuccessfully)
                 {
@@ -176,7 +176,7 @@ namespace PasteItCleaned.Helpers
 
                 var asyncGet = client.GetItemAsync(selectHitHash);
 
-                asyncGet.Wait(1000);
+                asyncGet.Wait(5000);
 
                 if (asyncGet.IsCompletedSuccessfully)
                 {

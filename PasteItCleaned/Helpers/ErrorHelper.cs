@@ -13,6 +13,8 @@ namespace PasteItCleaned.Helpers
         {
             try
             {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
                 DbHelper.InsertError(ex);
             }
             catch { }

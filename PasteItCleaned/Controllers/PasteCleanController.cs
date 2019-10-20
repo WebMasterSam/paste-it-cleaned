@@ -20,7 +20,14 @@ namespace PasteItCleaned.Controllers
     {
         private static List<BaseCleaner> Cleaners = new List<BaseCleaner>();
 
-        // POST api/v1/clean
+        // GET v1/clean
+        [HttpGet()]
+        public ActionResult Get()
+        {
+            return Ok("Up and running");
+        }
+
+        // POST v1/clean
         [HttpPost()]
         public ActionResult Post([FromBody] CleanObject obj)
         {
@@ -28,6 +35,8 @@ namespace PasteItCleaned.Controllers
             var html = "";
             var rtf = "";
             var keepStyles = false;
+
+            Console.WriteLine("PasteCleanController::Post");
 
             try
             {

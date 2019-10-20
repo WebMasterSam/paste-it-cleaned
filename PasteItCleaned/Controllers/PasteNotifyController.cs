@@ -11,7 +11,7 @@ namespace PasteItCleaned.Controllers
     [ApiController]
     public class PasteNotifyController : ControllerBase
     {
-        // POST api/v1/notify
+        // POST v1/notify
         [HttpPost()]
         public ActionResult Post([FromBody] NotifyObject obj)
         {
