@@ -1,0 +1,11 @@
+
+{
+    "region" : "us-east-1",
+    "profile" : "PasteItCleanedLambdaProd",
+    "configuration" : "Release",
+    "framework"     : "netcoreapp2.1",
+    "s3-bucket"     : "paste-it-cleaned-lambda",
+    "template"      : "serverless.template",
+    "template-parameters" : "\"ShouldCreateBucket\"=\"false\";\"BucketName\"=\"\"",
+    "stack-name"          : "PasteItCleaned-Lambda"
+}
