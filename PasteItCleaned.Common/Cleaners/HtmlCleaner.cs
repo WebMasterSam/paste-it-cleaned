@@ -438,7 +438,7 @@ namespace PasteItCleaned.Common.Cleaners
                     var height = this.GetNodeHeightValue(n);
 
                     if (srcAttr.Value.ToLower().StartsWith("http://") || srcAttr.Value.ToLower().StartsWith("https://"))
-                        srcAttr.Value = ImageHelper.GetDataUri(srcAttr.Value, width, height);
+                        srcAttr.Value = ImageHelper.GetExternalDataUri(srcAttr.Value, width, height);
                 }
             }
         }

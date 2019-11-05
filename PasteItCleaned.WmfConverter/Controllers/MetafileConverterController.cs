@@ -46,6 +46,26 @@ namespace PasteItCleaned.WmfConverter.Controllers
             catch (Exception ex)
             {
                 ErrorHelper.LogError(ex);
+
+                try
+                {
+                    var img = ResourceHelper.GetEmbeddedImage<MetafileConverterController>("Error.png");
+
+                    if (obj.width > 0 && obj.height > 0)
+                    {
+                        var minSize = Math.Min(obj.width, obj.height);
+
+                        img = ImageHelper.ResizeImage(img, minSize, minSize);
+                    }
+
+                    var errorBase64 = ImageHelper.GetBase64(img);
+
+                    return Ok(new Success(errorBase64));
+                }
+                catch (Exception inner)
+                {
+                    ErrorHelper.LogError(inner);
+                }
             }
 
             return Ok(new Success(""));
