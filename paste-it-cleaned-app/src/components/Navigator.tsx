@@ -22,7 +22,7 @@ import CreditCardIcon from "@material-ui/icons/CreditCard"
 const categories = [
   {
     id: "Account",
-    children: [{ id: "Information", icon: <AccountBoxIcon />, active: true }, { id: "Billing", icon: <CreditCardIcon /> }]
+    children: [{ id: "Information", icon: <AccountBoxIcon /> }, { id: "Billing", icon: <CreditCardIcon /> }]
   },
   {
     id: "Plugin",
@@ -98,6 +98,7 @@ function Navigator(props: NavigatorProps) {
               Paster Plugin for editors
             </ListItemText>
           </ListItem>
+
           {categories.map(({ id, children }) => (
             <React.Fragment key={id}>
               <ListItem className={classes.categoryHeader}>
@@ -109,18 +110,21 @@ function Navigator(props: NavigatorProps) {
                   {id}
                 </ListItemText>
               </ListItem>
-              {children.map(({ id: childId, icon, active }) => (
-                <ListItem key={childId} button className={clsx(classes.item, active && classes.itemActiveItem)}>
-                  <ListItemIcon className={classes.itemIcon}>{icon}</ListItemIcon>
-                  <ListItemText
-                    classes={{
-                      primary: classes.itemPrimary
-                    }}
-                  >
-                    {childId}
-                  </ListItemText>
-                </ListItem>
-              ))}
+              {children.map(({ id: childId, icon }) => {
+                var active = false
+                return (
+                  <ListItem key={childId} button className={clsx(classes.item, active && classes.itemActiveItem)}>
+                    <ListItemIcon className={classes.itemIcon}>{icon}</ListItemIcon>
+                    <ListItemText
+                      classes={{
+                        primary: classes.itemPrimary
+                      }}
+                    >
+                      {childId}
+                    </ListItemText>
+                  </ListItem>
+                )
+              })}
               <Divider className={classes.divider} />
             </React.Fragment>
           ))}
