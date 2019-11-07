@@ -1,11 +1,9 @@
 import React from "react"
-import { BrowserRouter, Switch, Route, Link as RouterLink, withRouter } from "react-router-dom"
+import { BrowserRouter, Switch, Route, Link } from "react-router-dom"
 
 import { createMuiTheme, createStyles, ThemeProvider, withStyles, WithStyles } from "@material-ui/core/styles"
 import CssBaseline from "@material-ui/core/CssBaseline"
 import Hidden from "@material-ui/core/Hidden"
-import Typography from "@material-ui/core/Typography"
-import Link from "@material-ui/core/Link"
 
 import Navigator from "./components/Navigator"
 import Content from "./components/Content"

@@ -5,37 +5,37 @@ import Tabs from "@material-ui/core/Tabs/Tabs"
 import { Link } from "react-router-dom"
 import { Url } from "../../shared/Urls"
 
-interface AccountHeaderProps {
+interface AnalyticsHeaderProps {
   onDrawerToggle: () => void
 }
 
-class AccountHeader extends React.Component<AccountHeaderProps> {
+class AnalyticsHeader extends React.Component<AnalyticsHeaderProps> {
   render() {
     var activeTab = 0
 
-    if (window.location.pathname.toLowerCase().startsWith(Url.Account)) {
+    if (window.location.pathname.toLowerCase().startsWith(Url.Usage)) {
       activeTab = 0
-    } else if (window.location.pathname.toLowerCase().startsWith(Url.Billing)) {
+    } else if (window.location.pathname.toLowerCase().startsWith(Url.Hits)) {
       activeTab = 1
     }
 
     return (
       <HeaderBase
         {...this.props}
-        title="Account"
+        title="Analytics"
         tabs={
           <Tabs value={activeTab}>
             <Tab
               label={
-                <Link to={Url.Account} className="tab-link">
-                  Informations
+                <Link to={Url.Usage} className="tab-link">
+                  Usage
                 </Link>
               }
             />
             <Tab
               label={
-                <Link to={Url.Billing} className="tab-link">
-                  Billing details
+                <Link to={Url.Hits} className="tab-link">
+                  Latest pastes
                 </Link>
               }
             />
@@ -46,4 +46,4 @@ class AccountHeader extends React.Component<AccountHeaderProps> {
   }
 }
 
-export default AccountHeader
+export default AnalyticsHeader
