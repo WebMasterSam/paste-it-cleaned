@@ -1,5 +1,5 @@
 import React from "react"
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom"
+import { Link, Switch, Route, NavLink } from "react-router-dom"
 import clsx from "clsx"
 
 import { createStyles, Theme, withStyles, WithStyles } from "@material-ui/core/styles"
@@ -22,15 +22,15 @@ import CreditCardIcon from "@material-ui/icons/CreditCard"
 const categories = [
   {
     id: "Account",
-    children: [{ id: "Information", icon: <AccountBoxIcon /> }, { id: "Billing", icon: <CreditCardIcon /> }]
+    children: [{ id: "Information", path: "/account", icon: <AccountBoxIcon /> }, { id: "Billing", path: "/billing", icon: <CreditCardIcon /> }]
   },
   {
     id: "Plugin",
-    children: [{ id: "Api Key(s)", icon: <VpnKeyIcon /> }, { id: "Plugin Config", icon: <SettingsIcon /> }, { id: "Plugin Integration", icon: <SettingsIcon /> }]
+    children: [{ id: "Api Key(s)", path: "/api-key", icon: <VpnKeyIcon /> }, { id: "Plugin Config", path: "/config", icon: <SettingsIcon /> }, { id: "Plugin Integration", path: "/integration", icon: <SettingsIcon /> }]
   },
   {
     id: "Analytics",
-    children: [{ id: "Usage", icon: <AssessmentIcon /> }, { id: "Latest pastes", icon: <FileCopyIcon /> }]
+    children: [{ id: "Usage", path: "/usage", icon: <AssessmentIcon /> }, { id: "Latest pastes", path: "/hits", icon: <FileCopyIcon /> }]
   }
 ]
 
@@ -65,7 +65,15 @@ const styles = (theme: Theme) =>
       color: "#4fc3f7"
     },
     itemPrimary: {
-      fontSize: "inherit"
+      fontSize: "inherit",
+      width: "100%",
+      display: "block"
+    },
+    itemPrimaryLink: {
+      color: "#bbb",
+      textDecoration: "none",
+      width: "100%",
+      display: "block"
     },
     itemIcon: {
       minWidth: "auto",
@@ -76,14 +84,18 @@ const styles = (theme: Theme) =>
     }
   })
 
-export interface NavigatorProps extends Omit<DrawerProps, "classes">, WithStyles<typeof styles> {}
+export interface NavigatorProps extends Omit<DrawerProps, "classes">, WithStyles<typeof styles> {
+  current: string
+}
 
-function Navigator(props: NavigatorProps) {
-  const { classes, ...other } = props
+class Navigator extends React.Component<NavigatorProps> {
+  render() {
+    const { classes, ...other } = this.props
 
-  return (
-    <Router>
+    console.log(window.location.pathname)
+    return (
       <Drawer variant="permanent" {...other}>
+        {this.props.current}
         <List disablePadding>
           <ListItem className={clsx(classes.firebase, classes.item, classes.itemCategory)}>PasteItCleaned</ListItem>
           <ListItem className={clsx(classes.item, classes.itemCategory)}>
@@ -95,7 +107,9 @@ function Navigator(props: NavigatorProps) {
                 primary: classes.itemPrimary
               }}
             >
-              Paster Plugin for editors
+              <Link to={`/`} className={classes.itemPrimaryLink}>
+                Dashboard
+              </Link>
             </ListItemText>
           </ListItem>
 
@@ -110,8 +124,10 @@ function Navigator(props: NavigatorProps) {
                   {id}
                 </ListItemText>
               </ListItem>
-              {children.map(({ id: childId, icon }) => {
-                var active = false
+              {children.map(({ id: childId, path, icon }) => {
+                console.log(window.location.pathname)
+                console.log(path)
+                var active = window.location.pathname.startsWith(path)
                 return (
                   <ListItem key={childId} button className={clsx(classes.item, active && classes.itemActiveItem)}>
                     <ListItemIcon className={classes.itemIcon}>{icon}</ListItemIcon>
@@ -120,7 +136,9 @@ function Navigator(props: NavigatorProps) {
                         primary: classes.itemPrimary
                       }}
                     >
-                      {childId}
+                      <Link to={`${path}`} className={classes.itemPrimaryLink}>
+                        {childId}
+                      </Link>
                     </ListItemText>
                   </ListItem>
                 )
@@ -130,8 +148,8 @@ function Navigator(props: NavigatorProps) {
           ))}
         </List>
       </Drawer>
-    </Router>
-  )
+    )
+  }
 }
 
 export default withStyles(styles)(Navigator)

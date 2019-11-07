@@ -1,5 +1,5 @@
 import React from "react"
-import { BrowserRouter as Router, Switch, Route, Link as RouterLink } from "react-router-dom"
+import { BrowserRouter, Switch, Route, Link as RouterLink, withRouter } from "react-router-dom"
 
 import { createMuiTheme, createStyles, ThemeProvider, withStyles, WithStyles } from "@material-ui/core/styles"
 import CssBaseline from "@material-ui/core/CssBaseline"
@@ -11,19 +11,7 @@ import Navigator from "./components/Navigator"
 import Content from "./components/Content"
 import Header from "./components/Header"
 import AccountInformation from "./views/account/information/AccountInformation"
-
-function Copyright() {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {"Copyright © "}
-      <Link color="inherit" href="https://pasteitcleaned.io/">
-        PasteItCleaned
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  )
-}
+import Footer from "./components/Footer"
 
 let theme = createMuiTheme({
   palette: {
@@ -157,61 +145,65 @@ const styles = createStyles({
     flex: 1,
     padding: theme.spacing(6, 4),
     background: "#eaeff1"
-  },
-  footer: {
-    padding: theme.spacing(2),
-    background: "#eaeff1"
   }
 })
 
 export interface AppProps extends WithStyles<typeof styles> {}
 
-function App(props: AppProps) {
-  const { classes } = props
-  const [mobileOpen, setMobileOpen] = React.useState(false)
+export interface AppState {
+  mobileOpen: boolean
+}
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen)
+class App extends React.Component<AppProps, AppState> {
+  constructor(props: AppProps) {
+    super(props)
+    this.state = { mobileOpen: false }
   }
 
-  return (
-    <Router>
-      <ThemeProvider theme={theme}>
-        <div className={classes.root}>
-          <CssBaseline />
+  render() {
+    const { classes } = this.props
 
-          <nav className={classes.drawer}>
-            <Hidden smUp implementation="js">
-              <Navigator PaperProps={{ style: { width: drawerWidth } }} variant="temporary" open={mobileOpen} onClose={handleDrawerToggle} />
-            </Hidden>
-            <Hidden xsDown implementation="css">
-              <Navigator PaperProps={{ style: { width: drawerWidth } }} />
-            </Hidden>
-          </nav>
+    const handleDrawerToggle = () => {
+      this.setState({ mobileOpen: !this.state.mobileOpen })
+    }
 
-          <div className={classes.app}>
-            <Header onDrawerToggle={handleDrawerToggle} />
-            <main className={classes.main}>
-              <Switch>
-                <Route exact path="/">
-                  <Content />
-                </Route>
-                <Route path="/account/information">
-                  <AccountInformation />
-                </Route>
-                <Route path="/dashboard">
-                  <Content />
-                </Route>
-              </Switch>
-            </main>
-            <footer className={classes.footer}>
-              <Copyright />
-            </footer>
+    return (
+      <BrowserRouter>
+        <ThemeProvider theme={theme}>
+          <div className={classes.root}>
+            <CssBaseline />
+
+            <nav className={classes.drawer}>
+              <Hidden smUp implementation="js">
+                <Navigator current={new Date().toLocaleTimeString()} PaperProps={{ style: { width: drawerWidth } }} variant="temporary" open={this.state.mobileOpen} onClose={handleDrawerToggle} />
+              </Hidden>
+              <Hidden xsDown implementation="css">
+                <Navigator current={new Date().toLocaleTimeString()} PaperProps={{ style: { width: drawerWidth } }} />
+              </Hidden>
+            </nav>
+
+            <div className={classes.app}>
+              <Header onDrawerToggle={handleDrawerToggle} />
+              <main className={classes.main}>
+                <Switch>
+                  <Route exact path="/">
+                    <Content />
+                  </Route>
+                  <Route path="/account">
+                    <AccountInformation />
+                  </Route>
+                  <Route path="/dashboard">
+                    <Content />
+                  </Route>
+                </Switch>
+              </main>
+              <Footer />
+            </div>
           </div>
-        </div>
-      </ThemeProvider>
-    </Router>
-  )
+        </ThemeProvider>
+      </BrowserRouter>
+    )
+  }
 }
 
 export default withStyles(styles)(App)
