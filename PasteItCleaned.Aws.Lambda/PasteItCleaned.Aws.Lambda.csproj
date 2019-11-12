@@ -6,6 +6,12 @@
     <AWSProjectType>Lambda</AWSProjectType>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="..\PasteItCleaned.Common.Assets\appsettings.Development.json" Link="appsettings.Development.json" />
+    <Content Include="..\PasteItCleaned.Common.Assets\appsettings.json" Link="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="AWSSDK.Core" Version="3.3.103.52" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.3.101.78" />
     <PackageReference Include="AWSSDK.S3" Version="3.3.102.15" />
@@ -19,17 +25,5 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PasteItCleaned.Common\PasteItCleaned.Common.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Update="appsettings.Development.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
   </ItemGroup>
 </Project>

@@ -11,6 +11,11 @@ namespace PasteItCleaned.Common.Helpers
             _config = config;
         }
 
+        public static T GetAppSetting<T>(string jsonPath)
+        {
+            return _config.GetValue<T>(jsonPath.Replace(".", ":"));
+        }
+
         public static string GetAppSetting(string jsonPath)
         {
             return _config.GetValue<string>(jsonPath.Replace(".", ":"));

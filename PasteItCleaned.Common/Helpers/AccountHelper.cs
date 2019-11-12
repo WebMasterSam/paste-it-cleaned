@@ -7,6 +7,9 @@ namespace PasteItCleaned.Common.Helpers
     {
         public static bool BalanceIsSufficient(Guid clientId)
         {
+            if (!ConfigHelper.GetAppSetting<bool>("Features.AccountValidation"))
+                return true;
+
             var client = DbHelper.SelectClient(clientId);
 
             return client.Billing.Balance > 0;

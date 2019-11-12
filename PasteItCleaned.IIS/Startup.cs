@@ -1,12 +1,18 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
 
 using PasteItCleaned.Common.Helpers;
+using PasteItCleaned.Common.Localization;
 
-namespace PasteItCleaned
+using System.Globalization;
+
+namespace PasteItCleaned.IIS
 {
     public class Startup
     {
@@ -31,17 +37,38 @@ namespace PasteItCleaned
                 });
             });
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddLocalization();
+
+            var supportedCultures = new[]
+            {
+                new CultureInfo("en"),
+                new CultureInfo("fr")
+            };
+
+            services.Configure<RequestLocalizationOptions>(options =>
+            {
+                options.DefaultRequestCulture = new RequestCulture("en");
+                options.SupportedCultures = supportedCultures;
+                options.SupportedUICultures = supportedCultures;
+            });
+
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
+                .AddDataAnnotationsLocalization();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IStringLocalizerFactory factory)
         {
+            T.SetStringLocalizerFactory(factory);
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseRequestLocalization();
             app.UseCors("Default");
             app.UseMvc();
         }

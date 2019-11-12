@@ -9,6 +9,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PasteItCleaned.WmfConverter
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PasteItCleaned.Common", "PasteItCleaned.Common\PasteItCleaned.Common.csproj", "{1AD21D04-B658-4DAC-A09E-01EA51AB8CB3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PasteItCleaned.IIS", "PasteItCleaned.IIS\PasteItCleaned.IIS.csproj", "{9F60818E-1234-40B4-9E40-29C5F342DB8B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common.Assets", "Common.Assets", "{64C88C46-150D-43EC-B7E1-315E7D7B316F}"
+	ProjectSection(SolutionItems) = preProject
+		PasteItCleaned.Common.Assets\appsettings.Development.json = PasteItCleaned.Common.Assets\appsettings.Development.json
+		PasteItCleaned.Common.Assets\appsettings.json = PasteItCleaned.Common.Assets\appsettings.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +35,10 @@ Global
 		{1AD21D04-B658-4DAC-A09E-01EA51AB8CB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1AD21D04-B658-4DAC-A09E-01EA51AB8CB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1AD21D04-B658-4DAC-A09E-01EA51AB8CB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F60818E-1234-40B4-9E40-29C5F342DB8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F60818E-1234-40B4-9E40-29C5F342DB8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F60818E-1234-40B4-9E40-29C5F342DB8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F60818E-1234-40B4-9E40-29C5F342DB8B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -22,4 +22,13 @@
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.6.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Update="Localization\Resources\SharedResources.en.resx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Localization\Resources\SharedResources.fr.resx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

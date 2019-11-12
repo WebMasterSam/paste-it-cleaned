@@ -12,6 +12,7 @@ using PasteItCleaned.Common.Cleaners.Web;
 using PasteItCleaned.Common.Controllers.Entities;
 using PasteItCleaned.Common.Entities;
 using PasteItCleaned.Common.Helpers;
+using PasteItCleaned.Common.Localization;
 
 namespace PasteItCleaned.Common.Controllers
 {
@@ -23,7 +24,7 @@ namespace PasteItCleaned.Common.Controllers
         [HttpGet()]
         public ActionResult Get()
         {
-            return Ok("Up and running");
+            return Ok(T.Get("App.Up"));
         }
 
         // POST v1/clean

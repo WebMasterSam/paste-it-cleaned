@@ -1,10 +1,10 @@
-﻿using System;
+﻿using PasteItCleaned.Common.Localization;
+using System;
 
 namespace PasteItCleaned.Common.Helpers
 {
     public static class ErrorHelper
     {
-        private const string ProjectPrefix = "PasteItCleaned";
         private const string ErrorFormat = "[{0} ERR-{1}]";
         private const string MessageFormat = "{0}: {1}";
         private const string MessageTag = "<p style='padding: 5px 10px; font-weight: bold; font-size: 14px; background-color: yellow;'>{0}</p>";
@@ -25,27 +25,27 @@ namespace PasteItCleaned.Common.Helpers
 
         public static string GetApiKeyDomainNotConfigured(string apiKey, string domain)
         {
-            return Error(12, string.Format("The domain where the plugin was used ({0}) is not configure for the account with API key ({1}).", domain, apiKey));
+            return Error(12, string.Format(T.Get("Error.ApiKey.Domain.NotConfigured"), domain, apiKey));
         }
 
         public static string GetApiKeyInvalid(string apiKey)
         {
-            return Error(11, string.Format("Your API key is invalid ({0}).", apiKey));
+            return Error(11, string.Format(T.Get("Error.ApiKey.Invalid"), apiKey));
         }
 
         public static string GetApiKeyAbsent()
         {
-            return Error(10, "You forgot to add an API key to your script tag.");
+            return Error(10, T.Get("Error.ApiKey.Missing"));
         }
 
         public static string GetAccountIsUnpaid()
         {
-            return Error(20, "Your account does not have sufficient credits, your credit card is expired or not working. Please check your payment informations and try again.");
+            return Error(20, T.Get("Error.Billing.PaymentRequired"));
         }
 
         private static string Code(int number)
         {
-            return string.Format(ErrorFormat, ProjectPrefix, number.ToString().PadLeft(3, '0'));
+            return string.Format(ErrorFormat, ConfigHelper.GetAppSetting("App.Name"), number.ToString().PadLeft(3, '0'));
         }
 
         private static string Error(int number, string message)

@@ -8,11 +8,17 @@ namespace PasteItCleaned.Common.Helpers
     {
         public static bool ApiKeyPresent(string apiKey)
         {
+            if (!ConfigHelper.GetAppSetting<bool>("Features.ApiKeyValidation"))
+                return true;
+
             return !string.IsNullOrWhiteSpace(apiKey);
         }
 
         public static bool ApiKeyValid(ApiKey apiKey)
         {
+            if (!ConfigHelper.GetAppSetting<bool>("Features.ApiKeyValidation"))
+                return true;
+
             if (apiKey != null)
                 if (apiKey.ExpiresOn.Date > DateTime.UtcNow.Date)
                     return true;
@@ -22,6 +28,9 @@ namespace PasteItCleaned.Common.Helpers
 
         public static bool ApiKeyFitsWithDomain(ApiKey apiKey, string domain)
         {
+            if (!ConfigHelper.GetAppSetting<bool>("Features.ApiKeyValidation"))
+                return true;
+
             if (domain == "localhost" || domain == "127.0.0.1")
                 return true;
 
