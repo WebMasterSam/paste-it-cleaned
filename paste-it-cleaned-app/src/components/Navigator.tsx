@@ -84,18 +84,23 @@ const styles = (theme: Theme) =>
     }
   })
 
-export interface NavigatorProps extends Omit<DrawerProps, "classes">, WithStyles<typeof styles> {
-  current: string
+export interface NavigatorProps extends Omit<DrawerProps, "classes">, WithStyles<typeof styles> {}
+
+interface NavigatorState {
+  route: string
 }
 
-class Navigator extends React.Component<NavigatorProps> {
+class Navigator extends React.Component<NavigatorProps, NavigatorState> {
+  constructor(props: NavigatorProps) {
+    super(props)
+    this.state = { route: "/" }
+  }
+
   render() {
     const { classes, ...other } = this.props
 
-    console.log(window.location.pathname)
     return (
       <Drawer variant="permanent" {...other}>
-        {this.props.current}
         <List disablePadding>
           <ListItem className={clsx(classes.firebase, classes.item, classes.itemCategory)}>PasteItCleaned</ListItem>
           <ListItem className={clsx(classes.item, classes.itemCategory)}>
@@ -107,7 +112,13 @@ class Navigator extends React.Component<NavigatorProps> {
                 primary: classes.itemPrimary
               }}
             >
-              <Link to={`/`} className={classes.itemPrimaryLink}>
+              <Link
+                to={`/`}
+                className={classes.itemPrimaryLink}
+                onClick={() => {
+                  this.setState({ route: "/" })
+                }}
+              >
                 Dashboard
               </Link>
             </ListItemText>
@@ -124,10 +135,10 @@ class Navigator extends React.Component<NavigatorProps> {
                   {id}
                 </ListItemText>
               </ListItem>
+
               {children.map(({ id: childId, path, icon }) => {
-                console.log(window.location.pathname)
-                console.log(path)
                 var active = window.location.pathname.startsWith(path)
+
                 return (
                   <ListItem key={childId} button className={clsx(classes.item, active && classes.itemActiveItem)}>
                     <ListItemIcon className={classes.itemIcon}>{icon}</ListItemIcon>
@@ -136,7 +147,13 @@ class Navigator extends React.Component<NavigatorProps> {
                         primary: classes.itemPrimary
                       }}
                     >
-                      <Link to={`${path}`} className={classes.itemPrimaryLink}>
+                      <Link
+                        to={`${path}`}
+                        className={classes.itemPrimaryLink}
+                        onClick={() => {
+                          this.setState({ route: path })
+                        }}
+                      >
                         {childId}
                       </Link>
                     </ListItemText>

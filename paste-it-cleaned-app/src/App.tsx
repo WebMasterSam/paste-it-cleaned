@@ -11,6 +11,15 @@ import Header from "./components/Header"
 import AccountInformation from "./views/account/information/AccountInformation"
 import Footer from "./components/Footer"
 
+import "./App.less"
+import { Url } from "./shared/Urls"
+import ApiKeys from "./views/plugin/api-key/ApiKeys"
+import BillingInformation from "./views/account/billing/BillingInformation"
+import AnalyticsHits from "./views/analytics/hits/AnalyticsHits"
+import PluginConfig from "./views/plugin/config/PluginConfig"
+import PluginIntegration from "./views/plugin/integration/PluginIntegration"
+import AnalyticsUsage from "./views/analytics/usage/AnalyticsUsage"
+
 let theme = createMuiTheme({
   palette: {
     primary: {
@@ -20,6 +29,11 @@ let theme = createMuiTheme({
     }
   },
   typography: {
+    h2: {
+      fontWeight: 500,
+      fontSize: 20,
+      letterSpacing: 0.5
+    },
     h5: {
       fontWeight: 500,
       fontSize: 26,
@@ -173,10 +187,10 @@ class App extends React.Component<AppProps, AppState> {
 
             <nav className={classes.drawer}>
               <Hidden smUp implementation="js">
-                <Navigator current={new Date().toLocaleTimeString()} PaperProps={{ style: { width: drawerWidth } }} variant="temporary" open={this.state.mobileOpen} onClose={handleDrawerToggle} />
+                <Navigator PaperProps={{ style: { width: drawerWidth } }} variant="temporary" open={this.state.mobileOpen} onClose={handleDrawerToggle} />
               </Hidden>
               <Hidden xsDown implementation="css">
-                <Navigator current={new Date().toLocaleTimeString()} PaperProps={{ style: { width: drawerWidth } }} />
+                <Navigator PaperProps={{ style: { width: drawerWidth } }} />
               </Hidden>
             </nav>
 
@@ -184,14 +198,29 @@ class App extends React.Component<AppProps, AppState> {
               <Header onDrawerToggle={handleDrawerToggle} />
               <main className={classes.main}>
                 <Switch>
-                  <Route exact path="/">
+                  <Route exact path={Url.Dashboard}>
                     <Content />
                   </Route>
-                  <Route path="/account">
+                  <Route path={Url.Account}>
                     <AccountInformation />
                   </Route>
-                  <Route path="/dashboard">
-                    <Content />
+                  <Route path={Url.ApiKey}>
+                    <ApiKeys />
+                  </Route>
+                  <Route path={Url.Billing}>
+                    <BillingInformation />
+                  </Route>
+                  <Route path={Url.Hits}>
+                    <AnalyticsHits />
+                  </Route>
+                  <Route path={Url.PluginConfig}>
+                    <PluginConfig />
+                  </Route>
+                  <Route path={Url.PluginIntegration}>
+                    <PluginIntegration />
+                  </Route>
+                  <Route path={Url.Usage}>
+                    <AnalyticsUsage />
                   </Route>
                 </Switch>
               </main>
