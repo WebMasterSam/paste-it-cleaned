@@ -1,64 +1,53 @@
-import React from 'react'
-import { TextField, Paper, Grid, Button, Typography, Select, MenuItem, InputLabel, FormControl, Table, TableHead, TableRow, TableBody, TableCell, TablePagination } from '@material-ui/core'
+import React, { Fragment } from 'react'
+import moment from 'moment'
+import { TextField, Paper, Grid, Button, Typography, Select, MenuItem, InputLabel, FormControl, Table, TableHead, TableRow, TableBody, TableCell, TablePagination, FormGroup, FormControlLabel } from '@material-ui/core'
 import FormWrapper from '../../../components/FormWrapper'
 import CreditCardIcon from '@material-ui/icons/CreditCard'
 import HistoryIcon from '@material-ui/icons/History'
+import PictureAsPdfIcon from '@material-ui/icons/PictureAsPdf'
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline'
+import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline'
 
-import './BillingInformation.less'
 import { VisaIcon } from './components/Visa'
 import { MasterCardIcon } from './components/MasterCard'
 import { AmexIcon } from './components/Amex'
 
+import './BillingInformation.less'
+import { PayPalIcon } from './components/PayPal'
+
 export interface BillingInformationProps {}
 
 const columns = [
-    { id: 'name', label: 'Name', minWidth: 170 },
-    { id: 'code', label: 'ISO\u00a0Code', minWidth: 100 },
-    {
-        id: 'population',
-        label: 'Population',
-        minWidth: 170,
-        align: 'right',
-        format: (value: any) => value.toLocaleString(),
-    },
-    {
-        id: 'size',
-        label: 'Size\u00a0(km\u00b2)',
-        minWidth: 170,
-        align: 'right',
-        format: (value: any) => value.toLocaleString(),
-    },
-    {
-        id: 'density',
-        label: 'Density',
-        minWidth: 170,
-        align: 'right',
-        format: (value: any) => value.toFixed(2),
-    },
+    { id: 'number', label: 'Number', minWidth: 150 },
+    { id: 'amount', label: 'Amount', minWidth: 150 },
+    { id: 'status', label: 'Status', minWidth: 150 },
+    { id: 'paidon', label: 'Paid on', align: 'right', minWidth: 200 },
+    { id: 'pdf', label: '', align: 'center', minWidth: 30 },
 ]
 
-function createData(name: any, code: any, population: any, size: any) {
-    const density = population / size
-    return { name, code, population, size, density }
+function createData(trxId: string, number: string, amount: number, status: 'paid' | 'pending', paidOn: Date) {
+    var numberNode = <a href={`/billing/invoice/${number}`}>#{number}</a>
+    var amountNode = amount.toString()
+    var statusNode =
+        status === 'paid' ? (
+            <span className="billing-status-paid">
+                <CheckCircleOutlineIcon /> Paid
+            </span>
+        ) : (
+            <span className="billing-status-pending">
+                <ErrorOutlineIcon /> Pending
+            </span>
+        )
+    var paidOnNode = moment(paidOn).format('YYYY-MM-DD HH:MM:SS')
+    var pdfNode = (
+        <a href={`/billing/invoice/${number}`}>
+            <PictureAsPdfIcon />
+        </a>
+    )
+    return { key: trxId, number: numberNode, amount: amountNode, status: statusNode, paidon: paidOnNode, pdf: pdfNode }
 }
 
-const rows = [
-    createData('India', 'IN', 1324171354, 3287263),
-    createData('China', 'CN', 1403500365, 9596961),
-    createData('Italy', 'IT', 60483973, 301340),
-    createData('United States', 'US', 327167434, 9833520),
-    createData('Canada', 'CA', 37602103, 9984670),
-    createData('Australia', 'AU', 25475400, 7692024),
-    createData('Germany', 'DE', 83019200, 357578),
-    createData('Ireland', 'IE', 4857000, 70273),
-    createData('Mexico', 'MX', 126577691, 1972550),
-    createData('Japan', 'JP', 126317000, 377973),
-    createData('France', 'FR', 67022000, 640679),
-    createData('United Kingdom', 'GB', 67545757, 242495),
-    createData('Russia', 'RU', 146793744, 17098246),
-    createData('Nigeria', 'NG', 200962417, 923768),
-    createData('Brazil', 'BR', 210147125, 8515767),
-]
+const rows = [createData('1', '100010334', 1.25, 'pending', new Date(2019, 5, 26, 11, 12, 0)), createData('2', '100010335', 2.25, 'paid', new Date(2019, 4, 26, 11, 12, 0))]
 
 function BillingInformation() {
     const [page, setPage] = React.useState(0)
@@ -77,6 +66,45 @@ function BillingInformation() {
         <React.Fragment>
             <Grid container spacing={3}>
                 <Grid item xs={12} lg={4}>
+                    <Paper className="paper wide">
+                        <Typography variant="h2" className="override-h2" component="h2">
+                            <CreditCardIcon /> Plan and payment method
+                        </Typography>
+                        <br />
+                        <FormWrapper>
+                            <Grid container spacing={3}>
+                                <Grid item xs={4}>
+                                    <Typography variant="body1" component="span">
+                                        <b>Current plan</b>
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={8}>
+                                    <Typography variant="body1" component="span">
+                                        Pay-as-you-go
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+                            <Grid container spacing={3}>
+                                <Grid item xs={4}>
+                                    <Typography variant="body1" component="span">
+                                        <b>Method</b>
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={8}>
+                                    <Typography variant="body1" component="span" className="override-body1">
+                                        <PayPalIcon height="20px" /> samuelrb@dotmedias.com
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+                        </FormWrapper>
+
+                        <Grid container spacing={3}>
+                            <Grid item xs={12}>
+                                <a href="#">Update payment method</a>
+                            </Grid>
+                        </Grid>
+                    </Paper>
+
                     <Paper className="paper wide">
                         <Typography variant="h2" className="override-h2" component="h2">
                             <CreditCardIcon /> Credit card
@@ -153,12 +181,12 @@ function BillingInformation() {
                                     <TableBody>
                                         {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => {
                                             return (
-                                                <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
+                                                <TableRow hover tabIndex={-1} key={row.key}>
                                                     {columns.map(column => {
                                                         const value = (row as any)[column.id] as any
                                                         return (
                                                             <TableCell key={column.id} align={column.align as any}>
-                                                                {column.format && typeof value === 'number' ? column.format(value) : value}
+                                                                {value}
                                                             </TableCell>
                                                         )
                                                     })}

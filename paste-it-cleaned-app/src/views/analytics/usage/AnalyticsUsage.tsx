@@ -1,13 +1,13 @@
-import React from "react"
+import React from 'react'
 
-import "./AnalyticsUsage.less"
+import './AnalyticsUsage.less'
 
 export interface AnalyticsUsageProps {}
 
 class AnalyticsUsage extends React.Component<AnalyticsUsageProps> {
-  render() {
-    return <div>Analytics Usge</div>
-  }
+    render() {
+        return <div>Analytics Usge</div>
+    }
 }
 
 export default AnalyticsUsage
