@@ -1,7 +1,12 @@
 import React, { HTMLProps } from 'react'
 import { SvgAttributes } from 'csstype'
 
-export const ImageIcon = (props: HTMLProps<SvgAttributes>) => (
+export type Position = {
+    x?: number
+    y?: number
+}
+
+export const ImageIcon = (props: HTMLProps<SvgAttributes> & Position) => (
     <svg version="1.1" x="0px" y="0px" viewBox="0 0 512 512" {...(props as any)}>
         <rect x="8.003" y="83.161" fill="#C1C4C6" width="495.994" height="345.676" />
         <rect x="40.815" y="115.969" fill="#4070C9" width="430.369" height="280.052" />

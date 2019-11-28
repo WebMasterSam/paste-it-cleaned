@@ -19,6 +19,8 @@ import AnalyticsHits from './views/analytics/hits/AnalyticsHits'
 import PluginConfig from './views/plugin/config/PluginConfig'
 import PluginIntegration from './views/plugin/integration/PluginIntegration'
 import AnalyticsUsage from './views/analytics/usage/AnalyticsUsage'
+import Dashboard from './views/dashboard/Dashboard'
+import PageWrapper from './components/PageWrapper'
 
 let theme = createMuiTheme({
     palette: {
@@ -60,7 +62,7 @@ theme = {
     overrides: {
         MuiDrawer: {
             paper: {
-                backgroundColor: '#18202c',
+                backgroundImage: 'linear-gradient(to right, #00324a, #003c59)',
             },
         },
         MuiButton: {
@@ -155,7 +157,6 @@ const styles = createStyles({
     },
     main: {
         flex: 1,
-        padding: theme.spacing(6, 4),
         background: '#eaeff1',
     },
 })
@@ -199,28 +200,42 @@ class App extends React.Component<AppProps, AppState> {
                             <main className={classes.main}>
                                 <Switch>
                                     <Route exact path={Url.Dashboard}>
-                                        <Content />
+                                        <Dashboard />
                                     </Route>
                                     <Route path={Url.Account}>
-                                        <AccountInformation />
+                                        <PageWrapper>
+                                            <AccountInformation />
+                                        </PageWrapper>
                                     </Route>
                                     <Route path={Url.ApiKey}>
-                                        <ApiKeys />
+                                        <PageWrapper>
+                                            <ApiKeys />
+                                        </PageWrapper>
                                     </Route>
                                     <Route path={Url.Billing}>
-                                        <BillingInformation />
+                                        <PageWrapper>
+                                            <BillingInformation />
+                                        </PageWrapper>
                                     </Route>
                                     <Route path={Url.Hits}>
-                                        <AnalyticsHits />
+                                        <PageWrapper>
+                                            <AnalyticsHits />
+                                        </PageWrapper>
                                     </Route>
                                     <Route path={Url.PluginConfig}>
-                                        <PluginConfig />
+                                        <PageWrapper>
+                                            <PluginConfig />
+                                        </PageWrapper>
                                     </Route>
                                     <Route path={Url.PluginIntegration}>
-                                        <PluginIntegration />
+                                        <PageWrapper>
+                                            <PluginIntegration />
+                                        </PageWrapper>
                                     </Route>
                                     <Route path={Url.Usage}>
-                                        <AnalyticsUsage />
+                                        <PageWrapper>
+                                            <AnalyticsUsage />
+                                        </PageWrapper>
                                     </Route>
                                 </Switch>
                             </main>

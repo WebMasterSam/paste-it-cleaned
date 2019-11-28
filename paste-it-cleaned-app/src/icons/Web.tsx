@@ -1,7 +1,12 @@
 import React, { HTMLProps } from 'react'
 import { SvgAttributes } from 'csstype'
 
-export const WebIcon = (props: HTMLProps<SvgAttributes>) => (
+export type Position = {
+    x?: number
+    y?: number
+}
+
+export const WebIcon = (props: HTMLProps<SvgAttributes> & Position) => (
     <svg version="1.1" x="0px" y="0px" viewBox="0 0 447.632 447" {...(props as any)}>
         <path fill="#444444" d="m231.816406 447.050781c34.230469-4.863281 64.238282-40.589843 83.121094-93.351562-27.296875-6.113281-55.152344-9.394531-83.121094-9.785157zm0 0" />
         <path

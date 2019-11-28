@@ -1,7 +1,12 @@
 import React, { HTMLProps } from 'react'
 import { SvgAttributes } from 'csstype'
 
-export const TextIcon = (props: HTMLProps<SvgAttributes>) => (
+export type Position = {
+    x?: number
+    y?: number
+}
+
+export const TextIcon = (props: HTMLProps<SvgAttributes> & Position) => (
     <svg version="1.1" x="0px" y="0px" viewBox="0 0 512 512" {...(props as any)}>
         <path
             fill="#444444"
