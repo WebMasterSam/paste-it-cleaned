@@ -1,67 +1,26 @@
-import React, { Fragment } from 'react'
-import moment from 'moment'
+import React from 'react'
+
 import { TextField, Paper, Grid, Button, Typography, Select, MenuItem, InputLabel, FormControl, Table, TableHead, TableRow, TableBody, TableCell, TablePagination, FormGroup, FormControlLabel } from '@material-ui/core'
-import FormWrapper from '../../../components/FormWrapper'
+
 import CreditCardIcon from '@material-ui/icons/CreditCard'
 import HistoryIcon from '@material-ui/icons/History'
-import PictureAsPdfIcon from '@material-ui/icons/PictureAsPdf'
-import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline'
-import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline'
 
-import { VisaIcon } from './components/Visa'
-import { MasterCardIcon } from './components/MasterCard'
-import { AmexIcon } from './components/Amex'
+import FormWrapper from '../../../components/FormWrapper'
+import { createData } from '../../../helpers/BillingHelper'
+
+import { VisaIcon } from '../../../icons/Visa'
+import { MasterCardIcon } from '../../../icons/MasterCard'
+import { AmexIcon } from '../../../icons/Amex'
+import { PayPalIcon } from '../../../icons/PayPal'
 
 import './BillingInformation.less'
-import { PayPalIcon } from './components/PayPal'
+import BillingTable from './components/BillingTable'
 
 export interface BillingInformationProps {}
-
-const columns = [
-    { id: 'number', label: 'Number', minWidth: 150 },
-    { id: 'amount', label: 'Amount', minWidth: 150 },
-    { id: 'status', label: 'Status', minWidth: 150 },
-    { id: 'paidon', label: 'Paid on', align: 'right', minWidth: 200 },
-    { id: 'pdf', label: '', align: 'center', minWidth: 30 },
-]
-
-function createData(trxId: string, number: string, amount: number, status: 'paid' | 'pending', paidOn: Date) {
-    var numberNode = <a href={`/billing/invoice/${number}`}>#{number}</a>
-    var amountNode = amount.toString()
-    var statusNode =
-        status === 'paid' ? (
-            <span className="billing-status-paid">
-                <CheckCircleOutlineIcon /> Paid
-            </span>
-        ) : (
-            <span className="billing-status-pending">
-                <ErrorOutlineIcon /> Pending
-            </span>
-        )
-    var paidOnNode = moment(paidOn).format('YYYY-MM-DD HH:MM:SS')
-    var pdfNode = (
-        <a href={`/billing/invoice/${number}`}>
-            <PictureAsPdfIcon />
-        </a>
-    )
-    return { key: trxId, number: numberNode, amount: amountNode, status: statusNode, paidon: paidOnNode, pdf: pdfNode }
-}
 
 const rows = [createData('1', '100010334', 1.25, 'pending', new Date(2019, 5, 26, 11, 12, 0)), createData('2', '100010335', 2.25, 'paid', new Date(2019, 4, 26, 11, 12, 0))]
 
 function BillingInformation() {
-    const [page, setPage] = React.useState(0)
-    const [rowsPerPage, setRowsPerPage] = React.useState(10)
-
-    const handleChangePage = (event: any, newPage: any) => {
-        setPage(newPage)
-    }
-
-    const handleChangeRowsPerPage = (event: any) => {
-        setRowsPerPage(+event.target.value)
-        setPage(0)
-    }
-
     return (
         <React.Fragment>
             <Grid container spacing={3}>
@@ -167,50 +126,7 @@ function BillingInformation() {
                         </Typography>
 
                         <FormWrapper>
-                            <div className="table-wrapper">
-                                <Table stickyHeader aria-label="sticky table">
-                                    <TableHead>
-                                        <TableRow>
-                                            {columns.map(column => (
-                                                <TableCell key={column.id} align={column.align as any} style={{ minWidth: column.minWidth }}>
-                                                    {column.label}
-                                                </TableCell>
-                                            ))}
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => {
-                                            return (
-                                                <TableRow hover tabIndex={-1} key={row.key}>
-                                                    {columns.map(column => {
-                                                        const value = (row as any)[column.id] as any
-                                                        return (
-                                                            <TableCell key={column.id} align={column.align as any}>
-                                                                {value}
-                                                            </TableCell>
-                                                        )
-                                                    })}
-                                                </TableRow>
-                                            )
-                                        })}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                            <TablePagination
-                                rowsPerPageOptions={[10, 25, 100]}
-                                component="div"
-                                count={rows.length}
-                                rowsPerPage={rowsPerPage}
-                                page={page}
-                                backIconButtonProps={{
-                                    'aria-label': 'previous page',
-                                }}
-                                nextIconButtonProps={{
-                                    'aria-label': 'next page',
-                                }}
-                                onChangePage={handleChangePage}
-                                onChangeRowsPerPage={handleChangeRowsPerPage}
-                            />
+                            <BillingTable rows={rows} full={true} />
                         </FormWrapper>
                     </Paper>
                 </Grid>

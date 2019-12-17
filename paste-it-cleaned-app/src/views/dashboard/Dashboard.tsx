@@ -13,9 +13,12 @@ import FormWrapper from '../../components/FormWrapper'
 import HitsTable from '../analytics/hits/components/HitsTable'
 
 import { createData } from '../../helpers/AnalyticsHelper'
+import { createData as createDataBilling } from '../../helpers/BillingHelper'
+
+import PageWrapper from '../../components/PageWrapper'
+import BillingTable from '../account/billing/components/BillingTable'
 
 import './Dashboard.less'
-import PageWrapper from '../../components/PageWrapper'
 
 export interface DashboardProps {}
 
@@ -70,6 +73,8 @@ const rows = [
     createData(new Date(2019, 5, 26, 11, 12, 0), '123.144.255.366', 'Image', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
 ]
 
+const rowsB = [createDataBilling('1', '100010334', 1.25, 'pending', new Date(2019, 5, 26, 11, 12, 0)), createDataBilling('2', '100010335', 2.25, 'paid', new Date(2019, 4, 26, 11, 12, 0))]
+
 class Dashboard extends React.Component<DashboardProps> {
     render() {
         return (
@@ -115,15 +120,30 @@ class Dashboard extends React.Component<DashboardProps> {
                     </Grid>
                 </div>
                 <PageWrapper>
-                    <Paper className="paper wide">
-                        <Typography variant="h2" className="override-h2" component="h2">
-                            <FileCopyIcon /> Last plugin uses
-                        </Typography>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12} lg={6}>
+                            <Paper className="paper wide">
+                                <Typography variant="h2" className="override-h2" component="h2">
+                                    <FileCopyIcon /> Last plugin uses
+                                </Typography>
 
-                        <FormWrapper>
-                            <HitsTable rows={rows} />
-                        </FormWrapper>
-                    </Paper>
+                                <FormWrapper>
+                                    <HitsTable rows={rows} full={false} />
+                                </FormWrapper>
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={12} lg={6}>
+                            <Paper className="paper wide">
+                                <Typography variant="h2" className="override-h2" component="h2">
+                                    <CreditCardIcon /> Last invoices
+                                </Typography>
+
+                                <FormWrapper>
+                                    <BillingTable rows={rowsB} full={false} />
+                                </FormWrapper>
+                            </Paper>
+                        </Grid>
+                    </Grid>
                 </PageWrapper>
             </Fragment>
         )

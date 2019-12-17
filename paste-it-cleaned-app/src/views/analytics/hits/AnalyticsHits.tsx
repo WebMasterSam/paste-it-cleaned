@@ -48,7 +48,7 @@ class AnalyticsHits extends React.Component<AnalyticsHitsProps, AnalyticsHitsSta
                 </Typography>
 
                 <FormWrapper>
-                    <HitsTable rows={rows} />
+                    <HitsTable rows={rows} full={true} />
                 </FormWrapper>
             </Paper>
         )

@@ -13,21 +13,23 @@ export interface HitsTableState {
     rowsPerPage: number
 }
 
-const columnsCompact = [
-    { id: 'timeStamp', label: 'Date/time', align: 'left', minWidth: 150 },
-    { id: 'type', label: 'Type', minWidth: 100 },
-    { id: 'ip', label: 'Client IP', minWidth: 75 },
-]
-
 const columnsFull = [
-    { id: 'timeStamp', label: 'Date/time', minWidth: 150 },
-    { id: 'type', label: 'Type', minWidth: 100 },
-    { id: 'ip', label: 'Client IP', minWidth: 75 },
-    { id: 'userAgent', label: 'User agent', minWidth: 150 },
-    { id: 'price', label: 'Price (USD)', align: 'right', minWidth: 75 },
+    { id: 'number', label: 'Number', minWidth: 150 },
+    { id: 'amount', label: 'Amount', minWidth: 150 },
+    { id: 'status', label: 'Status', minWidth: 150 },
+    { id: 'paidon', label: 'Paid on', align: 'right', minWidth: 200 },
+    { id: 'pdf', label: '', align: 'center', minWidth: 30 },
 ]
 
-class HitsTable extends React.Component<HitsTableProps, HitsTableState> {
+const columnsCompact = [
+    { id: 'number', label: 'Number', minWidth: 150 },
+    { id: 'amount', label: 'Amount', minWidth: 150 },
+    { id: 'status', label: 'Status', minWidth: 150 },
+    { id: 'paidon', label: 'Paid on', align: 'right', minWidth: 200 },
+    { id: 'pdf', label: '', align: 'center', minWidth: 30 },
+]
+
+class BillingTable extends React.Component<HitsTableProps, HitsTableState> {
     constructor(props: HitsTableProps) {
         super(props)
         this.state = { page: 0, rowsPerPage: 10, rows: props.rows }
@@ -98,4 +100,4 @@ class HitsTable extends React.Component<HitsTableProps, HitsTableState> {
     }
 }
 
-export default HitsTable
+export default BillingTable
