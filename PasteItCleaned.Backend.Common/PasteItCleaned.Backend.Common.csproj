@@ -23,12 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Localization\Resources\SharedResources.en.resx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Localization\Resources\SharedResources.fr.resx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <ProjectReference Include="..\PasteItCleaned.Common\PasteItCleaned.Common.csproj" />
   </ItemGroup>
 
 </Project>

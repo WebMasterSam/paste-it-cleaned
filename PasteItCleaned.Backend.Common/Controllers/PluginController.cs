@@ -12,6 +12,8 @@ namespace PasteItCleaned.Backend.Common.Controllers
         [HttpGet("api-keys/{id}")]
         public ActionResult GetApiKey()
         {
+            Console.WriteLine("PluginController::GetApiKey");
+
             return Ok(T.Get("App.Up"));
         }
 
@@ -19,6 +21,8 @@ namespace PasteItCleaned.Backend.Common.Controllers
         [HttpGet("api-keys")]
         public ActionResult GetApiKeys()
         {
+            Console.WriteLine("PluginController::GetApiKeys");
+
             return Ok(T.Get("App.Up"));
         }
 
@@ -26,6 +30,8 @@ namespace PasteItCleaned.Backend.Common.Controllers
         [HttpGet("config")]
         public ActionResult GetConfig()
         {
+            Console.WriteLine("PluginController::GetConfig");
+
             return Ok(T.Get("App.Up"));
         }
 
@@ -33,6 +39,8 @@ namespace PasteItCleaned.Backend.Common.Controllers
         [HttpPost("config")]
         public ActionResult Post([FromBody] PluginConfigRequest obj)
         {
+            Console.WriteLine("PluginController::Post");
+
             return Ok(T.Get("App.Up"));
         }
     }

@@ -1,6 +1,8 @@
 import React, { Fragment } from 'react'
 
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, AreaChart, Area } from 'recharts'
+
+import Auth from '@aws-amplify/auth'
 import { Grid, Card, Paper, Typography } from '@material-ui/core'
 
 import SettingsIcon from '@material-ui/icons/Settings'
@@ -19,6 +21,8 @@ import PageWrapper from '../../components/PageWrapper'
 import BillingTable from '../account/billing/components/BillingTable'
 
 import './Dashboard.less'
+import { DashboardController } from '../../controllers/DashboardController'
+import { CurrentSession } from '../../session/Session'
 
 export interface DashboardProps {}
 
@@ -76,6 +80,18 @@ const rows = [
 const rowsB = [createDataBilling('1', '100010334', 1.25, 'pending', new Date(2019, 5, 26, 11, 12, 0)), createDataBilling('2', '100010335', 2.25, 'paid', new Date(2019, 4, 26, 11, 12, 0))]
 
 class Dashboard extends React.Component<DashboardProps> {
+    componentDidMount() {
+        console.log(CurrentSession)
+        var c = new DashboardController()
+
+        c.getHits(
+            (json: any) => {
+                console.log(json)
+            },
+            () => {}
+        )
+    }
+
     render() {
         return (
             <Fragment>

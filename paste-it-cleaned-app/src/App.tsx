@@ -1,17 +1,17 @@
 import React from 'react'
-import { BrowserRouter, Switch, Route, Link } from 'react-router-dom'
+import Amplify, { Auth } from 'aws-amplify'
+import { BrowserRouter, Switch, Route } from 'react-router-dom'
 
 import { createMuiTheme, createStyles, ThemeProvider, withStyles, WithStyles } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline'
 import Hidden from '@material-ui/core/Hidden'
 
 import Navigator from './components/Navigator'
-import Content from './components/Content'
 import Header from './components/Header'
 import AccountInformation from './views/account/information/AccountInformation'
 import Footer from './components/Footer'
 
-import './App.less'
+import { withAuthenticator } from './auth/Auth/AuthenticatorWrapper'
 import { Url } from './shared/Urls'
 import ApiKeys from './views/plugin/api-key/ApiKeys'
 import BillingInformation from './views/account/billing/BillingInformation'
@@ -21,6 +21,11 @@ import PluginIntegration from './views/plugin/integration/PluginIntegration'
 import AnalyticsUsage from './views/analytics/usage/AnalyticsUsage'
 import Dashboard from './views/dashboard/Dashboard'
 import PageWrapper from './components/PageWrapper'
+import { CurrentSession, replaceCurrentSession } from './session/Session'
+
+import * as amplifyConfig from './config/aws-amplify.json'
+
+import './App.less'
 
 let theme = createMuiTheme({
     palette: {
@@ -167,10 +172,51 @@ export interface AppState {
     mobileOpen: boolean
 }
 
+Amplify.configure({
+    Auth: {
+        mandatorySignIn: true,
+        region: amplifyConfig.cognito.REGION,
+        userPoolId: amplifyConfig.cognito.USER_POOL_ID,
+        identityPoolId: amplifyConfig.cognito.IDENTITY_POOL_ID,
+        userPoolWebClientId: amplifyConfig.cognito.APP_CLIENT_ID,
+    },
+    Storage: {
+        region: amplifyConfig.s3.REGION,
+        bucket: amplifyConfig.s3.BUCKET,
+        identityPoolId: amplifyConfig.cognito.IDENTITY_POOL_ID,
+    },
+    API: {
+        endpoints: [
+            {
+                name: 'notes',
+                endpoint: amplifyConfig.apiGateway.URL,
+                region: amplifyConfig.apiGateway.REGION,
+            },
+        ],
+    },
+})
+
 class App extends React.Component<AppProps, AppState> {
     constructor(props: AppProps) {
         super(props)
         this.state = { mobileOpen: false }
+    }
+
+    componentDidMount() {
+        Auth.currentAuthenticatedUser()
+            .then((value: any) => {
+                const isValid: boolean = true
+                const userName: string = value.username!
+                const firstName: string = value.attributes!.name
+                const lastName: string = value.attributes!.family_name
+                const email: string = value.attributes!.email
+                const culture: string = 'en-US'
+                replaceCurrentSession(isValid, userName, firstName, lastName, email, culture)
+                console.log(CurrentSession)
+            })
+            .catch(e => {
+                replaceCurrentSession(false, '', '', '', '', 'en-US')
+            })
     }
 
     render() {
@@ -248,4 +294,4 @@ class App extends React.Component<AppProps, AppState> {
     }
 }
 
-export default withStyles(styles)(App)
+export default withAuthenticator(withStyles(styles)(App), false, undefined, undefined, undefined, undefined, ['email'])

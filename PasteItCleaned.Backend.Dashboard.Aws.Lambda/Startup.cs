@@ -33,6 +33,9 @@ namespace PasteItCleaned.Aws.Lambda
                 });
             });
 
+            // Adds Amazon Cognito as Identity Provider
+            services.AddCognitoIdentity();
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // Add S3 to the ASP.NET Core dependency injection framework.
@@ -47,6 +50,7 @@ namespace PasteItCleaned.Aws.Lambda
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseAuthentication();
             app.UseMvc();
             app.UseCors("Default");
         }

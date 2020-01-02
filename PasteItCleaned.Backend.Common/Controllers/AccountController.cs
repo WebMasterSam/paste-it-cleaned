@@ -8,17 +8,30 @@ namespace PasteItCleaned.Backend.Common.Controllers
 {
     public class AccountController : ControllerBase
     {
-        // GET account/info
-        [HttpGet("info")]
+        // GET account
+        [HttpGet()]
         public ActionResult Get()
         {
+            Console.WriteLine("AccountController::Get");
+
             return Ok(T.Get("App.Up"));
         }
 
-        // POST account/info
-        [HttpPost("info")]
+        // GET account/user
+        [HttpGet("user")]
+        public ActionResult GetUser()
+        {
+            Console.WriteLine("AccountController::GetUser");
+
+            return Ok(T.Get("App.Up"));
+        }
+
+        // POST account
+        [HttpPost()]
         public ActionResult Post([FromBody] AccountRequest obj)
         {
+            Console.WriteLine("AccountController::Post");
+
             return Ok(T.Get("App.Up"));
         }
     }

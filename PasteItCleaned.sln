@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common.Assets", "Common.Ass
 		PasteItCleaned.Common.Assets\appsettings.json = PasteItCleaned.Common.Assets\appsettings.json
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugin.Common", "Plugin.Common", "{AC69745D-3505-4A07-B457-A7378AFF7F86}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{AC69745D-3505-4A07-B457-A7378AFF7F86}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugin", "Plugin", "{304E8271-7A2C-4958-B180-D3E06DD21CCF}"
 EndProject
@@ -44,6 +44,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PasteItCleaned.Backend.Plugin.Aws.Lambda", "PasteItCleaned.Backend.Plugin.Aws.Lambda\PasteItCleaned.Backend.Plugin.Aws.Lambda.csproj", "{BAB833A9-6723-4870-AAE6-BAB02DB683E4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Backend.Common", "Backend.Common", "{3601EF7F-9782-49B5-AA60-4FA73EEAE559}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PasteItCleaned.Backend.IIS", "PasteItCleaned.Backend.IIS\PasteItCleaned.Backend.IIS.csproj", "{6E0A658B-6751-4877-A9B6-4745E18B14C5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -91,6 +93,10 @@ Global
 		{BAB833A9-6723-4870-AAE6-BAB02DB683E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BAB833A9-6723-4870-AAE6-BAB02DB683E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BAB833A9-6723-4870-AAE6-BAB02DB683E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E0A658B-6751-4877-A9B6-4745E18B14C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E0A658B-6751-4877-A9B6-4745E18B14C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E0A658B-6751-4877-A9B6-4745E18B14C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E0A658B-6751-4877-A9B6-4745E18B14C5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -106,6 +112,7 @@ Global
 		{9E9FF6C8-B0A8-439D-9B88-75FE5853A5E6} = {3601EF7F-9782-49B5-AA60-4FA73EEAE559}
 		{D39BA894-0FD0-4379-910F-06BBF32515F8} = {CEE2F735-D7F4-418E-A2AF-1D29A41B9A0A}
 		{BAB833A9-6723-4870-AAE6-BAB02DB683E4} = {CEE2F735-D7F4-418E-A2AF-1D29A41B9A0A}
+		{6E0A658B-6751-4877-A9B6-4745E18B14C5} = {CEE2F735-D7F4-418E-A2AF-1D29A41B9A0A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C272A0D0-6619-4397-8B3F-CE0629A57605}

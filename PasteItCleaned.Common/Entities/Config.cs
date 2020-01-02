@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace PasteItCleaned.Common.Entities
 {
     public class Config
     {
-        public Guid ClientId { get; set; }
-        public DateTime ExpiresOn { get; set; }
-
         public string Name { get; set; }
         public Dictionary<string, bool> Common { get; set; }
         public Dictionary<string, bool> Office { get; set; }

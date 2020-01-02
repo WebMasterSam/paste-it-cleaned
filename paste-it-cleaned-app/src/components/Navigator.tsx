@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import clsx from 'clsx'
+import { Auth } from 'aws-amplify'
 
 import { createStyles, Theme, withStyles, WithStyles } from '@material-ui/core/styles'
 import { Omit } from '@material-ui/types'
@@ -108,6 +109,11 @@ class Navigator extends React.Component<NavigatorProps, NavigatorState> {
         this.state = { route: '/' }
     }
 
+    logOut() {
+        // Afficher modale
+        Auth.signOut()
+    }
+
     render() {
         const { classes, ...other } = this.props
 
@@ -182,7 +188,7 @@ class Navigator extends React.Component<NavigatorProps, NavigatorState> {
                         </List>
                     </Grid>
                     <Grid item style={{ alignSelf: 'flex-end', padding: '20px' }}>
-                        <Button variant="contained" color="default">
+                        <Button variant="contained" color="default" onClick={this.logOut}>
                             Log out
                         </Button>
                     </Grid>

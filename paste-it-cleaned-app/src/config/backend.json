@@ -1,0 +1,5 @@
+{
+    "dashboard": {
+        "endpoint": "https://localhost:44399/dashboard"
+    }
+}

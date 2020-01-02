@@ -12,6 +12,8 @@ namespace PasteItCleaned.Backend.Common.Controllers
         [HttpGet("hits")]
         public ActionResult Get()
         {
+            Console.WriteLine("AnalyticsController::Get");
+
             // Use QS to filter by date, limit, sort, etc.
             return Ok(T.Get("App.Up"));
         }

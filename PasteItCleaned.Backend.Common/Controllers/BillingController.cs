@@ -12,6 +12,8 @@ namespace PasteItCleaned.Backend.Common.Controllers
         [HttpGet("invoices/{id}")]
         public ActionResult GetInvoice()
         {
+            Console.WriteLine("BillingController::GetInvoice");
+
             return Ok(T.Get("App.Up"));
         }
 
@@ -19,6 +21,8 @@ namespace PasteItCleaned.Backend.Common.Controllers
         [HttpGet("invoices")]
         public ActionResult GetInvoices()
         {
+            Console.WriteLine("BillingController::GetInvoices");
+
             return Ok(T.Get("App.Up"));
         }
 
@@ -26,6 +30,8 @@ namespace PasteItCleaned.Backend.Common.Controllers
         [HttpGet("payment-method")]
         public ActionResult GetPaymentMethod()
         {
+            Console.WriteLine("BillingController::GetPaymentMethod");
+
             return Ok(T.Get("App.Up"));
         }
 
@@ -33,6 +39,8 @@ namespace PasteItCleaned.Backend.Common.Controllers
         [HttpPost("payment-method")]
         public ActionResult Post([FromBody] BillingRequest obj)
         {
+            Console.WriteLine("BillingController::Post");
+
             return Ok(T.Get("App.Up"));
         }
     }
