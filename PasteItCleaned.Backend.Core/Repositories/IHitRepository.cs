@@ -6,6 +6,6 @@ namespace PasteItCleaned.Backend.Core.Repositories
 {
     public interface IHitRepository : IRepository<Hit>
     {
-
+        Task<Hit> GetByHashAsync(int hash);
     }
 }

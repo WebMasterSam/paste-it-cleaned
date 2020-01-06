@@ -11,11 +11,16 @@ namespace PasteItCleaned.Backend.Common.Helpers
         {
             Console.WriteLine(authToken);
 
-            var accessToken = Base64Helper.GetString(authToken.Replace("Bearer ", "").Split('.')[1]);
-            var token = JObject.Parse(accessToken);
-            var userName = token.SelectToken("username").Value<string>();
+            if (!string.IsNullOrWhiteSpace(authToken))
+            {
+                var accessToken = Base64Helper.GetString(authToken.Replace("Bearer ", "").Split('.')[1]);
+                var token = JObject.Parse(accessToken);
+                var userName = token.SelectToken("username").Value<string>();
 
-            return GetClient(userName);
+                return GetClient(userName);
+            }
+
+            return null;
         }
 
         public static Client GetClient(string userName)

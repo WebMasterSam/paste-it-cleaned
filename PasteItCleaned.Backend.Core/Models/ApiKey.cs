@@ -8,7 +8,6 @@ namespace PasteItCleaned.Backend.Core.Models
         public Guid ApiKeyId { get; set; }
         public string Key { get; set; }
         public Guid ClientId { get; set; }
-        public List<string> Domains { get; set; }
         public DateTime ExpiresOn { get; set; }
     }
 }

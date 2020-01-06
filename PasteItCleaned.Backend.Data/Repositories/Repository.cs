@@ -32,9 +32,9 @@ namespace PasteItCleaned.Backend.Data.Repositories
             return Context.Set<TEntity>().Where(predicate);
         }
 
-        public Task<IEnumerable<TEntity>> GetAllByParentIdAsync(Guid clientId)
+        public async Task<IEnumerable<TEntity>> GetAllByParentIdAsync(Guid clientId)
         {
-            throw new NotImplementedException();
+            return await Context.Set<TEntity>().ToListAsync();
         }
 
         public Task<TEntity> GetByIdAsync(Guid id)

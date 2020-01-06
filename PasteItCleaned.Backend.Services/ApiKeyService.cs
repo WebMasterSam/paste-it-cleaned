@@ -48,7 +48,6 @@ namespace PasteItCleaned.Backend.Services
 
         public async Task UpdateApiKey(ApiKey apiKeyToBeUpdated, ApiKey apiKey)
         {
-            apiKeyToBeUpdated.Domains = apiKey.Domains;
             apiKeyToBeUpdated.ExpiresOn = apiKey.ExpiresOn;
 
             await _unitOfWork.CommitAsync();

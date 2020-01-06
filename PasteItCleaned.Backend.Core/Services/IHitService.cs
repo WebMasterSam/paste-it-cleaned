@@ -7,9 +7,9 @@ namespace PasteItCleaned.Backend.Core.Services
 {
     public interface IHitService
     {
-        Task<IEnumerable<Hit>> GetAllByClientId(Guid clientId);
-        Task<Hit> GetById(Guid hitDailyId);
-        Task<Hit> GetByHash(string hash);
+        Task<IEnumerable<Hit>> GetAllByClientIdAsync(Guid clientId);
+        Task<Hit> GetByIdAsync(Guid hitDailyId);
+        Task<Hit> GetByHashAsync(int hash);
         Task<Hit> CreateHit(Hit hit);
     }
 }
