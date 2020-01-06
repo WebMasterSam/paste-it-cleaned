@@ -6,6 +6,7 @@ using PasteItCleaned.Common.Localization;
 
 namespace PasteItCleaned.Backend.Common.Controllers
 {
+    [Route("billing")]
     public class BillingController : ControllerBase
     {
         // GET billing/invoices/

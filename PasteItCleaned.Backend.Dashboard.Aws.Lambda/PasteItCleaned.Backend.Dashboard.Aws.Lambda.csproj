@@ -24,6 +24,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PasteItCleaned.Backend.Common\PasteItCleaned.Backend.Common.csproj" />
+    <ProjectReference Include="..\PasteItCleaned.Backend.Core\PasteItCleaned.Backend.Core.csproj" />
     <ProjectReference Include="..\PasteItCleaned.Common\PasteItCleaned.Common.csproj" />
   </ItemGroup>
 </Project>

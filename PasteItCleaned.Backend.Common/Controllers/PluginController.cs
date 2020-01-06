@@ -6,6 +6,7 @@ using PasteItCleaned.Common.Localization;
 
 namespace PasteItCleaned.Backend.Common.Controllers
 {
+    [Route("plugin")]
     public class PluginController : ControllerBase
     {
         // GET plugin/api-keys/{id}

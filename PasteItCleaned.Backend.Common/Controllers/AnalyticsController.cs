@@ -6,6 +6,7 @@ using PasteItCleaned.Common.Localization;
 
 namespace PasteItCleaned.Backend.Common.Controllers
 {
+    [Route("analytics")]
     public class AnalyticsController : ControllerBase
     {
         // GET analytics/hits/

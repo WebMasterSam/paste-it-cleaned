@@ -7,7 +7,7 @@ namespace PasteItCleaned.Backend.Core.Repositories
 {
     public interface IRepository<TEntity> where TEntity : class
     {
-        ValueTask<TEntity> GetByIdAsync(Guid id);
+        Task<TEntity> GetByIdAsync(Guid id);
         Task<IEnumerable<TEntity>> GetAllByParentIdAsync(Guid clientId);
 
         IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate);

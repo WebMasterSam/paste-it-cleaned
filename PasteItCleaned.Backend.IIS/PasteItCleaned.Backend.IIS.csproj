@@ -20,10 +20,14 @@
     <PackageReference Include="Amazon.Extensions.CognitoAuthentication" Version="1.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.1.4" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\PasteItCleaned.Backend.Common\PasteItCleaned.Backend.Common.csproj" />
+    <ProjectReference Include="..\PasteItCleaned.Backend.Core\PasteItCleaned.Backend.Core.csproj" />
+    <ProjectReference Include="..\PasteItCleaned.Backend.Services\PasteItCleaned.Backend.Services.csproj" />
     <ProjectReference Include="..\PasteItCleaned.Common\PasteItCleaned.Common.csproj" />
   </ItemGroup>
 

@@ -6,6 +6,7 @@ using PasteItCleaned.Common.Localization;
 
 namespace PasteItCleaned.Backend.Common.Controllers
 {
+    [Route("account")]
     public class AccountController : ControllerBase
     {
         // GET account

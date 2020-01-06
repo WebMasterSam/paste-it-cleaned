@@ -37,7 +37,7 @@ namespace PasteItCleaned.Backend.Data.Repositories
             throw new NotImplementedException();
         }
 
-        public ValueTask<TEntity> GetByIdAsync(Guid id)
+        public Task<TEntity> GetByIdAsync(Guid id)
         {
             return Context.Set<TEntity>().FindAsync(id);
         }

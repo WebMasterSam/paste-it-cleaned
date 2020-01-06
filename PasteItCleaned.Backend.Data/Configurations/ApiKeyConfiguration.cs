@@ -19,10 +19,10 @@ namespace PasteItCleaned.Backend.Data.Configurations
                 .IsRequired()
                 .HasMaxLength(50);
 
-            builder
+            /*builder
                 .HasOne(m => m.Artist)
                 .WithMany(a => a.Musics)
-                .HasForeignKey(m => m.ArtistId);
+                .HasForeignKey(m => m.ArtistId);*/
 
             builder
                 .ToTable("ApiKeys");

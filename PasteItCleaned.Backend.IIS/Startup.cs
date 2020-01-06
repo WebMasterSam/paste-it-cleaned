@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using System.Globalization;
+
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Localization;
@@ -9,14 +11,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
-using MySql.Data.EntityFrameworkCore.Extensions;
+
+using Swashbuckle.AspNetCore.Swagger;
 
 using PasteItCleaned.Backend.Core;
 using PasteItCleaned.Backend.Data;
+using PasteItCleaned.Backend.Core.Services;
+using PasteItCleaned.Backend.Services;
 using PasteItCleaned.Common.Helpers;
 using PasteItCleaned.Common.Localization;
-
-using System.Globalization;
 
 namespace PasteItCleaned.IIS
 {
@@ -79,8 +82,14 @@ namespace PasteItCleaned.IIS
             });
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddTransient<IApiKeyService, ApiKeyService>();
 
             services.AddDbContext<PasteItCleanedDbContext>(options => options.UseMySQL(Configuration.GetConnectionString("Default"), x => x.MigrationsAssembly("PasteItCleaned.Backend.Data")));
+
+            services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new Info { Title = "PasteItCleaned Backend", Version = "v1" });
+            });
 
             services.AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
@@ -97,6 +106,13 @@ namespace PasteItCleaned.IIS
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.RoutePrefix = "";
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "PasteItCleaned Backend V1");
+            });
 
             app.UseRequestLocalization();
             app.UseCors("Default");
