@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-
+using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
-
+using Amazon.Runtime;
+using Newtonsoft.Json;
 using PasteItCleaned.Common.Cleaners;
 using PasteItCleaned.Common.Entities;
 
@@ -34,7 +35,7 @@ namespace PasteItCleaned.Common.Helpers
 
                 var asyncGet = client.GetItemAsync(selectApiKey);
 
-                asyncGet.Wait(5000);
+                WaitAndCatch(asyncGet);
 
                 if (asyncGet.IsCompletedSuccessfully)
                 {
@@ -79,7 +80,7 @@ namespace PasteItCleaned.Common.Helpers
 
                 var asyncGet = client.GetItemAsync(selectClient);
 
-                asyncGet.Wait(5000);
+                WaitAndCatch(asyncGet);
 
                 if (asyncGet.IsCompletedSuccessfully)
                 {
@@ -169,7 +170,7 @@ namespace PasteItCleaned.Common.Helpers
 
                 var asyncGet = client.GetItemAsync(selectUser);
 
-                asyncGet.Wait(5000);
+                WaitAndCatch(asyncGet);
 
                 if (asyncGet.IsCompletedSuccessfully)
                 {
@@ -209,7 +210,7 @@ namespace PasteItCleaned.Common.Helpers
 
                 var asyncGet = client.GetItemAsync(selectHitHash);
 
-                asyncGet.Wait(5000);
+                WaitAndCatch(asyncGet);
 
                 if (asyncGet.IsCompletedSuccessfully)
                 {
@@ -260,10 +261,26 @@ namespace PasteItCleaned.Common.Helpers
             clientObj.ApiKeys = new List<string>();
             clientObj.ApiKeys.Add(apiKey);
             clientObj.Billing = new Billing();
+            clientObj.Billing.Contact = new Contact();
+            clientObj.Billing.PayPal = new BillingPayPal();
+            clientObj.Billing.Stripe = new BillingStripe();
             clientObj.Configs = new List<Config>();
             clientObj.Configs.Add(new Config() { Name = "DEFAULT", Common = new Dictionary<string, bool>() { { "EmbedExternalImages", false }, { "RemoveEmptyTags", true }, { "RemoveSpanTags", true } }, Web = new Dictionary<string, bool>() { { "RemoveClassNames", true }, { "RemoveIframes", true }, { "RemoveTagAttributes", true } } });
 
             DbHelper.SaveClient(clientObj);
+        }
+
+        public static void InsertApiKey(Guid clientId, string apiKey)
+        {
+            ApiKey key = new ApiKey();
+
+            key.ClientId = clientId;
+            key.Key = apiKey;
+            key.Domains = new List<string>();
+            key.Domains.Add("yourdomain.com");
+            key.ExpiresOn = DateTime.Now.AddYears(1);
+
+            DbHelper.SaveApiKey(key);
         }
 
 
@@ -311,6 +328,11 @@ namespace PasteItCleaned.Common.Helpers
         }
 
 
+
+
+
+
+
         private static void SaveHit(Guid clientId, SourceType type, decimal price, string ip, string referer)
         {
             using (var client = DbHelper.GetAmazonClient())
@@ -331,7 +353,7 @@ namespace PasteItCleaned.Common.Helpers
                     }
                 };
 
-                client.PutItemAsync(insertHit);
+                WaitAndCatch(client.PutItemAsync(insertHit));
             }
         }
 
@@ -354,7 +376,7 @@ namespace PasteItCleaned.Common.Helpers
 
                 var asyncGet = client.GetItemAsync(selectHit);
 
-                asyncGet.Wait(1000);
+                WaitAndCatch(asyncGet);
 
                 if (asyncGet.IsCompletedSuccessfully)
                 {
@@ -388,8 +410,8 @@ namespace PasteItCleaned.Common.Helpers
                                 { "Counts", new AttributeValue { M = counts }}
                             }
                         };
-                        
-                        client.PutItemAsync(updateHit);
+
+                        WaitAndCatch(client.PutItemAsync(updateHit));
                     }
                     else
                     {
@@ -409,7 +431,7 @@ namespace PasteItCleaned.Common.Helpers
                             }
                         };
 
-                        client.PutItemAsync(insertHit);
+                        WaitAndCatch(client.PutItemAsync(insertHit));
                     }
                 }
             }
@@ -432,7 +454,7 @@ namespace PasteItCleaned.Common.Helpers
                     }
                 };
 
-                client.PutItemAsync(insertHitHash);
+                WaitAndCatch(client.PutItemAsync(insertHitHash));
             }
         }
 
@@ -453,7 +475,7 @@ namespace PasteItCleaned.Common.Helpers
                     }
                 };
 
-                client.PutItemAsync(insertError);
+                WaitAndCatch(client.PutItemAsync(insertError));
             }
         }
 
@@ -473,7 +495,7 @@ namespace PasteItCleaned.Common.Helpers
                     }
                 };
 
-                client.PutItemAsync(insertUser);
+                WaitAndCatch(client.PutItemAsync(insertUser));
             }
         }
 
@@ -490,24 +512,24 @@ namespace PasteItCleaned.Common.Helpers
                 var configs = new List<AttributeValue>();
                 var contact = new Dictionary<string, AttributeValue>();
 
-                billingContact.Add("Address", new AttributeValue { S = clientObj.Billing.Contact.Address });
-                billingContact.Add("City", new AttributeValue { S = clientObj.Billing.Contact.City });
-                billingContact.Add("Country", new AttributeValue { S = clientObj.Billing.Contact.Country });
-                billingContact.Add("FirstName", new AttributeValue { S = clientObj.Billing.Contact.FirstName });
-                billingContact.Add("LastName", new AttributeValue { S = clientObj.Billing.Contact.LastName });
-                billingContact.Add("PhoneNumber", new AttributeValue { S = clientObj.Billing.Contact.PhoneNumber });
-                billingContact.Add("State", new AttributeValue { S = clientObj.Billing.Contact.State });
+                AddSAttributeValue(billingContact, "Address", clientObj.Billing.Contact.Address);
+                AddSAttributeValue(billingContact, "City", clientObj.Billing.Contact.City);
+                AddSAttributeValue(billingContact, "Country", clientObj.Billing.Contact.Country);
+                AddSAttributeValue(billingContact, "FirstName", clientObj.Billing.Contact.FirstName);
+                AddSAttributeValue(billingContact, "LastName", clientObj.Billing.Contact.LastName);
+                AddSAttributeValue(billingContact, "PhoneNumber", clientObj.Billing.Contact.PhoneNumber);
+                AddSAttributeValue(billingContact, "State", clientObj.Billing.Contact.State);
 
-                billingPayPal.Add("Token", new AttributeValue { S = clientObj.Billing.PayPal.Token });
+                AddSAttributeValue(billingPayPal, "Token", clientObj.Billing.PayPal.Token);
 
-                billingStripe.Add("Token", new AttributeValue { S = clientObj.Billing.Stripe.Token });
+                AddSAttributeValue(billingStripe, "Token", clientObj.Billing.Stripe.Token);
 
-                billing.Add("Balance", new AttributeValue { N = "0" });
+                //billing.Add("Balance", new AttributeValue { N = "0.00" });
                 billing.Add("Contact", new AttributeValue { M = billingContact });
                 billing.Add("PayPal", new AttributeValue { M = billingPayPal });
                 billing.Add("Stripe", new AttributeValue { M = billingStripe });
 
-                business.Add("Name", new AttributeValue { S = clientObj.Business.Name });
+                business.Add("Name", SAttributeValue(clientObj.Business.Name));
 
                 foreach (Config config in clientObj.Configs)
                 {
@@ -520,9 +542,9 @@ namespace PasteItCleaned.Common.Helpers
                     configCommon.Add("RemoveEmptyTags", new AttributeValue { BOOL = config.Common["RemoveEmptyTags"] });
                     configCommon.Add("RemoveSpanTags", new AttributeValue { BOOL = config.Common["RemoveSpanTags"] });
 
-                    configWeb.Add("RemoveClassNames", new AttributeValue { BOOL = config.Common["RemoveClassNames"] });
-                    configWeb.Add("RemoveIframes", new AttributeValue { BOOL = config.Common["RemoveIframes"] });
-                    configWeb.Add("RemoveTagAttributes", new AttributeValue { BOOL = config.Common["RemoveTagAttributes"] });
+                    configWeb.Add("RemoveClassNames", new AttributeValue { BOOL = config.Web["RemoveClassNames"] });
+                    configWeb.Add("RemoveIframes", new AttributeValue { BOOL = config.Web["RemoveIframes"] });
+                    configWeb.Add("RemoveTagAttributes", new AttributeValue { BOOL = config.Web["RemoveTagAttributes"] });
 
                     oneConfig.Add("Common", new AttributeValue { M = configCommon });
                     oneConfig.Add("Office", new AttributeValue { M = configOffice });
@@ -531,20 +553,20 @@ namespace PasteItCleaned.Common.Helpers
                     configs.Add(new AttributeValue { M = oneConfig });
                 }
 
-                contact.Add("Address", new AttributeValue { S = clientObj.Contact.Address });
-                contact.Add("City", new AttributeValue { S = clientObj.Contact.City });
-                contact.Add("Country", new AttributeValue { S = clientObj.Contact.Country });
-                contact.Add("FirstName", new AttributeValue { S = clientObj.Contact.FirstName });
-                contact.Add("LastName", new AttributeValue { S = clientObj.Contact.LastName });
-                contact.Add("PhoneNumber", new AttributeValue { S = clientObj.Contact.PhoneNumber });
-                contact.Add("State", new AttributeValue { S = clientObj.Contact.State });
+                AddSAttributeValue(contact, "Address", clientObj.Contact.Address);
+                AddSAttributeValue(contact, "City", clientObj.Contact.City);
+                AddSAttributeValue(contact, "Country", clientObj.Contact.Country);
+                AddSAttributeValue(contact, "FirstName", clientObj.Contact.FirstName);
+                AddSAttributeValue(contact, "LastName", clientObj.Contact.LastName);
+                AddSAttributeValue(contact, "PhoneNumber", clientObj.Contact.PhoneNumber);
+                AddSAttributeValue(contact, "State", clientObj.Contact.State);
 
                 var insertClient = new PutItemRequest
                 {
                     TableName = tableClient,
                     Item = new Dictionary<string, AttributeValue>
                     {
-                        { "ClientId", new AttributeValue { S = clientObj.ClientId.ToString() }},
+                        { "ClientId", SAttributeValue(clientObj.ClientId.ToString())},
                         { "ApiKeys", new AttributeValue { SS = clientObj.ApiKeys }},
                         { "Billing", new AttributeValue { M = billing }},
                         { "Business", new AttributeValue { M = business }},
@@ -553,72 +575,73 @@ namespace PasteItCleaned.Common.Helpers
                     }
                 };
 
-                /*var billing = item["Billing"].M;
-                var billingBalance = GetMapNode(billing, "Balance");
-                var business = item["Business"].M;
-                var businessContact = GetMapNode(business, "Contact");
-                var contact = item["Contact"].M;
+                Console.WriteLine(JsonConvert.SerializeObject(insertClient));
 
-                clientObj.ClientId = new Guid(item["ClientId"].S);
-
-                clientObj.Contact = new Contact();
-                clientObj.Contact.FirstName = contact["FirstName"].S;
-                clientObj.Contact.LastName = contact["LastName"].S;
-                clientObj.Contact.PhoneNumber = contact["PhoneNumber"].S;
-
-                clientObj.Business = new Business();
-                clientObj.Business.Name = business["Name"].S;
-
-                clientObj.Business.Contact = new Contact();
-                clientObj.Business.Contact.FirstName = contact["FirstName"].S;
-                clientObj.Business.Contact.LastName = contact["LastName"].S;
-                clientObj.Business.Contact.Address = businessContact.M["Address"].S;
-                clientObj.Business.Contact.City = businessContact.M["City"].S;
-                clientObj.Business.Contact.Country = businessContact.M["Country"].S;
-                clientObj.Business.Contact.PhoneNumber = businessContact.M["PhoneNumber"].S;
-                clientObj.Business.Contact.State = businessContact.M["State"].S;
-
-                clientObj.ApiKeys = new List<string>();
-
-                foreach (var apiKey in item["ApiKeys"].SS)
-                    clientObj.ApiKeys.Add(apiKey);
-
-                clientObj.Billing = new Billing();
-                clientObj.Billing.Balance = decimal.Parse(billingBalance.N, System.Globalization.CultureInfo.InvariantCulture);
-                clientObj.Billing.Contact = new Contact();
-                clientObj.Billing.Contact.FirstName = contact["FirstName"].S;
-                clientObj.Billing.Contact.LastName = contact["LastName"].S;
-                clientObj.Billing.Contact.PhoneNumber = contact["PhoneNumber"].S;
-
-                clientObj.Configs = new List<Config>();
-                foreach (var config in item["Configs"].L)
-                {
-                    var obj = new Config();
-                    var common = GetMapNode(config.M, "Common");
-                    var office = GetMapNode(config.M, "Office");
-                    var web = GetMapNode(config.M, "Web");
-
-                    obj.Name = config.M["Name"].S;
-                    obj.Common = new Dictionary<string, bool>();
-                    obj.Office = new Dictionary<string, bool>();
-                    obj.Web = new Dictionary<string, bool>();
-
-                    foreach (var i in common.M)
-                        obj.Common.Add(i.Key, i.Value.BOOL);
-
-                    foreach (var i in office.M)
-                        obj.Office.Add(i.Key, i.Value.BOOL);
-
-                    foreach (var i in web.M)
-                        obj.Web.Add(i.Key, i.Value.BOOL);
-
-                    clientObj.Configs.Add(obj);
-                }*/
-
-                client.PutItemAsync(insertClient);
+                WaitAndCatch(client.PutItemAsync(insertClient));
             }
         }
 
+        private static void SaveApiKey(ApiKey apiKey)
+        {
+            using (var client = DbHelper.GetAmazonClient())
+            {
+                var tableApiKey = ConfigHelper.GetAppSetting("Amazon.DynamoDB.Tables.ApiKey");
+                var domains = new List<AttributeValue>();
+
+                foreach (string domain in apiKey.Domains)
+                {
+                    domains.Add(new AttributeValue { S = domain });
+                }
+
+                var insertApiKey = new PutItemRequest
+                {
+                    TableName = tableApiKey,
+                    Item = new Dictionary<string, AttributeValue>
+                    {
+                        { "ApiKey", new AttributeValue { S = apiKey.Key }},
+                        { "ClientId", new AttributeValue { S = apiKey.ClientId.ToString() }},
+                        { "Domains", new AttributeValue { L = domains }},
+                        { "ExpiresOn", new AttributeValue { S = apiKey.ExpiresOn.ToString() }}
+                    }
+                };
+
+                client.PutItemAsync(insertApiKey);
+            }
+        }
+
+
+        private static void WaitAndCatch<T>(Task<T> task)
+        {
+            try
+            {
+                try
+                {
+                    task.Wait(5000);
+                }
+                catch (Exception e)
+                {
+                    throw e.InnerException;
+                }
+            }
+            catch (AmazonServiceException ase)
+            {
+                Console.WriteLine("Could not complete operation");
+                Console.WriteLine("Error Message:  " + ase.Message);
+                Console.WriteLine("HTTP Status:    " + ase.StatusCode);
+                Console.WriteLine("AWS Error Code: " + ase.ErrorCode);
+                Console.WriteLine("Error Type:     " + ase.ErrorType);
+                Console.WriteLine("Request ID:     " + ase.RequestId);
+            }
+            catch (AmazonClientException ace)
+            {
+                Console.WriteLine("Internal error occurred communicating with DynamoDB");
+                Console.WriteLine("Error Message:  " + ace.Message);
+            }
+            catch (Exception ex) {
+                Console.WriteLine(ex.InnerException.Message + " " + ex.InnerException.StackTrace);
+                throw;
+            }
+        }
 
         private static AttributeValue GetMapNode(Dictionary<string, AttributeValue> map, string node)
         {
@@ -635,6 +658,20 @@ namespace PasteItCleaned.Common.Helpers
             var secretKey = ConfigHelper.GetAppSetting("Amazon.DynamoDB.SecretKey");
 
             return new AmazonDynamoDBClient(accessKey, secretKey, Amazon.RegionEndpoint.USEast1);
+        }
+
+        private static AttributeValue SAttributeValue(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return new AttributeValue { S = "-" };
+
+            return new AttributeValue { S = value };
+        }
+
+        private static void AddSAttributeValue(Dictionary<string, AttributeValue> parent, string name, string value)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+                parent.Add(name, SAttributeValue(value));
         }
     }
 }

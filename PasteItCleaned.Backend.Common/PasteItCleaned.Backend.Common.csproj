@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PasteItCleaned.Backend.Data\PasteItCleaned.Backend.Data.csproj" />
     <ProjectReference Include="..\PasteItCleaned.Common\PasteItCleaned.Common.csproj" />
   </ItemGroup>
 

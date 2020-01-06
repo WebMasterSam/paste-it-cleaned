@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-
+using PasteItCleaned.Backend.Core;
+using PasteItCleaned.Backend.Data;
 using PasteItCleaned.Common.Helpers;
 
 namespace PasteItCleaned.Aws.Lambda
@@ -32,6 +33,8 @@ namespace PasteItCleaned.Aws.Lambda
                     builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
                 });
             });
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             // Adds Amazon Cognito as Identity Provider
             services.AddCognitoIdentity();

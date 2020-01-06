@@ -1,14 +1,23 @@
-﻿using PasteItCleaned.Common.Entities;
+﻿using Newtonsoft.Json.Linq;
+using PasteItCleaned.Common.Entities;
 using PasteItCleaned.Common.Helpers;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Backend.Common.Helpers
 {
     public static class SessionHelper
     {
+        public static Client GetCurrentClient(string authToken)
+        {
+            Console.WriteLine(authToken);
+
+            var accessToken = Base64Helper.GetString(authToken.Replace("Bearer ", "").Split('.')[1]);
+            var token = JObject.Parse(accessToken);
+            var userName = token.SelectToken("username").Value<string>();
+
+            return GetClient(userName);
+        }
+
         public static Client GetClient(string userName)
         {
             var user = DbHelper.SelectUser(userName);
@@ -24,7 +33,7 @@ namespace PasteItCleaned.Backend.Common.Helpers
                 var apiKey = ApiKeyHelper.GenerateApiKey();
 
                 DbHelper.InsertClient(user.ClientId, apiKey);
-                DbHelper.InsertApiKey(apiKey);
+                DbHelper.InsertApiKey(user.ClientId, apiKey);
 
                 client = DbHelper.GetClient(user.ClientId);
             }
