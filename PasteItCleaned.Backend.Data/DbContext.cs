@@ -9,6 +9,7 @@ namespace PasteItCleaned.Backend.Data
         public DbSet<ApiKey> ApiKeys { get; set; }
         public DbSet<Client> Clients { get; set; }
         public DbSet<Config> Configs { get; set; }
+        public DbSet<Domain> Domains { get; set; }
         public DbSet<Error> Errors { get; set; }
         public DbSet<HitDaily> HitsDaily { get; set; }
         public DbSet<Hit> Hits { get; set; }
@@ -22,7 +23,8 @@ namespace PasteItCleaned.Backend.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.ApplyConfiguration(new ApiKeyConfiguration()); // others
+            builder.ApplyConfiguration(new ApiKeyConfiguration());
+            builder.ApplyConfiguration(new HitConfiguration()); // others
         }
     }
 }

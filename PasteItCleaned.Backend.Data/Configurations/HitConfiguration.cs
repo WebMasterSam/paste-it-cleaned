@@ -8,23 +8,17 @@ namespace PasteItCleaned.Backend.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Hit> builder)
         {
-            builder
-                .HasKey(m => m.HitId);
+            builder.HasKey(m => m.HitId);
 
-            builder
-                .Property(m => m.HitId);
+            builder.Property(m => m.ClientId);
+            builder.Property(m => m.Date);
+            builder.Property(m => m.Hash);
+            builder.Property(m => m.Ip);
+            builder.Property(m => m.Price);
+            builder.Property(m => m.Referer);
+            builder.Property(m => m.Type);
 
-            builder
-                .Property(m => m.Hash)
-                .IsRequired();
-
-            /*builder
-                .HasOne(m => m.Artist)
-                .WithMany(a => a.Musics)
-                .HasForeignKey(m => m.ArtistId);*/
-
-            builder
-                .ToTable("Hits");
+            builder.ToTable("hit");
         }
     }
 }

@@ -8,24 +8,23 @@ namespace PasteItCleaned.Backend.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<ApiKey> builder)
         {
-            builder
-                .HasKey(m => m.ApiKeyId);
+            builder.HasKey(m => m.ApiKeyId);
 
-            builder
-                .Property(m => m.ApiKeyId);
+            builder.Property(m => m.ClientId).IsRequired();
+            builder.Property(m => m.ExpiresOn).IsRequired();
+            builder.Property(m => m.Key).IsRequired();
 
-            builder
+            /*builder
                 .Property(m => m.Key)
                 .IsRequired()
                 .HasMaxLength(50);
 
-            /*builder
+            builder
                 .HasOne(m => m.Artist)
                 .WithMany(a => a.Musics)
                 .HasForeignKey(m => m.ArtistId);*/
 
-            builder
-                .ToTable("ApiKeys");
+            builder.ToTable("api_key");
         }
     }
 }
