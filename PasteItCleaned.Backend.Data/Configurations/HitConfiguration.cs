@@ -10,13 +10,13 @@ namespace PasteItCleaned.Backend.Data.Configurations
         {
             builder.HasKey(m => m.HitId);
 
-            builder.Property(m => m.ClientId);
-            builder.Property(m => m.Date);
-            builder.Property(m => m.Hash);
-            builder.Property(m => m.Ip);
-            builder.Property(m => m.Price);
-            builder.Property(m => m.Referer);
-            builder.Property(m => m.Type);
+            //builder.Property(m => m.ClientId);
+            //builder.Property(m => m.Date);
+            //builder.Property(m => m.Hash);
+            //builder.Property(m => m.Ip);
+            //builder.Property(m => m.Price);
+            //builder.Property(m => m.Referer);
+            //builder.Property(m => m.Type);
 
             builder.ToTable("hit");
         }

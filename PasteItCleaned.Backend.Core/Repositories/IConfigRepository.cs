@@ -6,6 +6,6 @@ namespace PasteItCleaned.Backend.Core.Repositories
 {
     public interface IConfigRepository : IRepository<Config>
     {
-
+        Task<Config> GetByNameAsync(string name);
     }
 }

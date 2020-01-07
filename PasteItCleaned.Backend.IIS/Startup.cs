@@ -83,7 +83,16 @@ namespace PasteItCleaned.IIS
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddTransient<IApiKeyService, ApiKeyService>();
+            services.AddTransient<IClientService, ClientService>();
+            services.AddTransient<IConfigService, ConfigService>();
+            //services.AddTransient<IDomainService, DomainService>();
+            //services.AddTransient<IErrorService, ErrorService>();
+            //services.AddTransient<IHitDailyService, HitDailyService>();
             services.AddTransient<IHitService, HitService>();
+            services.AddTransient<IInvoiceService, InvoiceService>();
+            //services.AddTransient<IPaymentMethodService, PaymentMethodService>();
+            //services.AddTransient<IPaymentService, PaymentService>();
+            services.AddTransient<IUserService, UserService>();
 
             services.AddDbContext<PasteItCleanedDbContext>(options => options.UseMySQL(Configuration.GetConnectionString("Default"), x => x.MigrationsAssembly("PasteItCleaned.Backend.Data")));
 

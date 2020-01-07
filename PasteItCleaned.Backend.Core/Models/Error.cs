@@ -1,14 +1,17 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PasteItCleaned.Backend.Core.Models
 {
     public class Error
     {
-        [Column("error_id")]
+        [Column("error_id", TypeName = "char(36)")]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key]
         public Guid ErrorId { get; set; }
 
-        [Column("client_id")]
+        [Column("client_id", TypeName = "char(36)")]
         public Guid ClientId { get; set; }
 
         [Column("error_message")]

@@ -17,19 +17,19 @@ namespace PasteItCleaned.Backend.Common.Helpers
                 var token = JObject.Parse(accessToken);
                 var userName = token.SelectToken("username").Value<string>();
 
-                return GetClient(userName);
+                return GetClient(userName, userName);
             }
 
             return null;
         }
 
-        public static Client GetClient(string userName)
+        public static Client GetClient(string cognitoId, string cognitoUserName)
         {
-            var user = DbHelper.SelectUser(userName);
+            var user = DbHelper.SelectUser(cognitoUserName);
 
             if (user == null) {
-                DbHelper.InsertUser(userName);
-                user = DbHelper.SelectUser(userName);
+                DbHelper.InsertUser(cognitoUserName);
+                user = DbHelper.SelectUser(cognitoUserName);
             }
 
             var client = DbHelper.GetClient(user.ClientId);

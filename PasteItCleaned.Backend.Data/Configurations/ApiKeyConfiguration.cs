@@ -10,19 +10,9 @@ namespace PasteItCleaned.Backend.Data.Configurations
         {
             builder.HasKey(m => m.ApiKeyId);
 
-            builder.Property(m => m.ClientId).IsRequired();
-            builder.Property(m => m.ExpiresOn).IsRequired();
-            builder.Property(m => m.Key).IsRequired();
-
-            /*builder
-                .Property(m => m.Key)
-                .IsRequired()
-                .HasMaxLength(50);
-
-            builder
-                .HasOne(m => m.Artist)
-                .WithMany(a => a.Musics)
-                .HasForeignKey(m => m.ArtistId);*/
+            //builder.Property(m => m.ClientId).IsRequired();
+            //builder.Property(m => m.ExpiresOn).IsRequired();
+            //builder.Property(m => m.Key).IsRequired();
 
             builder.ToTable("api_key");
         }

@@ -1,14 +1,17 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PasteItCleaned.Backend.Core.Models
 {
     public class HitDaily
     {
-        [Column("hit_daily_id")]
+        [Column("hit_daily_id", TypeName = "char(36)")]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key]
         public Guid HitDailyId { get; set; }
 
-        [Column("client_id")]
+        [Column("client_id", TypeName = "char(36)")]
         public Guid ClientId { get; set; }
 
         [Column("hit_daily_date")]

@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using PasteItCleaned.Backend.Common.Helpers;
 using PasteItCleaned.Backend.Core.Services;
 using PasteItCleaned.Common.Localization;
 
 namespace PasteItCleaned.Backend.Common.Controllers
 {
     [Route("dashboard")]
-    public class DashboardController : ControllerBase
+    public class DashboardController : BaseController
     {
         private readonly IHitService _hitService;
+        private readonly IInvoiceService _invoiceService;
 
-        public DashboardController(IHitService hitService)
+        public DashboardController(IApiKeyService apiKeyService, IClientService clientService, IUserService userService, IHitService hitService, IInvoiceService invoiceService) : base(apiKeyService, clientService, userService)
         {
             this._hitService = hitService;
+            this._invoiceService = invoiceService;
         }
 
         // GET dashboard/hits/
@@ -23,14 +24,11 @@ namespace PasteItCleaned.Backend.Common.Controllers
         {
             Console.WriteLine("DashboardController::GetHits");
 
-            var client = SessionHelper.GetCurrentClient(authorization);
+            var client = this.GetOrCreateClient(authorization);
 
             var hits = await _hitService.GetAllByClientIdAsync(Guid.Empty);
 
             return Ok(hits);
-
-            // Use QS to filter by date, limit, sort, etc.
-            //return Ok("{ 'asdf' : 'ff' }");
         }
 
         // GET dashboard/invoices/
@@ -39,7 +37,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
         {
             Console.WriteLine("DashboardController::GetInvoices");
 
-            var client = SessionHelper.GetCurrentClient(authorization);
+            var client = this.GetOrCreateClient(authorization);
 
             // Use QS to filter by date, limit, sort, etc.
             return Ok(T.Get("App.Up"));
