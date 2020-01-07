@@ -9,6 +9,7 @@ namespace PasteItCleaned.Backend.Core
         IApiKeyRepository ApiKeys { get; }
         IClientRepository Clients { get; }
         IConfigRepository Configs { get; }
+        IDomainRepository Domains { get; }
         IErrorRepository Errors { get; }
         IHitDailyRepository HitsDaily { get; }
         IHitRepository Hits { get; }

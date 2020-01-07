@@ -11,6 +11,7 @@ namespace PasteItCleaned.Backend.Data
         private ApiKeyRepository _apiKeyRepository;
         private ClientRepository _clientRepository;
         private ConfigRepository _configRepository;
+        private DomainRepository _domainRepository;
         private ErrorRepository _errorRepository;
         private HitDailyRepository _hitDailyRepository;
         private HitRepository _hitRepository;
@@ -29,6 +30,8 @@ namespace PasteItCleaned.Backend.Data
         public IClientRepository Clients => _clientRepository = _clientRepository ?? new ClientRepository(_context);
 
         public IConfigRepository Configs => _configRepository = _configRepository ?? new ConfigRepository(_context);
+
+        public IDomainRepository Domains => _domainRepository = _domainRepository ?? new DomainRepository(_context);
 
         public IErrorRepository Errors => _errorRepository = _errorRepository ?? new ErrorRepository(_context);
 

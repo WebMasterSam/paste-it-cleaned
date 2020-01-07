@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 
 namespace PasteItCleaned.Backend.Core.Repositories
 {
-    public interface IDomainRepository : IRepository<ApiKey>
+    public interface IDomainRepository : IRepository<Domain>
     {
-        Task<ApiKey> GetByNameAsync(string name);
+        Task<Domain> GetByNameAsync(string name);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,6 +16,9 @@ using PasteItCleaned.Common.Localization;
 
 namespace PasteItCleaned.Common.Controllers
 {
+    [ApiController]
+    [Route("v1/clean")]
+    [EnableCors("Default")]
     public class PasteCleanController : ControllerBase
     {
         private static List<BaseCleaner> Cleaners = new List<BaseCleaner>();

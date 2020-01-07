@@ -9,7 +9,7 @@ namespace PasteItCleaned.Backend.Core.Services
     {
         Task<IEnumerable<PaymentMethod>> GetAllByClientId(Guid clientId);
         Task<PaymentMethod> GetById(Guid paymentMethodId);
-        Task<PaymentMethod> CreateApiKey(PaymentMethod paymentMethod);
+        Task<PaymentMethod> CreatePaymentMethod(PaymentMethod paymentMethod);
         Task UpdatePaymentMethod(PaymentMethod paymentMethodToBeUpdated, PaymentMethod paymentMethod);
         Task DeletePaymentMethod(PaymentMethod paymentMethod);
     }

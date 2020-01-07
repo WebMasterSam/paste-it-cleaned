@@ -1,16 +1,28 @@
 ﻿using System;
-
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
-
+using PasteItCleaned.Backend.Core.Services;
 using PasteItCleaned.Common.Cleaners;
 using PasteItCleaned.Common.Controllers.Entities;
 using PasteItCleaned.Common.Helpers;
 
 namespace PasteItCleaned.Common.Controllers
 {
+    [ApiController]
+    [Route("v1/notify")]
+    [EnableCors("Default")]
     public class PasteNotifyController : ControllerBase
     {
+        private readonly IHitService _hitService;
+        private readonly IHitDailyService _hitDailyService;
+
+        public PasteNotifyController(IHitService hitService, IHitDailyService hitDailyService)
+        {
+            this._hitService = hitService;
+            this._hitDailyService = hitDailyService;
+        }
+
         // POST v1/notify
         [HttpPost()]
         public ActionResult Post([FromBody] NotifyObject obj)
