@@ -93,6 +93,7 @@ namespace PasteItCleaned.IIS
             services.AddTransient<IPaymentMethodService, PaymentMethodService>();
             services.AddTransient<IPaymentService, PaymentService>();
             services.AddTransient<IUserService, UserService>();
+            services.AddTransient<ITimeZoneService, TimeZoneService>();
 
             services.AddDbContext<PasteItCleanedDbContext>(options => options.UseMySQL(Configuration.GetConnectionString("Default"), x => x.MigrationsAssembly("PasteItCleaned.Backend.Data")));
 

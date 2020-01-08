@@ -41,6 +41,9 @@ namespace PasteItCleaned.Backend.Core.Models
         [Column("phone_number")]
         public string PhoneNumber { get; set; }
 
+        [Column("timezone")]
+        public string TimeZone { get; set; }
+
 
         [Column("created_on")]
         public DateTime CreatedOn { get; set; }

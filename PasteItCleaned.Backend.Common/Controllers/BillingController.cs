@@ -9,7 +9,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
     [Route("billing")]
     public class BillingController : ControllerBase
     {
-        // GET billing/invoices/
+        // GET billing/invoices/{id}
         [HttpGet("invoices/{id}")]
         public ActionResult GetInvoice()
         {

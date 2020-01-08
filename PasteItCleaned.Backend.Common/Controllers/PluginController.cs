@@ -9,6 +9,15 @@ namespace PasteItCleaned.Backend.Common.Controllers
     [Route("plugin")]
     public class PluginController : ControllerBase
     {
+        // GET plugin/api-keys
+        [HttpGet("api-keys")]
+        public ActionResult GetApiKeys()
+        {
+            Console.WriteLine("PluginController::GetApiKeys");
+
+            return Ok(T.Get("App.Up"));
+        }
+
         // GET plugin/api-keys/{id}
         [HttpGet("api-keys/{id}")]
         public ActionResult GetApiKey()
@@ -18,11 +27,11 @@ namespace PasteItCleaned.Backend.Common.Controllers
             return Ok(T.Get("App.Up"));
         }
 
-        // GET plugin/api-keys
-        [HttpGet("api-keys")]
-        public ActionResult GetApiKeys()
+        // DELETE plugin/api-keys/{id}
+        [HttpDelete("api-keys/{id}")]
+        public ActionResult DeleteApiKey()
         {
-            Console.WriteLine("PluginController::GetApiKeys");
+            Console.WriteLine("PluginController::DeleteApiKey");
 
             return Ok(T.Get("App.Up"));
         }
