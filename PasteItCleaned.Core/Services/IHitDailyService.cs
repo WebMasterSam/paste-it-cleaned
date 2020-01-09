@@ -1,13 +1,15 @@
 ﻿using PasteItCleaned.Core.Models;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace PasteItCleaned.Core.Services
 {
     public interface IHitDailyService
     {
-        Task<HitDaily> Get(Guid clientId, DateTime date);
-        Task<HitDaily> CreateHitDaily(HitDaily hitDaily);
-        Task IncreaseHitDaily(HitDaily hitDaily, string type, decimal price);
+        Task<IEnumerable<HitDaily>> GetByDatesAsync(Guid clientId, DateTime startDate, DateTime endDate);
+        Task<HitDaily> GetByDateAsync(Guid clientId, DateTime date);
+        Task<HitDaily> CreateHitDailyAsync(HitDaily hitDaily);
+        Task IncreaseHitDailyAsync(HitDaily hitDaily, string type, decimal price);
     }
 }
