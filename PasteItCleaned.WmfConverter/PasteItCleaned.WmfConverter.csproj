@@ -9,11 +9,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PasteItCleaned.Common\PasteItCleaned.Common.csproj" />
+    <EmbeddedResource Include="Assets\Error.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Assets\Error.png" />
+    <ProjectReference Include="..\PasteItCleaned.Common\PasteItCleaned.Plugin.csproj" />
   </ItemGroup>
 
 </Project>

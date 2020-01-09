@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 using PasteItCleaned.Common.Helpers;
+using PasteItCleaned.Core.Helpers;
 using PasteItCleaned.WmfConverter.Controllers.Entities;
 
 namespace PasteItCleaned.WmfConverter.Controllers

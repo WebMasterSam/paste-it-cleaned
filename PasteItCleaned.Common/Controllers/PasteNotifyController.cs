@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
-using PasteItCleaned.Backend.Core.Services;
+using PasteItCleaned.Core.Services;
 using PasteItCleaned.Common.Cleaners;
 using PasteItCleaned.Common.Controllers.Entities;
 using PasteItCleaned.Common.Helpers;

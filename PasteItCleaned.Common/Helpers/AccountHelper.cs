@@ -1,5 +1,6 @@
 ﻿using System;
 using PasteItCleaned.Common.Cleaners;
+using PasteItCleaned.Core.Helpers;
 
 namespace PasteItCleaned.Common.Helpers
 {

@@ -1,4 +1,5 @@
 ﻿using PasteItCleaned.Common.Localization;
+using PasteItCleaned.Core.Helpers;
 using System;
 
 namespace PasteItCleaned.Common.Helpers

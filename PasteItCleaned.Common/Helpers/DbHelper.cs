@@ -8,6 +8,7 @@ using Amazon.Runtime;
 using Newtonsoft.Json;
 using PasteItCleaned.Common.Cleaners;
 using PasteItCleaned.Common.Entities;
+using PasteItCleaned.Core.Helpers;
 
 namespace PasteItCleaned.Common.Helpers
 {

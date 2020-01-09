@@ -16,10 +16,15 @@ using Swashbuckle.AspNetCore.Swagger;
 
 using PasteItCleaned.Backend.Core;
 using PasteItCleaned.Backend.Data;
-using PasteItCleaned.Backend.Core.Services;
+using PasteItCleaned.Core.Services;
 using PasteItCleaned.Backend.Services;
-using PasteItCleaned.Common.Helpers;
 using PasteItCleaned.Common.Localization;
+using PasteItCleaned.Core.Helpers;
+using PasteItCleaned.Backend.Core.Middleware.Logging;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Diagnostics;
+using Newtonsoft.Json;
+using Microsoft.AspNetCore.Http;
 
 namespace PasteItCleaned.IIS
 {
@@ -81,6 +86,8 @@ namespace PasteItCleaned.IIS
                 options.SupportedUICultures = supportedCultures;
             });
 
+            services.AddLogging(logging => logging.AddConsole());
+
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddTransient<IApiKeyService, ApiKeyService>();
             services.AddTransient<IClientService, ClientService>();
@@ -118,6 +125,7 @@ namespace PasteItCleaned.IIS
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseRequestResponseLogging();
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
@@ -125,9 +133,20 @@ namespace PasteItCleaned.IIS
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "PasteItCleaned Backend V1");
             });
 
-            app.UseRequestLocalization();
             app.UseCors("Default");
             app.UseAuthentication();
+
+            app.UseExceptionHandler(a => a.Run(async context =>
+            {
+                var feature = context.Features.Get<IExceptionHandlerPathFeature>();
+                var exception = feature.Error;
+                var result = JsonConvert.SerializeObject(new { error = exception.Message });
+
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsync(result);
+            }));
+
+            app.UseRequestLocalization();
             app.UseMvc();
         }
     }

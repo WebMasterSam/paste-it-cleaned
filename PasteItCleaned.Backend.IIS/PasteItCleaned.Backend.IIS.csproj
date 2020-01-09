@@ -25,10 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PasteItCleaned.Backend.Common\PasteItCleaned.Backend.Common.csproj" />
-    <ProjectReference Include="..\PasteItCleaned.Backend.Core\PasteItCleaned.Backend.Core.csproj" />
-    <ProjectReference Include="..\PasteItCleaned.Backend.Services\PasteItCleaned.Backend.Services.csproj" />
-    <ProjectReference Include="..\PasteItCleaned.Common\PasteItCleaned.Common.csproj" />
+    <ProjectReference Include="..\PasteItCleaned.Backend\PasteItCleaned.Backend.csproj" />
+    <ProjectReference Include="..\PasteItCleaned.Data\PasteItCleaned.Data.csproj" />
+    <ProjectReference Include="..\PasteItCleaned.Services\PasteItCleaned.Services.csproj" />
   </ItemGroup>
 
 </Project>

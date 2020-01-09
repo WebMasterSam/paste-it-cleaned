@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using PasteItCleaned.Common.Entities;
+using PasteItCleaned.Core.Helpers;
 using System;
 
 namespace PasteItCleaned.Common.Helpers
@@ -51,11 +52,6 @@ namespace PasteItCleaned.Common.Helpers
         public static ApiKey GetApiKeyFromDb(string apiKey)
         {
             return DbHelper.SelectApiKey(apiKey);
-        }
-
-        public static string GenerateApiKey()
-        {
-            return Guid.NewGuid().ToString().Replace("-", "").Substring(5, 20);
         }
     }
 }
