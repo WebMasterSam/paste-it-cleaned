@@ -1,11 +1,17 @@
 ﻿using PasteItCleaned.Core.Models;
+using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Backend.Core.Repositories
 {
     public interface IHitRepository : IRepository<Hit>
     {
-        Task<Hit> GetByHashAsync(int hash);
+        int Count(Guid clientId, string type, DateTime startDate, DateTime endDate);
+
+        PagedList<Hit> List(Guid clientId, string type, DateTime startDate, DateTime endDate, int page, int pageSize);
+
+        Hit GetByHash(Guid clientId, DateTime date, int hash);
+
+        void DeleteByDate(DateTime priorTo);
     }
 }

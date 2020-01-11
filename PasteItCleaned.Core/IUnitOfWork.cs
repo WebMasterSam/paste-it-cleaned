@@ -1,6 +1,5 @@
 ﻿using PasteItCleaned.Backend.Core.Repositories;
 using System;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Backend.Core
 {
@@ -17,6 +16,6 @@ namespace PasteItCleaned.Backend.Core
         IPaymentMethodRepository PaymentMethods { get; }
         IPaymentRepository Payments { get; }
         IUserRepository Users { get; }
-        Task<int> CommitAsync();
+        int Commit();
     }
 }

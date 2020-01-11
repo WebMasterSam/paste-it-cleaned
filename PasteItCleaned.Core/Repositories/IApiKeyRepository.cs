@@ -1,10 +1,17 @@
 ﻿using PasteItCleaned.Core.Models;
-using System.Threading.Tasks;
+using System;
+using System.Collections.Generic;
 
 namespace PasteItCleaned.Backend.Core.Repositories
 {
     public interface IApiKeyRepository : IRepository<ApiKey>
     {
-        Task<ApiKey> GetByKeyAsync(string key);
+        int Count(Guid clientId);
+        List<ApiKey> List(Guid clientId);
+
+        ApiKey Get(Guid apiKeyId);
+        ApiKey GetByKey(string key);
+
+        void LogicalDelete(Guid apiKeyId);
     }
 }

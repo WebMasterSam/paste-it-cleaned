@@ -1,11 +1,17 @@
 ﻿using PasteItCleaned.Core.Models;
+using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Backend.Core.Repositories
 {
     public interface IConfigRepository : IRepository<Config>
     {
-        Task<Config> GetByNameAsync(string name);
+        int Count(Guid clientId);
+        List<Config> List(Guid clientId);
+
+        Config Get(Guid configId);
+        Config GetByName(string name);
+
+        void LogicalDelete(Guid configId);
     }
 }

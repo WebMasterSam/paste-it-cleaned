@@ -1,8 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using PasteItCleaned.Core.Models;
+﻿using PasteItCleaned.Core.Models;
 using PasteItCleaned.Backend.Core.Repositories;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Linq;
+using System;
 
 namespace PasteItCleaned.Backend.Data.Repositories
 {
@@ -11,10 +10,36 @@ namespace PasteItCleaned.Backend.Data.Repositories
         public ClientRepository(PasteItCleanedDbContext context) : base(context)
         { }
 
-        public async Task<IEnumerable<Client>> GetAllAsync()
+        public int Count()
         {
-            return await Context.Clients
-                .ToListAsync();
+            return Context.Clients
+                .Where(m => !m.Deleted)
+                .Count();
+        }
+
+        public Client Get(Guid clientId)
+        {
+            return Context.Clients
+                .Where(m => m.ClientId == clientId)
+                .FirstOrDefault();
+        }
+
+        public PagedList<Client> List(int page, int pageSize)
+        {
+            var query = Context.Clients
+                .Where(m => !m.Deleted);
+
+            return this.PagedList(query, page, pageSize);
+        }
+
+        public void LogicalDelete(Guid clientId)
+        {
+            var entity = Context.Clients
+                .Where(m => m.ClientId == clientId)
+                .FirstOrDefault();
+
+            entity.Deleted = true;
+            entity.UpdatedOn = DateTime.UtcNow;
         }
     }
 }

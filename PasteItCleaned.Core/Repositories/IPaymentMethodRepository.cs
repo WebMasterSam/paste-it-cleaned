@@ -1,11 +1,12 @@
 ﻿using PasteItCleaned.Core.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using System;
 
 namespace PasteItCleaned.Backend.Core.Repositories
 {
     public interface IPaymentMethodRepository : IRepository<PaymentMethod>
     {
+        PaymentMethod GetCurrent(Guid clientId);
 
+        void LogicalDelete(Guid paymentMethodId);
     }
 }

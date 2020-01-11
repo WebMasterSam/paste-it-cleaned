@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PasteItCleaned.Backend.Core.Repositories;
+using PasteItCleaned.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Backend.Data.Repositories
 {
@@ -17,61 +17,43 @@ namespace PasteItCleaned.Backend.Data.Repositories
             this.Context = context as PasteItCleanedDbContext;
         }
 
-        public async Task AddAsync(TEntity entity)
+        public TEntity Add(TEntity entity)
         {
-            await Context.Set<TEntity>().AddAsync(entity);
+            Context.Set<TEntity>().Add(entity);
+
+            return entity;
         }
 
-        public async Task AddRangeAsync(IEnumerable<TEntity> entities)
+        public List<TEntity> AddRange(List<TEntity> entities)
         {
-            await Context.Set<TEntity>().AddRangeAsync(entities);
+            Context.Set<TEntity>().AddRange(entities);
+
+            return entities;
         }
 
-        public IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate)
+        public List<TEntity> Find(Expression<Func<TEntity, bool>> predicate)
         {
-            return Context.Set<TEntity>().Where(predicate);
+            return Context.Set<TEntity>().Where(predicate).ToList();
         }
 
-        public async Task<IEnumerable<TEntity>> GetAllByParentIdAsync(Guid clientId)
+        protected PagedList<TEntity> PagedList(IQueryable<TEntity> query, int page, int pageSize)
         {
-            return await Context.Set<TEntity>().ToListAsync();
+            var result = new PagedList<TEntity>();
+
+            result.CurrentPage = page;
+            result.PageSize = pageSize;
+            result.RowCount = query.Count();
+
+            var pageCount = (double)result.RowCount / pageSize;
+
+            result.PageCount = (int)Math.Ceiling(pageCount);
+
+            var skip = (page - 1) * pageSize;
+
+            result.Results = query.Skip(skip).Take(pageSize).ToList();
+
+            return result;
         }
 
-        public Task<TEntity> GetByIdAsync(Guid id)
-        {
-            return Context.Set<TEntity>().FindAsync(id);
-        }
-
-        public void LogicalDelete(TEntity entity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void LogicalDeleteRange(IEnumerable<TEntity> entities)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<TEntity> SingleOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)
-        {
-            return Context.Set<TEntity>().SingleOrDefaultAsync(predicate);
-        }
-
-        /*
-        public async Task<IEnumerable<TEntity>> GetAllAsync()
-        {
-            return await Context.Set<TEntity>().ToListAsync();
-        }
-
-        public void Remove(TEntity entity)
-        {
-            Context.Set<TEntity>().Remove(entity);
-        }
-
-        public void RemoveRange(IEnumerable<TEntity> entities)
-        {
-            Context.Set<TEntity>().RemoveRange(entities);
-        }
-        */
     }
 }

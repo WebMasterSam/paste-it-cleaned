@@ -1,14 +1,18 @@
 ﻿using PasteItCleaned.Core.Models;
 using System;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Core.Services
 {
     public interface IClientService
     {
-        Task<Client> GetById(Guid clientId);
-        Task<Client> CreateClient(Client client);
-        Task UpdateClient(Client clientToBeUpdated, Client client);
-        Task DeleteClient(Client client);
+        PagedList<Client> List(Guid clientId);
+
+        Client Get(Guid clientId);
+
+        Client Create(Client client);
+
+        Client Update(Client clientToUpdate, Client client);
+
+        void Delete(Client client);
     }
 }

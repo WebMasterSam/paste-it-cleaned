@@ -1,12 +1,16 @@
 ﻿using PasteItCleaned.Core.Models;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Backend.Core.Repositories
 {
     public interface IHitDailyRepository : IRepository<HitDaily>
     {
-        Task<IEnumerable<HitDaily>> GetByDatesAsync(Guid clientId, DateTime startDate, DateTime endDate);
+        int Count(Guid clientId, string type, DateTime startDate, DateTime endDate);
+
+        PagedList<HitDaily> List(Guid clientId, DateTime startDate, DateTime endDate, int page, int pageSize);
+
+        HitDaily AddOrUpdate(HitDaily hitDaily);
+
+        void DeleteByDate(DateTime priorTo);
     }
 }

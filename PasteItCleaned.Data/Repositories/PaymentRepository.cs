@@ -1,5 +1,7 @@
 ﻿using PasteItCleaned.Core.Models;
 using PasteItCleaned.Backend.Core.Repositories;
+using System;
+using System.Linq;
 
 namespace PasteItCleaned.Backend.Data.Repositories
 {
@@ -7,5 +9,19 @@ namespace PasteItCleaned.Backend.Data.Repositories
     {
         public PaymentRepository(PasteItCleanedDbContext context) : base(context)
         { }
+
+        public Payment Get(Guid paymentId)
+        {
+            return Context.Payments
+                .Where(m => m.PaymentId == paymentId)
+                .FirstOrDefault();
+        }
+
+        public Payment GetByInvoice(Guid invoiceId)
+        {
+            return Context.Payments
+                .Where(m => m.InvoiceId == invoiceId)
+                .FirstOrDefault();
+        }
     }
 }

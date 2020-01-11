@@ -5,7 +5,7 @@ namespace PasteItCleaned.Core.Services
 {
     public interface ITimeZoneService
     {
-        IEnumerable<TimeZone> GetAll();
-        IEnumerable<TimeZone> GetAll(string countryCode);
+        List<TimeZone> GetAll();
+        List<TimeZone> GetAll(string countryCode);
     }
 }

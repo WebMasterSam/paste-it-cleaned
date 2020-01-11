@@ -1,6 +1,4 @@
 ﻿using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using PasteItCleaned.Core.Models;
 using PasteItCleaned.Backend.Core.Repositories;
 
@@ -11,18 +9,20 @@ namespace PasteItCleaned.Backend.Data.Repositories
         public UserRepository(PasteItCleanedDbContext context) : base(context)
         { }
 
-        public async Task<User> GetByCognitoIdAsync(string cognitoId)
+        public User GetByCognitoId(string cognitoId)
         {
-            return await Context.Users
+            return Context.Users
                 .Where(m => m.CognitoId == cognitoId)
-                .FirstOrDefaultAsync();
+                .Where(m => !m.Deleted)
+                .FirstOrDefault();
         }
 
-        public async Task<User> GetByCognitoUsernameAsync(string cognitoUsername)
+        public User GetByCognitoUsername(string cognitoUsername)
         {
-            return await Context.Users
+            return Context.Users
                 .Where(m => m.CognitoUsername == cognitoUsername)
-                .FirstOrDefaultAsync();
+                .Where(m => !m.Deleted)
+                .FirstOrDefault();
         }
     }
 }

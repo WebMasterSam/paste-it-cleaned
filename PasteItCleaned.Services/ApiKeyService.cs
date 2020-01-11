@@ -3,7 +3,6 @@ using PasteItCleaned.Core.Models;
 using PasteItCleaned.Core.Services;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Backend.Services
 {
@@ -16,41 +15,48 @@ namespace PasteItCleaned.Backend.Services
             this._unitOfWork = unitOfWork;
         }
 
-        public async Task<ApiKey> CreateApiKey(ApiKey apiKey)
+        public int Count(Guid clientId)
         {
-            await _unitOfWork.ApiKeys.AddAsync(apiKey);
-            await _unitOfWork.CommitAsync();
+            return _unitOfWork.ApiKeys.Count(clientId);
+        }
+
+        public ApiKey Create(ApiKey apiKey)
+        {
+            _unitOfWork.ApiKeys.Add(apiKey);
+            _unitOfWork.Commit();
 
             return apiKey;
         }
 
-        public async Task DeleteApiKey(ApiKey apiKey)
+        public void Delete(Guid apiKeyId)
         {
-            _unitOfWork.ApiKeys.LogicalDelete(apiKey);
+            _unitOfWork.ApiKeys.LogicalDelete(apiKeyId);
 
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
         }
 
-        public async Task<IEnumerable<ApiKey>> GetAllByClientId(Guid clientId)
+        public ApiKey Get(Guid apiKeyId)
         {
-            return await _unitOfWork.ApiKeys.GetAllByParentIdAsync(clientId);
+            return _unitOfWork.ApiKeys.Get(apiKeyId);
         }
 
-        public async Task<ApiKey> GetById(Guid apiKeyId)
+        public ApiKey GetByKey(string key)
         {
-            return await _unitOfWork.ApiKeys.GetByIdAsync(apiKeyId);
+            return _unitOfWork.ApiKeys.GetByKey(key);
         }
 
-        public async Task<ApiKey> GetByKey(string key)
+        public List<ApiKey> List(Guid clientId)
         {
-            return await _unitOfWork.ApiKeys.GetByKeyAsync(key);
+            return _unitOfWork.ApiKeys.List(clientId);
         }
 
-        public async Task UpdateApiKey(ApiKey apiKeyToBeUpdated, ApiKey apiKey)
+        public ApiKey Update(ApiKey apiKeyToUpdate, ApiKey apiKey)
         {
-            apiKeyToBeUpdated.ExpiresOn = apiKey.ExpiresOn;
+            apiKeyToUpdate.ExpiresOn = apiKey.ExpiresOn;
 
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
+
+            return apiKeyToUpdate;
         }
     }
 }

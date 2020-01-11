@@ -1,22 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Backend.Core.Repositories
 {
     public interface IRepository<TEntity> where TEntity : class
     {
-        Task<TEntity> GetByIdAsync(Guid id);
-        Task<IEnumerable<TEntity>> GetAllByParentIdAsync(Guid clientId);
+        List<TEntity> Find(Expression<Func<TEntity, bool>> predicate);
 
-        IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate);
-        Task<TEntity> SingleOrDefaultAsync(Expression<Func<TEntity, bool>> predicate);
-
-        Task AddAsync(TEntity entity);
-        Task AddRangeAsync(IEnumerable<TEntity> entities);
-
-        void LogicalDelete(TEntity entity);
-        void LogicalDeleteRange(IEnumerable<TEntity> entities);
+        TEntity Add(TEntity entity);
+        List<TEntity> AddRange(List<TEntity> entities);
     }
 }

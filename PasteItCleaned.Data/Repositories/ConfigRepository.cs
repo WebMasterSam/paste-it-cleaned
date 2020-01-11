@@ -1,8 +1,8 @@
 ﻿using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using PasteItCleaned.Core.Models;
 using PasteItCleaned.Backend.Core.Repositories;
+using System;
+using System.Collections.Generic;
 
 namespace PasteItCleaned.Backend.Data.Repositories
 {
@@ -11,11 +11,45 @@ namespace PasteItCleaned.Backend.Data.Repositories
         public ConfigRepository(PasteItCleanedDbContext context) : base(context)
         { }
 
-        public async Task<Config> GetByNameAsync(string name)
+        public int Count(Guid clientId)
         {
-            return await Context.Configs
+            return Context.Configs
+                .Where(m => m.ClientId == clientId)
+                .Where(m => !m.Deleted)
+                .Count();
+        }
+
+        public Config Get(Guid configId)
+        {
+            return Context.Configs
+                .Where(m => m.ConfigId == configId)
+                .FirstOrDefault();
+        }
+
+        public Config GetByName(string name)
+        {
+            return Context.Configs
                 .Where(m => m.Name == name)
-                .FirstOrDefaultAsync();
+                .Where(m => !m.Deleted)
+                .FirstOrDefault();
+        }
+
+        public List<Config> List(Guid clientId)
+        {
+            return Context.Configs
+                .Where(m => m.ClientId == clientId)
+                .Where(m => !m.Deleted)
+                .ToList();
+        }
+
+        public void LogicalDelete(Guid configId)
+        {
+            var entity = Context.Configs
+                .Where(m => m.ConfigId == configId)
+                .FirstOrDefault();
+
+            entity.Deleted = true;
+            entity.UpdatedOn = DateTime.UtcNow;
         }
     }
 }

@@ -1,16 +1,15 @@
 ﻿using PasteItCleaned.Core.Models;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Core.Services
 {
     public interface IPaymentService
     {
-        Task<IEnumerable<Payment>> GetAllByClientId(Guid clientId);
-        Task<Payment> GetById(Guid paymentId);
-        Task<Payment> CreatePayment(Payment payment);
-        Task UpdatePayment(Payment paymentToBeUpdated, Payment payment);
-        Task DeletePayment(Payment payment);
+        Payment Get(Guid paymentId);
+        Payment GetByInvoice(Guid invoiceId);
+
+        Payment Create(Payment payment);
+
+        Payment Update(Payment paymentToUpdate, Payment payment);
     }
 }

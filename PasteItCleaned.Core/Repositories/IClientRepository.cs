@@ -1,11 +1,15 @@
 ﻿using PasteItCleaned.Core.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using System;
 
 namespace PasteItCleaned.Backend.Core.Repositories
 {
     public interface IClientRepository : IRepository<Client>
     {
-        Task<IEnumerable<Client>> GetAllAsync();
+        int Count();
+        PagedList<Client> List(int page, int pageSize);
+
+        Client Get(Guid clientId);
+
+        void LogicalDelete(Guid clientId);
     }
 }

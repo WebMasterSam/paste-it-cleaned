@@ -1,8 +1,7 @@
 ﻿using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using PasteItCleaned.Core.Models;
 using PasteItCleaned.Backend.Core.Repositories;
+using System;
 
 namespace PasteItCleaned.Backend.Data.Repositories
 {
@@ -11,11 +10,32 @@ namespace PasteItCleaned.Backend.Data.Repositories
         public InvoiceRepository(PasteItCleanedDbContext context) : base(context)
         { }
 
-        public async Task<Invoice> GetByNumberAsync(int number)
+        public int Count(Guid clientId)
         {
-            return await Context.Invoices
-                .Where(m => m.Number == number)
-                .FirstOrDefaultAsync();
+            return Context.Invoices
+                .Where(m => m.ClientId == clientId)
+                .Count();
+        }
+
+        public Invoice Get(Guid invoiceId)
+        {
+            return Context.Invoices
+                .Where(m => m.InvoiceId == invoiceId)
+                .FirstOrDefault();
+        }
+
+        public Invoice GetByNumber(Guid clientId, int number)
+        {
+            return Context.Invoices
+                .Where(m => m.ClientId == clientId || m.Number == number)
+                .FirstOrDefault();
+        }
+
+        public PagedList<Invoice> List(Guid clientId, int page, int pageSize)
+        {
+            var query = Context.Invoices.Where(m => m.ClientId == clientId);
+
+            return this.PagedList(query, page, pageSize);
         }
     }
 }

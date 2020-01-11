@@ -1,17 +1,20 @@
 ﻿using PasteItCleaned.Core.Models;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Core.Services
 {
     public interface IConfigService
     {
-        Task<IEnumerable<Config>> GetAllByClientId(Guid clientId);
-        Task<Config> GetById(Guid configId);
-        Task<Config> GetByName(string name);
-        Task<Config> CreateConfig(Config config);
-        Task UpdateConfig(Config configToBeUpdated, Config config);
-        Task DeleteConfig(Config config);
+        List<Config> List(Guid clientId);
+
+        Config Get(Guid configId);
+        Config GetByName(string name);
+
+        Config Create(Config config);
+
+        Config Update(Config configToUpdate, Config config);
+
+        void Delete(Config config);
     }
 }

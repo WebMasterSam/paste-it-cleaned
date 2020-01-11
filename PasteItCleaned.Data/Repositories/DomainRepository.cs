@@ -1,8 +1,8 @@
 ﻿using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using PasteItCleaned.Core.Models;
 using PasteItCleaned.Backend.Core.Repositories;
+using System;
+using System.Collections.Generic;
 
 namespace PasteItCleaned.Backend.Data.Repositories
 {
@@ -11,11 +11,45 @@ namespace PasteItCleaned.Backend.Data.Repositories
         public DomainRepository(PasteItCleanedDbContext context) : base(context)
         { }
 
-        public async Task<Domain> GetByNameAsync(string name)
+        public int Count(Guid apiKeyId)
         {
-            return await Context.Domains
+            return Context.Domains
+                .Where(m => m.ApiKeyId == apiKeyId)
+                .Where(m => !m.Deleted)
+                .Count();
+        }
+
+        public Domain Get(Guid domainId)
+        {
+            return Context.Domains
+                .Where(m => m.DomainId == domainId)
+                .FirstOrDefault();
+        }
+
+        public Domain GetByName(string name)
+        {
+            return Context.Domains
                 .Where(m => m.Name == name)
-                .FirstOrDefaultAsync();
+                .Where(m => !m.Deleted)
+                .FirstOrDefault();
+        }
+
+        public List<Domain> List(Guid apiKeyId)
+        {
+            return Context.Domains
+                .Where(m => m.ApiKeyId == apiKeyId)
+                .Where(m => !m.Deleted)
+                .ToList();
+        }
+
+        public void LogicalDelete(Guid domainId)
+        {
+            var entity = Context.Domains
+                .Where(m => m.DomainId == domainId)
+                .FirstOrDefault();
+
+            entity.Deleted = true;
+            entity.UpdatedOn = DateTime.UtcNow;
         }
     }
 }

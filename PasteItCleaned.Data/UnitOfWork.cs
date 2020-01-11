@@ -1,7 +1,6 @@
 ﻿using PasteItCleaned.Backend.Core;
 using PasteItCleaned.Backend.Core.Repositories;
 using PasteItCleaned.Backend.Data.Repositories;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Backend.Data
 {
@@ -47,9 +46,9 @@ namespace PasteItCleaned.Backend.Data
 
         public IUserRepository Users => _userRepository = _userRepository ?? new UserRepository(_context);
 
-        public async Task<int> CommitAsync()
+        public int Commit()
         {
-            return await _context.SaveChangesAsync();
+            return _context.SaveChanges();
         }
 
         public void Dispose()

@@ -1,16 +1,19 @@
 ﻿using PasteItCleaned.Core.Models;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Core.Services
 {
     public interface IInvoiceService
     {
-        Task<IEnumerable<Invoice>> GetAllByClientIdAsync(Guid clientId);
-        Task<Invoice> GetByIdAsync(Guid invoiceId);
-        Task<Invoice> GetByNumberAsync(int number);
-        Task<Invoice> CreateInvoiceAsync(Invoice invoice);
-        Task SetPaidAsync(Guid invoiceId);
+        //int Count(Guid clientId);
+
+        PagedList<Invoice> List(Guid clientId, int page, int pageSize);
+
+        Invoice Get(Guid invoiceId);
+        Invoice GetByNumber(Guid clientId, int number);
+
+        Invoice Create(Invoice invoice);
+
+        Invoice SetPaid(Guid invoiceId);
     }
 }

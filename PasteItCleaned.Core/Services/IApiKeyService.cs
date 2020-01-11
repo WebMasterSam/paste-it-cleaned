@@ -1,17 +1,21 @@
 ﻿using PasteItCleaned.Core.Models;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Core.Services
 {
     public interface IApiKeyService
     {
-        Task<IEnumerable<ApiKey>> GetAllByClientId(Guid clientId);
-        Task<ApiKey> GetById(Guid apiKeyId);
-        Task<ApiKey> GetByKey(string key);
-        Task<ApiKey> CreateApiKey(ApiKey apiKey);
-        Task UpdateApiKey(ApiKey apiKeyToBeUpdated, ApiKey apiKey);
-        Task DeleteApiKey(ApiKey apiKey);
+        int Count(Guid clientId);
+        List<ApiKey> List(Guid clientId);
+
+        ApiKey Get(Guid apiKeyId);
+        ApiKey GetByKey(string key);
+
+        ApiKey Create(ApiKey apiKey);
+
+        ApiKey Update(ApiKey apiKeyToUpdate, ApiKey apiKey);
+
+        void Delete(Guid apiKeyId);
     }
 }

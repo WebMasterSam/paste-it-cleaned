@@ -1,10 +1,17 @@
 ﻿using PasteItCleaned.Core.Models;
-using System.Threading.Tasks;
+using System;
+using System.Collections.Generic;
 
 namespace PasteItCleaned.Backend.Core.Repositories
 {
     public interface IDomainRepository : IRepository<Domain>
     {
-        Task<Domain> GetByNameAsync(string name);
+        int Count(Guid apiKeyId);
+        List<Domain> List(Guid apiKeyId);
+
+        Domain Get(Guid domainId);
+        Domain GetByName(string name);
+
+        void LogicalDelete(Guid domainId);
     }
 }
