@@ -32,7 +32,8 @@ namespace PasteItCleaned.Backend.Data.Repositories
         {
             return Context.Hits
                 .Where(m => m.Hash == hash)
-                .Where(m => m.Date == date.Date)
+                .Where(m => m.Date >= date.Date)
+                .Where(m => m.Date <= date.Date.AddDays(1).AddSeconds(-1))
                 .FirstOrDefault();
         }
 

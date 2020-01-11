@@ -66,7 +66,7 @@ namespace PasteItCleaned.Plugin.Controllers
                                 }
 
                                 _hitService.Create(new Hit { ClientId = clientId, Date = DateTime.UtcNow, Hash = obj.hash, Ip = ip, Price = price, Referer = referer, Type = pasteTypeObj.ToString() });
-                                _hitDailyService.CreateOrIncrease(clientId, DateTime.UtcNow, pasteTypeObj.ToString(), price);
+                                _hitDailyService.CreateOrIncrease(clientId, DateTime.UtcNow.Date, pasteTypeObj.ToString(), price);
                             }
 
                             return Ok(new PluginSuccess(""));

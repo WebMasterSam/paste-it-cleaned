@@ -1,6 +1,5 @@
 ﻿using PasteItCleaned.Core.Models;
 using System;
-using System.Collections.Generic;
 
 namespace PasteItCleaned.Backend.Core.Repositories
 {

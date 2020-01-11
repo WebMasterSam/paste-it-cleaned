@@ -119,7 +119,7 @@ namespace PasteItCleaned.Plugin.Controllers
                             }
 
                             _hitService.Create(new Hit { ClientId = clientId, Date = DateTime.UtcNow, Hash = hash, Ip = ip, Price = price, Referer = referer, Type = cleaner.GetSourceType().ToString() });
-                            _hitDailyService.CreateOrIncrease(clientId, DateTime.UtcNow, cleaner.GetSourceType().ToString(), price);
+                            _hitDailyService.CreateOrIncrease(clientId, DateTime.UtcNow.Date, cleaner.GetSourceType().ToString(), price);
                         }
                         catch (Exception ex)
                         {
