@@ -2,8 +2,6 @@
 using PasteItCleaned.Core.Models;
 using PasteItCleaned.Core.Services;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Backend.Services
 {
@@ -16,36 +14,24 @@ namespace PasteItCleaned.Backend.Services
             this._unitOfWork = unitOfWork;
         }
 
-        public async Task<Error> CreateError(Error error)
+        public Error Create(Error error)
         {
-            await _unitOfWork.Errors.AddAsync(error);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Errors.Add(error);
+            _unitOfWork.Commit();
 
             return error;
         }
 
-        public async Task DeleteError(Error error)
+        public void Delete(DateTime priorTo)
         {
-            _unitOfWork.Errors.LogicalDelete(error);
+            _unitOfWork.Errors.DeleteByDate(priorTo);
 
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
         }
 
-        public async Task DeleteErrors(DateTime olderThan)
+        public PagedList<Error> List(Guid clientId, int page, int pageSize)
         {
-            //_unitOfWork.Errors.LogicalDelete(error);
-
-            await _unitOfWork.CommitAsync();
-        }
-
-        public async Task<IEnumerable<Error>> GetAllByClientId(Guid clientId)
-        {
-            return await _unitOfWork.Errors.GetAllByParentIdAsync(clientId);
-        }
-
-        public async Task<Error> GetById(Guid errorId)
-        {
-            return await _unitOfWork.Errors.GetByIdAsync(errorId);
+            return _unitOfWork.Errors.List(clientId, page, pageSize);
         }
     }
 }

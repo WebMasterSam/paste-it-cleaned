@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
 
-namespace PasteItCleaned.Common.Helpers
+namespace PasteItCleaned.Plugin.Helpers
 {
     public static class HostHelper
     {

@@ -6,15 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 using PasteItCleaned.Backend.Core;
 using PasteItCleaned.Backend.Core.Middleware.Logging;
 using PasteItCleaned.Backend.Data;
-using PasteItCleaned.Common.Helpers;
 using PasteItCleaned.Core.Helpers;
 
 namespace PasteItCleaned.Aws.Lambda
 {
     public class Startup
     {
-        public const string AppS3BucketKey = "AppS3Bucket";
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;

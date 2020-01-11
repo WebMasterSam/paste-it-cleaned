@@ -5,7 +5,7 @@ namespace PasteItCleaned.Core.Services
 {
     public interface IClientService
     {
-        PagedList<Client> List(Guid clientId);
+        PagedList<Client> List(int page, int pageSize);
 
         Client Get(Guid clientId);
 
@@ -13,6 +13,8 @@ namespace PasteItCleaned.Core.Services
 
         Client Update(Client clientToUpdate, Client client);
 
-        void Delete(Client client);
+        Client DecreaseBalance(Guid clientId, decimal amount);
+
+        void Delete(Guid clientId);
     }
 }

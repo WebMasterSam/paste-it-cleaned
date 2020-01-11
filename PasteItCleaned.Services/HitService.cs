@@ -2,8 +2,6 @@
 using PasteItCleaned.Core.Models;
 using PasteItCleaned.Core.Services;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Backend.Services
 {
@@ -16,34 +14,29 @@ namespace PasteItCleaned.Backend.Services
             this._unitOfWork = unitOfWork;
         }
 
-        public async Task<Hit> CreateHit(Hit hit)
+        public Hit Create(Hit hit)
         {
-            await _unitOfWork.Hits.AddAsync(hit);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Hits.Add(hit);
+            _unitOfWork.Commit();
 
             return hit;
         }
 
-        public async Task DeleteHit(Hit hit)
+        public void DeleteByDate(DateTime priorTo)
         {
-            _unitOfWork.Hits.LogicalDelete(hit);
+            _unitOfWork.Hits.DeleteByDate(priorTo);
 
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
         }
 
-        public async Task<IEnumerable<Hit>> GetAllByClientIdAsync(Guid clientId)
+        public Hit GetByHash(Guid clientId, DateTime date, int hash)
         {
-            return await _unitOfWork.Hits.GetAllByParentIdAsync(clientId);
+            return _unitOfWork.Hits.GetByHash(clientId, date, hash);
         }
 
-        public async Task<Hit> GetByHashAsync(int hash)
+        public PagedList<Hit> List(Guid clientId, string type, DateTime startDate, DateTime endDate, int page, int pageSize)
         {
-            return await _unitOfWork.Hits.GetByHashAsync(hash);
-        }
-
-        public async Task<Hit> GetByIdAsync(Guid HitId)
-        {
-            return await _unitOfWork.Hits.GetByIdAsync(HitId);
+            return _unitOfWork.Hits.List(clientId, type, startDate, endDate, page, pageSize);
         }
     }
 }

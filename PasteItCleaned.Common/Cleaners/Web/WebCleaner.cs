@@ -1,6 +1,7 @@
-﻿using PasteItCleaned.Common.Entities;
+﻿using PasteItCleaned.Core.Entities;
+using PasteItCleaned.Core.Models;
 
-namespace PasteItCleaned.Common.Cleaners.Web
+namespace PasteItCleaned.Plugin.Cleaners.Web
 {
     public class WebCleaner : HtmlCleaner
     {
@@ -18,19 +19,19 @@ namespace PasteItCleaned.Common.Cleaners.Web
         {
             var cleaned = html;
 
-            if (config.GetConfigValue("RemoveIframes", true))
+            if (config.RemoveIframes)
                 cleaned = base.SafeExec(base.RemoveIframes, cleaned);
 
             var htmlDoc = base.ParseWithHtmlAgilityPack(cleaned);
             var rtfDoc = base.ParseWithRtfPipe(rtf);
 
-            if (config.GetConfigValue("EmbedExternalImages", false))
+            if (config.EmbedExternalImages)
                 htmlDoc = base.SafeExec(this.EmbedExternalImages, htmlDoc, rtfDoc);
 
-            if (config.GetConfigValue("RemoveTagAttributes", true))
+            if (config.RemoveTagAttributes)
                 htmlDoc = base.SafeExec(this.RemoveUselessAttributes, htmlDoc, rtfDoc);
 
-            if (config.GetConfigValue("RemoveClassNames", true))
+            if (config.RemoveClassNames)
             {
                 htmlDoc = base.SafeExec(base.AddInlineStyles, htmlDoc, rtfDoc);
                 htmlDoc = base.SafeExec(this.RemoveClassAttributes, htmlDoc, rtfDoc);

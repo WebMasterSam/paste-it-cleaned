@@ -4,7 +4,7 @@ using System.Drawing;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
-using PasteItCleaned.Common.Helpers;
+using PasteItCleaned.Plugin.Helpers;
 using PasteItCleaned.Core.Helpers;
 using PasteItCleaned.WmfConverter.Controllers.Entities;
 
@@ -46,7 +46,7 @@ namespace PasteItCleaned.WmfConverter.Controllers
             }
             catch (Exception ex)
             {
-                ErrorHelper.LogError(ex);
+                Console.WriteLine(ex.Message + ex.StackTrace);
 
                 try
                 {
@@ -65,7 +65,7 @@ namespace PasteItCleaned.WmfConverter.Controllers
                 }
                 catch (Exception inner)
                 {
-                    ErrorHelper.LogError(inner);
+                    Console.WriteLine(inner.Message + inner.StackTrace);
                 }
             }
 

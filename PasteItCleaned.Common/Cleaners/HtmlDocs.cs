@@ -1,6 +1,6 @@
 ﻿using HtmlAgilityPack;
 
-namespace PasteItCleaned.Common.Cleaners
+namespace PasteItCleaned.Plugin.Cleaners
 {
     public class HtmlDocs
     {

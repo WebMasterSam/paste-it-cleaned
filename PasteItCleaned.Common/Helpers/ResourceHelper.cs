@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection;
 
-namespace PasteItCleaned.Common.Helpers
+namespace PasteItCleaned.Plugin.Helpers
 {
     public static class ResourceHelper
     {

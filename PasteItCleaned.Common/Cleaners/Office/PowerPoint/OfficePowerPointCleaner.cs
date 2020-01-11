@@ -1,6 +1,7 @@
-﻿using PasteItCleaned.Common.Entities;
+﻿using PasteItCleaned.Core.Entities;
+using PasteItCleaned.Core.Models;
 
-namespace PasteItCleaned.Common.Cleaners.Office.PowerPoint
+namespace PasteItCleaned.Plugin.Cleaners.Office.PowerPoint
 {
     public class OfficePowerPointCleaner : OfficeBaseCleaner
     {

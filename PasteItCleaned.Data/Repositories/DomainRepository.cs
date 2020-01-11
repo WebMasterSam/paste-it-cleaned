@@ -26,9 +26,10 @@ namespace PasteItCleaned.Backend.Data.Repositories
                 .FirstOrDefault();
         }
 
-        public Domain GetByName(string name)
+        public Domain GetByName(Guid apiKeyId, string name)
         {
             return Context.Domains
+                .Where(m => m.ApiKeyId == apiKeyId)
                 .Where(m => m.Name == name)
                 .Where(m => !m.Deleted)
                 .FirstOrDefault();

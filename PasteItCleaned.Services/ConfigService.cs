@@ -3,7 +3,6 @@ using PasteItCleaned.Core.Models;
 using PasteItCleaned.Core.Services;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Backend.Services
 {
@@ -16,48 +15,50 @@ namespace PasteItCleaned.Backend.Services
             this._unitOfWork = unitOfWork;
         }
 
-        public async Task<Config> CreateConfig(Config config)
+        public Config Create(Config config)
         {
-            await _unitOfWork.Configs.AddAsync(config);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Configs.Add(config);
+            _unitOfWork.Commit();
 
             return config;
         }
 
-        public async Task DeleteConfig(Config config)
+        public void Delete(Guid configId)
         {
-            _unitOfWork.Configs.LogicalDelete(config);
+            _unitOfWork.Configs.LogicalDelete(configId);
 
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
         }
 
-        public async Task<IEnumerable<Config>> GetAllByClientId(Guid clientId)
+        public Config Get(Guid configId)
         {
-            return await _unitOfWork.Configs.GetAllByParentIdAsync(clientId);
+            return _unitOfWork.Configs.Get(configId);
         }
 
-        public async Task<Config> GetById(Guid configId)
+        public Config GetByName(string name)
         {
-            return await _unitOfWork.Configs.GetByIdAsync(configId);
+            return _unitOfWork.Configs.GetByName(name);
         }
 
-        public async Task<Config> GetByName(string name)
+        public List<Config> List(Guid clientId)
         {
-            return await _unitOfWork.Configs.GetByNameAsync(name);
+            return _unitOfWork.Configs.List(clientId);
         }
 
-        public async Task UpdateConfig(Config configToBeUpdated, Config config)
+        public Config Update(Config configToUpdate, Config config)
         {
-            configToBeUpdated.Name = config.Name;
-            configToBeUpdated.EmbedExternalImages = config.EmbedExternalImages;
-            configToBeUpdated.RemoveClassNames = config.RemoveClassNames;
-            configToBeUpdated.RemoveEmptyTags = config.RemoveEmptyTags;
-            configToBeUpdated.RemoveIframes = config.RemoveIframes;
-            configToBeUpdated.RemoveSpanTags = config.RemoveSpanTags;
-            configToBeUpdated.RemoveTagAttributes = config.RemoveTagAttributes;
-            configToBeUpdated.UpdatedOn = DateTime.Now;
+            configToUpdate.Name = config.Name;
+            configToUpdate.EmbedExternalImages = config.EmbedExternalImages;
+            configToUpdate.RemoveClassNames = config.RemoveClassNames;
+            configToUpdate.RemoveEmptyTags = config.RemoveEmptyTags;
+            configToUpdate.RemoveIframes = config.RemoveIframes;
+            configToUpdate.RemoveSpanTags = config.RemoveSpanTags;
+            configToUpdate.RemoveTagAttributes = config.RemoveTagAttributes;
+            configToUpdate.UpdatedOn = DateTime.Now;
 
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
+
+            return configToUpdate;
         }
     }
 }

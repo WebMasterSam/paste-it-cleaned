@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System.Globalization;
+
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,15 +9,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
+
+using Swashbuckle.AspNetCore.Swagger;
+
 using PasteItCleaned.Backend.Core;
 using PasteItCleaned.Core.Services;
 using PasteItCleaned.Core.Helpers;
-using PasteItCleaned.Common.Localization;
-using Swashbuckle.AspNetCore.Swagger;
-using System.Globalization;
 using PasteItCleaned.Backend.Data;
 using PasteItCleaned.Backend.Services;
 using PasteItCleaned.Backend.Core.Middleware.Logging;
+using PasteItCleaned.Plugin.Localization;
 
 namespace PasteItCleaned.IIS
 {

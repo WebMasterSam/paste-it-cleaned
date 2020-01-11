@@ -1,7 +1,6 @@
 ﻿using PasteItCleaned.Core.Models;
 using PasteItCleaned.Backend.Core.Repositories;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace PasteItCleaned.Backend.Data.Repositories
@@ -34,11 +33,12 @@ namespace PasteItCleaned.Backend.Data.Repositories
             Context.Errors.RemoveRange(entities);
         }
 
-        public List<Error> List(Guid clientId)
+        public PagedList<Error> List(Guid clientId, int page, int pageSize)
         {
-            return Context.Errors
-                .Where(m => m.ClientId == clientId)
-                .ToList();
+            var query = Context.Errors
+                .Where(m => m.ClientId == clientId);
+
+            return this.PagedList(query, page, pageSize);
         }
     }
 }

@@ -5,10 +5,11 @@ using System.Text;
 
 using HtmlAgilityPack;
 
-using PasteItCleaned.Common.Entities;
-using PasteItCleaned.Common.Helpers;
+using PasteItCleaned.Core.Entities;
+using PasteItCleaned.Plugin.Helpers;
+using PasteItCleaned.Core.Models;
 
-namespace PasteItCleaned.Common.Cleaners
+namespace PasteItCleaned.Plugin.Cleaners
 {
     public class HtmlCleaner : BaseCleaner
     {
@@ -16,7 +17,7 @@ namespace PasteItCleaned.Common.Cleaners
 
         public override SourceType GetSourceType()
         {
-            return SourceType.Unknown;
+            return SourceType.Other;
         }
 
         public override string Clean(string html, string rtf, Config config, bool keepStyles)
@@ -32,7 +33,6 @@ namespace PasteItCleaned.Common.Cleaners
             //if (config.GetConfigValue("removeEmptyTags", true))
 
             //if (config.GetConfigValue("removeSpanTags", true))
-
 
             var cleaned = this.GetOuterHtml(htmlDoc);
 

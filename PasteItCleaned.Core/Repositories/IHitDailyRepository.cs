@@ -9,7 +9,7 @@ namespace PasteItCleaned.Backend.Core.Repositories
 
         PagedList<HitDaily> List(Guid clientId, DateTime startDate, DateTime endDate, int page, int pageSize);
 
-        HitDaily AddOrUpdate(HitDaily hitDaily);
+        HitDaily Get(Guid clientId, DateTime date);
 
         void DeleteByDate(DateTime priorTo);
     }

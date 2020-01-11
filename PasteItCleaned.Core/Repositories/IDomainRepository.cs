@@ -10,7 +10,7 @@ namespace PasteItCleaned.Backend.Core.Repositories
         List<Domain> List(Guid apiKeyId);
 
         Domain Get(Guid domainId);
-        Domain GetByName(string name);
+        Domain GetByName(Guid apiKeyId, string name);
 
         void LogicalDelete(Guid domainId);
     }

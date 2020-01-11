@@ -14,7 +14,7 @@ namespace PasteItCleaned.Backend.Services
 
         }
 
-        public IEnumerable<TimeZone> GetAll()
+        public List<TimeZone> GetAll()
         {
             var allZones = TZNames.GetDisplayNames("en-US");
             var zones = TZNames.GetDisplayNames(Thread.CurrentThread.CurrentCulture.ToString());
@@ -28,7 +28,7 @@ namespace PasteItCleaned.Backend.Services
             return timeZones;
         }
 
-        public IEnumerable<TimeZone> GetAll(string countryCode)
+        public List<TimeZone> GetAll(string countryCode)
         {
             var allZones = TZNames.GetDisplayNames("en-US");
             var countryZones = TZNames.GetTimeZonesForCountry(countryCode, Thread.CurrentThread.CurrentCulture.ToString(), System.DateTimeOffset.UtcNow);

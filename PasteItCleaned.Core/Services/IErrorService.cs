@@ -5,7 +5,7 @@ namespace PasteItCleaned.Core.Services
 {
     public interface IErrorService
     {
-        PagedList<Error> List(Guid clientId);
+        PagedList<Error> List(Guid clientId, int page, int pageSize);
 
         Error Create(Error error);
 

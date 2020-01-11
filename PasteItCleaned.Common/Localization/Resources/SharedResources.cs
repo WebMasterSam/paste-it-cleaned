@@ -1,4 +1,4 @@
-﻿namespace PasteItCleaned.Common.Localization.Resources
+﻿namespace PasteItCleaned.Plugin.Localization.Resources
 {
     public class SharedResources
     {

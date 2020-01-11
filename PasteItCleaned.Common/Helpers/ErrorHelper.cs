@@ -1,28 +1,14 @@
-﻿using PasteItCleaned.Common.Localization;
+﻿using PasteItCleaned.Plugin.Localization;
 using PasteItCleaned.Core.Helpers;
 using System;
 
-namespace PasteItCleaned.Common.Helpers
+namespace PasteItCleaned.Plugin.Helpers
 {
     public static class ErrorHelper
     {
         private const string ErrorFormat = "[{0} ERR-{1}]";
         private const string MessageFormat = "{0}: {1}";
         private const string MessageTag = "<p style='padding: 5px 10px; font-weight: bold; font-size: 14px; background-color: yellow;'>{0}</p>";
-
-        public static void LogError(Exception ex)
-        {
-            try
-            {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine(ex.StackTrace);
-                DbHelper.InsertError(ex);
-            }
-            catch { }
-
-            if (ex.InnerException != null)
-                LogError(ex.InnerException);
-        }
 
         public static string GetApiKeyDomainNotConfigured(string apiKey, string domain)
         {

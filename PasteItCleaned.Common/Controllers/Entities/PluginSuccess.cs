@@ -1,13 +1,13 @@
-﻿namespace PasteItCleaned.Common.Controllers.Entities
+﻿namespace PasteItCleaned.Plugin.Controllers.Entities
 {
-    public class Success
+    public class PluginSuccess
     {
-        public Success(string content)
+        public PluginSuccess(string content)
         {
             this.Content = content;
         }
 
-        public Success(string content, string exception)
+        public PluginSuccess(string content, string exception)
         {
             this.Content = content;
             this.Exception = exception;

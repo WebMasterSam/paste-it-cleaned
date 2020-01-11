@@ -1,23 +1,28 @@
 ﻿using System;
+
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
-using PasteItCleaned.Core.Services;
-using PasteItCleaned.Common.Cleaners;
-using PasteItCleaned.Common.Controllers.Entities;
-using PasteItCleaned.Common.Helpers;
+using Microsoft.Extensions.Logging;
 
-namespace PasteItCleaned.Common.Controllers
+using PasteItCleaned.Core.Entities;
+using PasteItCleaned.Core.Helpers;
+using PasteItCleaned.Core.Models;
+using PasteItCleaned.Core.Services;
+using PasteItCleaned.Plugin.Controllers.Entities;
+using PasteItCleaned.Plugin.Helpers;
+
+namespace PasteItCleaned.Plugin.Controllers
 {
     [ApiController]
     [Route("v1/notify")]
     [EnableCors("Default")]
-    public class PasteNotifyController : ControllerBase
+    public class PasteNotifyController : BaseController
     {
         private readonly IHitService _hitService;
         private readonly IHitDailyService _hitDailyService;
 
-        public PasteNotifyController(IHitService hitService, IHitDailyService hitDailyService)
+        public PasteNotifyController(IApiKeyService apiKeyService, IClientService clientService, IConfigService configService, IDomainService domainService, IErrorService errorService, IHitService hitService, IHitDailyService hitDailyService, ILogger<PasteNotifyController> logger) : base(apiKeyService, clientService, configService, domainService, errorService, logger)
         {
             this._hitService = hitService;
             this._hitDailyService = hitDailyService;
@@ -27,63 +32,62 @@ namespace PasteItCleaned.Common.Controllers
         [HttpPost()]
         public ActionResult Post([FromBody] NotifyObject obj)
         {
-            var hash = "";
             var pasteType = "";
 
             try
             {
-                var apiKey = ApiKeyHelper.GetApiKeyFromHeaders(this.HttpContext);
+                var apiKey = this.GetApiKeyFromHeaders(this.HttpContext);
 
-                hash = obj.hash;
                 pasteType = obj.pasteType;
 
-                if (ApiKeyHelper.ApiKeyPresent(apiKey))
+                if (this.ApiKeyPresent(apiKey))
                 {
-                    var objApiKey = ApiKeyHelper.GetApiKeyFromDb(apiKey);
+                    var objApiKey = this.GetApiKeyFromDb(apiKey);
                     var domain = HostHelper.GetHostFromHeaders(this.HttpContext);
 
-                    if (ApiKeyHelper.ApiKeyValid(objApiKey))
+                    if (this.ApiKeyValid(objApiKey))
                     {
-                        if (ApiKeyHelper.ApiKeyFitsWithDomain(objApiKey, domain))
+                        if (this.ApiKeyFitsWithDomain(objApiKey, domain))
                         {
                             var pasteTypeObj = obj.pasteType.Trim().ToLower() == "image" ? SourceType.Image : SourceType.Text;
                             var ip = HttpContext.Features.Get<IHttpConnectionFeature>()?.RemoteIpAddress.ToString();
                             var referer = Request.Headers["Referer"].ToString();
-                            var hitHash = DbHelper.GetHitHash(objApiKey.ClientId, hash);
+                            var hitHash = _hitService.GetByHash(objApiKey.ClientId, DateTime.UtcNow.Date, obj.hash);
                             var price = 0.0M;
 
-                            if (hitHash.Date < DateTime.UtcNow.Date)
+                            if (hitHash == null)
                             {
-                                price = AccountHelper.GetHitPrice(objApiKey.ClientId, pasteTypeObj);
-                                AccountHelper.DecreaseBalance(objApiKey.ClientId, pasteTypeObj, price);
-                                DbHelper.InsertHitHash(objApiKey.ClientId, hash);
+                                price = PricingHelper.GetHitPrice(objApiKey.ClientId, pasteTypeObj);
+                                this.DecreaseBalance(objApiKey.ClientId, price);
                             }
 
-                            DbHelper.InsertHit(objApiKey.ClientId, pasteTypeObj, ip, referer, price);
+                            _hitService.Create(new Hit { ClientId = objApiKey.ClientId, Date = DateTime.UtcNow, Hash = obj.hash, Ip = ip, Price = price, Referer = referer, Type = pasteTypeObj.ToString() });
+                            _hitDailyService.CreateOrIncrease(objApiKey.ClientId, DateTime.UtcNow, pasteTypeObj.ToString(), price);
 
-                            return Ok(new Success(""));
+
+                            return Ok(new PluginSuccess(""));
                         }
                         else
-                            return Ok(new Error(ErrorHelper.GetApiKeyDomainNotConfigured(apiKey, domain)));
+                            return Ok(new PluginError(ErrorHelper.GetApiKeyDomainNotConfigured(apiKey, domain)));
                     }
                     else
-                        return Ok(new Error(ErrorHelper.GetApiKeyInvalid(apiKey)));
+                        return Ok(new PluginError(ErrorHelper.GetApiKeyInvalid(apiKey)));
                 }
 
-                return Ok(new Error(ErrorHelper.GetApiKeyAbsent()));
+                return Ok(new PluginError(ErrorHelper.GetApiKeyAbsent()));
             }
             catch (Exception ex)
             {
-                ErrorHelper.LogError(ex);
+                this.LogError(ex);
             }
 
-            return Ok(new Success(""));
+            return Ok(new PluginSuccess(""));
         }
     }
 
     public class NotifyObject
     {
-        public string hash { get; set; }
+        public int hash { get; set; }
         public string pasteType { get; set; }
     }
 }

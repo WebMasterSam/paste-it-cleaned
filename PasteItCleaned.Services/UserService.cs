@@ -2,8 +2,6 @@
 using PasteItCleaned.Core.Models;
 using PasteItCleaned.Core.Services;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Backend.Services
 {
@@ -16,46 +14,31 @@ namespace PasteItCleaned.Backend.Services
             this._unitOfWork = unitOfWork;
         }
 
-        public async Task<User> CreateUser(User user)
+        public User GetByCognitoId(string cognitoId)
         {
-            await _unitOfWork.Users.AddAsync(user);
-            await _unitOfWork.CommitAsync();
+            return _unitOfWork.Users.GetByCognitoId(cognitoId);
+        }
+
+        public User GetByCognitoUsername(string cognitoUsername)
+        {
+            return _unitOfWork.Users.GetByCognitoUsername(cognitoUsername);
+        }
+
+        public User Create(User user)
+        {
+            _unitOfWork.Users.Add(user);
+            _unitOfWork.Commit();
 
             return user;
         }
 
-        public async Task DeleteUser(User user)
+        public User Update(User userToUpdate, User user)
         {
-            _unitOfWork.Users.LogicalDelete(user);
+            userToUpdate.UpdatedOn = DateTime.Now;
 
-            await _unitOfWork.CommitAsync();
-        }
+            _unitOfWork.Commit();
 
-        public async Task<IEnumerable<User>> GetAllByClientId(Guid clientId)
-        {
-            return await _unitOfWork.Users.GetAllByParentIdAsync(clientId);
-        }
-
-        public async Task<User> GetById(Guid userId)
-        {
-            return await _unitOfWork.Users.GetByIdAsync(userId);
-        }
-
-        public async Task<User> GetByCognitoId(string key)
-        {
-            return await _unitOfWork.Users.GetByCognitoIdAsync(key);
-        }
-
-        public async Task<User> GetByCognitoUsername(string key)
-        {
-            return await _unitOfWork.Users.GetByCognitoUsernameAsync(key);
-        }
-
-        public async Task UpdateUser(User userToBeUpdated, User user)
-        {
-            userToBeUpdated.UpdatedOn = DateTime.Now;
-
-            await _unitOfWork.CommitAsync();
+            return userToUpdate;
         }
     }
 }

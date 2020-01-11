@@ -5,7 +5,6 @@ using PasteItCleaned.Core.Models;
 using PasteItCleaned.Core.Services;
 using PasteItCleaned.Core.Helpers;
 using System;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Backend.Common.Controllers
 {
@@ -23,7 +22,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
             this.Log = logger;
         }
 
-        protected async Task<Client> GetOrCreateClient(string authToken)
+        protected Client GetOrCreateClient(string authToken)
         {
             Log.LogDebug("BaseController::GetOrCreateClient");
 
@@ -34,19 +33,19 @@ namespace PasteItCleaned.Backend.Common.Controllers
                 var cognitoId = token.SelectToken("sub").Value<string>();
                 var cognitoUsername = token.SelectToken("username").Value<string>();
 
-                var user = await _userService.GetByCognitoId(cognitoId);
+                var user = _userService.GetByCognitoId(cognitoId);
 
                 if (user == null)
                 {
-                    user = await _userService.GetByCognitoUsername(cognitoUsername);
+                    user = _userService.GetByCognitoUsername(cognitoUsername);
                 }
 
                 if (user == null)
                 {
-                    var client = await _clientService.CreateClient(new Client { CreatedOn = DateTime.Now });
+                    var client = _clientService.Create(new Client { CreatedOn = DateTime.Now });
 
-                    await _apiKeyService.CreateApiKey(new ApiKey { ClientId = client.ClientId, CreatedOn = DateTime.Now, Key = ApiKeyHelper.GenerateApiKey(), ExpiresOn = DateTime.Now.AddYears(10) });
-                    await _userService.CreateUser(new User { ClientId = client.ClientId, CreatedOn = DateTime.Now, CognitoId = cognitoId, CognitoUsername = cognitoUsername });
+                    _apiKeyService.Create(new ApiKey { ClientId = client.ClientId, CreatedOn = DateTime.Now, Key = ApiKeyHelper.GenerateApiKey(), ExpiresOn = DateTime.Now.AddYears(10) });
+                    _userService.Create(new User { ClientId = client.ClientId, CreatedOn = DateTime.Now, CognitoId = cognitoId, CognitoUsername = cognitoUsername });
 
                     return client;
                 }

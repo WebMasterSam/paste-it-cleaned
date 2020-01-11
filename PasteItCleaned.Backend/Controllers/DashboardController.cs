@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PasteItCleaned.Core.Models;
@@ -28,16 +27,16 @@ namespace PasteItCleaned.Backend.Common.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public async Task<ActionResult<List<Hit>>> GetHits([FromHeader]string authorization)
+        public ActionResult<List<Hit>> GetHits([FromHeader]string authorization)
         {
-            var client = await this.GetOrCreateClient(authorization);
+            var client = this.GetOrCreateClient(authorization);
 
             if (client == null)
                 return StatusCode(401);
 
             try
             {
-                var hits = await _hitService.GetAllByClientIdAsync(client.ClientId);
+                var hits = _hitService.List(client.ClientId, "", DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow, 0, 20);
 
                 return Ok(hits);
             }
@@ -54,16 +53,16 @@ namespace PasteItCleaned.Backend.Common.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public async Task<ActionResult<List<HitDaily>>> GetHitsDaily([FromHeader]string authorization, [FromQuery]DateTime startDate, [FromQuery]DateTime endDate)
+        public ActionResult<List<HitDaily>> GetHitsDaily([FromHeader]string authorization, [FromQuery]DateTime startDate, [FromQuery]DateTime endDate)
         {
-            var client = await this.GetOrCreateClient(authorization);
+            var client = this.GetOrCreateClient(authorization);
 
             if (client == null)
                 return StatusCode(401);
 
             try
             {
-                var hits = await _hitDailyService.GetByDatesAsync(client.ClientId, startDate, endDate);
+                var hits = _hitDailyService.List(client.ClientId, startDate, endDate, 0, 20);
 
                 return Ok(hits);
             }
@@ -80,16 +79,16 @@ namespace PasteItCleaned.Backend.Common.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public async Task<ActionResult<List<Invoice>>> GetInvoices([FromHeader]string authorization)
+        public ActionResult<List<Invoice>> GetInvoices([FromHeader]string authorization)
         {
-            var client = await this.GetOrCreateClient(authorization);
+            var client = this.GetOrCreateClient(authorization);
 
             if (client == null)
                 return StatusCode(401);
 
             try
             {
-                var invoices = await _invoiceService.GetAllByClientIdAsync(client.ClientId);
+                var invoices = _invoiceService.List(client.ClientId, 0, 20);
 
                 return Ok(invoices);
             }

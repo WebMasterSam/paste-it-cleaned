@@ -1,17 +1,16 @@
 ﻿using HtmlAgilityPack;
-
-using PasteItCleaned.Common.Entities;
-using PasteItCleaned.Common.Helpers;
+using PasteItCleaned.Core.Entities;
+using PasteItCleaned.Core.Models;
 
 using System;
 
-namespace PasteItCleaned.Common.Cleaners
+namespace PasteItCleaned.Plugin.Cleaners
 {
     public class BaseCleaner
     {
         public virtual SourceType GetSourceType()
         {
-            return SourceType.Unknown;
+            return SourceType.Other;
         }
 
         public virtual bool CanClean(string content)
@@ -32,7 +31,7 @@ namespace PasteItCleaned.Common.Cleaners
             }
             catch (Exception ex)
             {
-                ErrorHelper.LogError(ex);
+                Console.WriteLine(ex.Message + ex.StackTrace);
                 return content;
             }
         }
@@ -45,7 +44,7 @@ namespace PasteItCleaned.Common.Cleaners
             }
             catch (Exception ex)
             {
-                ErrorHelper.LogError(ex);
+                Console.WriteLine(ex.Message + ex.StackTrace);
                 return html;
             }
         }

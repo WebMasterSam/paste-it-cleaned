@@ -1,4 +1,4 @@
-﻿namespace PasteItCleaned.Common.Cleaners
+﻿namespace PasteItCleaned.Core.Entities
 {
     public enum SourceType
     {
@@ -8,6 +8,6 @@
         Excel = 11,
         PowerPoint = 12,
         Web = 99,
-        Unknown = 99999
+        Other = 99999
     }
 }

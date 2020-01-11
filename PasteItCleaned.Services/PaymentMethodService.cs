@@ -2,8 +2,6 @@
 using PasteItCleaned.Core.Models;
 using PasteItCleaned.Core.Services;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Backend.Services
 {
@@ -16,36 +14,33 @@ namespace PasteItCleaned.Backend.Services
             this._unitOfWork = unitOfWork;
         }
 
-        public async Task<PaymentMethod> CreatePaymentMethod(PaymentMethod paymentMethod)
+        public PaymentMethod Create(PaymentMethod paymentMethod)
         {
-            await _unitOfWork.PaymentMethods.AddAsync(paymentMethod);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.PaymentMethods.Add(paymentMethod);
+            _unitOfWork.Commit();
 
             return paymentMethod;
         }
 
-        public async Task DeletePaymentMethod(PaymentMethod paymentMethod)
+        public void Delete(Guid paymentMethodId)
         {
-            _unitOfWork.PaymentMethods.LogicalDelete(paymentMethod);
+            _unitOfWork.PaymentMethods.LogicalDelete(paymentMethodId);
 
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
         }
 
-        public async Task<IEnumerable<PaymentMethod>> GetAllByClientId(Guid clientId)
+        public void DeleteCurrent(Guid clientId)
         {
-            return await _unitOfWork.PaymentMethods.GetAllByParentIdAsync(clientId);
+            var paymentMethod = _unitOfWork.PaymentMethods.GetCurrent(clientId);
+
+            _unitOfWork.PaymentMethods.LogicalDelete(paymentMethod.PaymentMethodId);
+
+            _unitOfWork.Commit();
         }
 
-        public async Task<PaymentMethod> GetById(Guid paymentMethodId)
+        public PaymentMethod GetCurrent(Guid clientId)
         {
-            return await _unitOfWork.PaymentMethods.GetByIdAsync(paymentMethodId);
-        }
-
-        public async Task UpdatePaymentMethod(PaymentMethod paymentMethodToBeUpdated, PaymentMethod paymentMethod)
-        {
-            paymentMethodToBeUpdated.UpdatedOn = DateTime.Now;
-
-            await _unitOfWork.CommitAsync();
+            return _unitOfWork.PaymentMethods.GetCurrent(clientId);
         }
     }
 }

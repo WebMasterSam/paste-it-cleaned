@@ -11,9 +11,7 @@ namespace PasteItCleaned.Core.Services
 
         //HitDaily GetByDate(Guid clientId, DateTime date);
 
-        HitDaily Create(HitDaily hitDaily);
-
-        HitDaily Increase(HitDaily hitDaily, string type, decimal price);
+        HitDaily CreateOrIncrease(Guid clientId, DateTime date, string type, decimal price);
 
         void DeleteByDate(DateTime priorTo);
     }

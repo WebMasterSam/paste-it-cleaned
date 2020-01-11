@@ -1,7 +1,5 @@
 ﻿using PasteItCleaned.Core.Helpers;
 using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -10,7 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 
-namespace PasteItCleaned.Common.Helpers
+namespace PasteItCleaned.Plugin.Helpers
 {
     public static class ImageHelper
     {
@@ -119,7 +117,7 @@ namespace PasteItCleaned.Common.Helpers
             }
             catch (Exception ex)
             {
-                ErrorHelper.LogError(ex);
+                Console.WriteLine(ex);
             }
 
             return dataUri;

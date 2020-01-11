@@ -2,8 +2,6 @@
 using PasteItCleaned.Core.Models;
 using PasteItCleaned.Core.Services;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Backend.Services
 {
@@ -16,36 +14,31 @@ namespace PasteItCleaned.Backend.Services
             this._unitOfWork = unitOfWork;
         }
 
-        public async Task<Payment> CreatePayment(Payment payment)
+        public Payment Create(Payment payment)
         {
-            await _unitOfWork.Payments.AddAsync(payment);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Payments.Add(payment);
+            _unitOfWork.Commit();
 
             return payment;
         }
 
-        public async Task DeletePayment(Payment payment)
+        public Payment Get(Guid paymentId)
         {
-            _unitOfWork.Payments.LogicalDelete(payment);
-
-            await _unitOfWork.CommitAsync();
+            return _unitOfWork.Payments.Get(paymentId);
         }
 
-        public async Task<IEnumerable<Payment>> GetAllByClientId(Guid clientId)
+        public Payment GetByInvoice(Guid invoiceId)
         {
-            return await _unitOfWork.Payments.GetAllByParentIdAsync(clientId);
+            return _unitOfWork.Payments.GetByInvoice(invoiceId);
         }
 
-        public async Task<Payment> GetById(Guid paymentId)
+        public Payment Update(Payment paymentToUpdate, Payment payment)
         {
-            return await _unitOfWork.Payments.GetByIdAsync(paymentId);
-        }
+            paymentToUpdate.TrxNumber = payment.TrxNumber;
 
-        public async Task UpdatePayment(Payment paymentToBeUpdated, Payment payment)
-        {
-            paymentToBeUpdated.TrxNumber = payment.TrxNumber;
+            _unitOfWork.Commit();
 
-            await _unitOfWork.CommitAsync();
+            return paymentToUpdate;
         }
     }
 }

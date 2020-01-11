@@ -15,6 +15,6 @@ namespace PasteItCleaned.Core.Services
 
         Config Update(Config configToUpdate, Config config);
 
-        void Delete(Config config);
+        void Delete(Guid configId);
     }
 }

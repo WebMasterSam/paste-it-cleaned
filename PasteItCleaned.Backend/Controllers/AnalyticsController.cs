@@ -24,12 +24,12 @@ namespace PasteItCleaned.Backend.Common.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public async Task<ActionResult> GetHits([FromHeader]string authorization)
+        public ActionResult GetHits([FromHeader]string authorization)
         {
             try
             {
-                var client = await this.GetOrCreateClient(authorization);
-                var hits = await _hitService.GetAllByClientIdAsync(client.ClientId);
+                var client = this.GetOrCreateClient(authorization);
+                var hits = _hitService.List(client.ClientId, "", DateTime.MinValue, DateTime.MaxValue, 0, 100);
 
                 return Ok(hits);
             }

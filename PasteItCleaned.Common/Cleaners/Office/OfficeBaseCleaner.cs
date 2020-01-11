@@ -1,6 +1,6 @@
-﻿using PasteItCleaned.Common.Entities;
+﻿using PasteItCleaned.Core.Models;
 
-namespace PasteItCleaned.Common.Cleaners.Office
+namespace PasteItCleaned.Plugin.Cleaners.Office
 {
     public class OfficeBaseCleaner : HtmlCleaner
     {
@@ -21,7 +21,7 @@ namespace PasteItCleaned.Common.Cleaners.Office
             htmlDoc = base.SafeExec(base.RemoveUselessStyles, htmlDoc, rtfDoc);
             htmlDoc = base.SafeExec(base.EmbedInternalImages, htmlDoc, rtfDoc);
 
-            if (config.GetConfigValue("EmbedExternalImages", false))
+            if (config.EmbedExternalImages)
                 htmlDoc = base.SafeExec(base.EmbedExternalImages, htmlDoc, rtfDoc);
 
             htmlDoc = base.SafeExec(base.RemoveUselessAttributes, htmlDoc, rtfDoc);

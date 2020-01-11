@@ -1,6 +1,7 @@
-﻿using PasteItCleaned.Common.Entities;
+﻿using PasteItCleaned.Core.Entities;
+using PasteItCleaned.Core.Models;
 
-namespace PasteItCleaned.Common.Cleaners.Office.Excel
+namespace PasteItCleaned.Plugin.Cleaners.Office.Excel
 {
     public class OfficeExcelCleaner : OfficeBaseCleaner
     {

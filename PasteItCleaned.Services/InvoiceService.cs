@@ -2,8 +2,6 @@
 using PasteItCleaned.Core.Models;
 using PasteItCleaned.Core.Services;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Backend.Services
 {
@@ -16,51 +14,38 @@ namespace PasteItCleaned.Backend.Services
             this._unitOfWork = unitOfWork;
         }
 
-        public async Task<Invoice> CreateInvoiceAsync(Invoice invoice)
+        public Invoice Create(Invoice invoice)
         {
-            await _unitOfWork.Invoices.AddAsync(invoice);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Invoices.Add(invoice);
+            _unitOfWork.Commit();
 
             return invoice;
         }
 
-        public async Task DeleteInvoice(Invoice apiKey)
+        public Invoice Get(Guid invoiceId)
         {
-            _unitOfWork.Invoices.LogicalDelete(apiKey);
-
-            await _unitOfWork.CommitAsync();
+            return _unitOfWork.Invoices.Get(invoiceId);
         }
 
-        public async Task<IEnumerable<Invoice>> GetAllByClientIdAsync(Guid clientId)
+        public Invoice GetByNumber(Guid clientId, int number)
         {
-            return await _unitOfWork.Invoices.GetAllByParentIdAsync(clientId);
+            return _unitOfWork.Invoices.GetByNumber(clientId, number);
         }
 
-        public async Task<Invoice> GetByIdAsync(Guid apiKeyId)
+        public PagedList<Invoice> List(Guid clientId, int page, int pageSize)
         {
-            return await _unitOfWork.Invoices.GetByIdAsync(apiKeyId);
+            return _unitOfWork.Invoices.List(clientId, page, pageSize);
         }
 
-        public async Task<Invoice> GetByNumberAsync(int number)
+        public Invoice SetPaid(Guid invoiceId)
         {
-            return await _unitOfWork.Invoices.GetByNumberAsync(number);
-        }
+            var invoice = _unitOfWork.Invoices.Get(invoiceId);
 
-        public async Task SetPaidAsync(Guid invoiceId)
-        {
-            var invoice = await GetByIdAsync(invoiceId);
+            invoice.Paid = invoice.Paid;
 
-            invoice.Paid = true;
-            invoice.PaidOn = DateTime.Now;
+            _unitOfWork.Commit();
 
-            await _unitOfWork.CommitAsync();
-        }
-
-        public async Task UpdateApiKey(Invoice invoiceToBeUpdated, Invoice invoice)
-        {
-            invoiceToBeUpdated.Paid = invoice.Paid;
-
-            await _unitOfWork.CommitAsync();
+            return invoice;
         }
     }
 }

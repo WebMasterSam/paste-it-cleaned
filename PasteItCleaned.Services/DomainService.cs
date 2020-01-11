@@ -3,7 +3,6 @@ using PasteItCleaned.Core.Models;
 using PasteItCleaned.Core.Services;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Backend.Services
 {
@@ -16,47 +15,44 @@ namespace PasteItCleaned.Backend.Services
             this._unitOfWork = unitOfWork;
         }
 
-        public async Task<Domain> CreateDomain(Domain domain)
+        public Domain Create(Domain domain)
         {
-            await _unitOfWork.Domains.AddAsync(domain);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Domains.Add(domain);
+            _unitOfWork.Commit();
 
             return domain;
         }
 
-        public async Task DeleteDomain(Domain domain)
+        public void Delete(Guid domainId)
         {
-            _unitOfWork.Domains.LogicalDelete(domain);
+            _unitOfWork.Domains.LogicalDelete(domainId);
 
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
         }
 
-        public async Task<IEnumerable<Domain>> GetAllByApiKeyId(Guid apiKeyId)
+        public Domain Get(Guid domainId)
         {
-            return await _unitOfWork.Domains.GetAllByParentIdAsync(apiKeyId);
+            return _unitOfWork.Domains.Get(domainId);
         }
 
-        public async Task<Domain> GetById(Guid configId)
+        public Domain GetByName(Guid apiKeyId, string name)
         {
-            return await _unitOfWork.Domains.GetByIdAsync(configId);
+            return _unitOfWork.Domains.GetByName(apiKeyId, name);
         }
 
-        public async Task<Domain> GetByName(string name)
+        public List<Domain> List(Guid apiKeyId)
         {
-            return await _unitOfWork.Domains.GetByNameAsync(name);
+            return _unitOfWork.Domains.List(apiKeyId);
         }
 
-        public async Task UpdateConfig(Domain domainToBeUpdated, Domain domain)
+        public Domain Update(Domain domainToUpdate, Domain domain)
         {
-            domainToBeUpdated.Name = domain.Name;
-            domainToBeUpdated.UpdatedOn = DateTime.Now;
+            domainToUpdate.Name = domain.Name;
+            domainToUpdate.UpdatedOn = DateTime.Now;
 
-            await _unitOfWork.CommitAsync();
-        }
+            _unitOfWork.Commit();
 
-        public Task UpdateDomain(Domain domainToBeUpdated, Domain domain)
-        {
-            throw new NotImplementedException();
+            return domainToUpdate;
         }
     }
 }

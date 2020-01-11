@@ -2,7 +2,6 @@
 using PasteItCleaned.Core.Models;
 using PasteItCleaned.Core.Services;
 using System;
-using System.Threading.Tasks;
 
 namespace PasteItCleaned.Backend.Services
 {
@@ -15,40 +14,58 @@ namespace PasteItCleaned.Backend.Services
             this._unitOfWork = unitOfWork;
         }
 
-        public async Task<Client> CreateClient(Client client)
+        public Client Create(Client client)
         {
-            await _unitOfWork.Clients.AddAsync(client);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Clients.Add(client);
+            _unitOfWork.Commit();
 
             return client;
         }
 
-        public async Task DeleteClient(Client client)
+        public Client DecreaseBalance(Guid clientId, decimal amount)
         {
-            _unitOfWork.Clients.LogicalDelete(client);
+            var client = _unitOfWork.Clients.Get(clientId);
 
-            await _unitOfWork.CommitAsync();
+            client.Balance -= amount;
+
+            _unitOfWork.Commit();
+
+            return client;
         }
 
-        public async Task<Client> GetById(Guid clientId)
+        public void Delete(Guid clientId)
         {
-            return await _unitOfWork.Clients.GetByIdAsync(clientId);
+            _unitOfWork.Clients.LogicalDelete(clientId);
+
+            _unitOfWork.Commit();
         }
 
-        public async Task UpdateClient(Client clientToBeUpdated, Client client)
+        public Client Get(Guid clientId)
         {
-            clientToBeUpdated.Address = client.Address;
-            clientToBeUpdated.Balance = client.Balance;
-            clientToBeUpdated.BusinessName = client.BusinessName;
-            clientToBeUpdated.City = client.City;
-            clientToBeUpdated.Country = client.Country;
-            clientToBeUpdated.FirstName = client.FirstName;
-            clientToBeUpdated.LastName = client.LastName;
-            clientToBeUpdated.PhoneNumber = client.PhoneNumber;
-            clientToBeUpdated.State = client.State;
-            clientToBeUpdated.UpdatedOn = DateTime.Now;
+            return _unitOfWork.Clients.Get(clientId);
+        }
 
-            await _unitOfWork.CommitAsync();
+        public PagedList<Client> List(int page, int pageSize)
+        {
+            return _unitOfWork.Clients.List(page, pageSize);
+        }
+
+        public Client Update(Client clientToUpdate, Client client)
+        {
+            clientToUpdate.Address = client.Address;
+            clientToUpdate.Balance = client.Balance;
+            clientToUpdate.BusinessName = client.BusinessName;
+            clientToUpdate.City = client.City;
+            clientToUpdate.Country = client.Country;
+            clientToUpdate.FirstName = client.FirstName;
+            clientToUpdate.LastName = client.LastName;
+            clientToUpdate.PhoneNumber = client.PhoneNumber;
+            clientToUpdate.State = client.State;
+            clientToUpdate.UpdatedOn = DateTime.Now;
+
+            _unitOfWork.Commit();
+
+            return clientToUpdate;
         }
     }
 }

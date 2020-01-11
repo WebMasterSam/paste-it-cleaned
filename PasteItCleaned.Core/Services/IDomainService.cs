@@ -9,12 +9,12 @@ namespace PasteItCleaned.Core.Services
         List<Domain> List(Guid apiKeyId);
 
         Domain Get(Guid domainId);
-        Domain GetByName(string name);
+        Domain GetByName(Guid apiKeyId, string name);
 
         Domain Create(Domain domain);
 
         Domain Update(Domain domainToUpdate, Domain domain);
 
-        void Delete(Domain domain);
+        void Delete(Guid domainId);
     }
 }

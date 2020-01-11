@@ -11,14 +11,6 @@ namespace PasteItCleaned.Backend.Data.Repositories
         public HitDailyRepository(PasteItCleanedDbContext context) : base(context)
         { }
 
-        public HitDaily AddOrUpdate(HitDaily hitDaily)
-        {
-            if (Context.Entry(hitDaily).State == EntityState.Detached)
-                Context.HitsDaily.Add(hitDaily);
-
-            return hitDaily;
-        }
-
         public int Count(Guid clientId, string type, DateTime startDate, DateTime endDate)
         {
             var rows = Context.HitsDaily
@@ -46,6 +38,14 @@ namespace PasteItCleaned.Backend.Data.Repositories
                 .Where(m => m.Date < priorTo);
 
             Context.HitsDaily.RemoveRange(entities);
+        }
+
+        public HitDaily Get(Guid clientId, DateTime date)
+        {
+            return Context.HitsDaily
+                .Where(m => m.ClientId == clientId)
+                .Where(m => m.Date == date.Date)
+                .FirstOrDefault();
         }
 
         public PagedList<HitDaily> List(Guid clientId, DateTime startDate, DateTime endDate, int page, int pageSize)

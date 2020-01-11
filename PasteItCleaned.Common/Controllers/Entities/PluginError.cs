@@ -1,8 +1,8 @@
-﻿namespace PasteItCleaned.Common.Controllers.Entities
+﻿namespace PasteItCleaned.Plugin.Controllers.Entities
 {
-    public class Error
+    public class PluginError
     {
-        public Error(string content)
+        public PluginError(string content)
         {
             this.Content = content;
         }

@@ -2,7 +2,7 @@
 
 using System.Reflection;
 
-namespace PasteItCleaned.Common.Localization
+namespace PasteItCleaned.Plugin.Localization
 {
     public static class T
     {
