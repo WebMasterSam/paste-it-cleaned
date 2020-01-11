@@ -35,9 +35,9 @@ namespace PasteItCleaned.Backend.Services
             return _unitOfWork.Configs.Get(configId);
         }
 
-        public Config GetByName(string name)
+        public Config GetByName(Guid clientId, string name)
         {
-            return _unitOfWork.Configs.GetByName(name);
+            return _unitOfWork.Configs.GetByName(clientId, name);
         }
 
         public List<Config> List(Guid clientId)

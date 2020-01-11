@@ -1,6 +1,5 @@
 ﻿using PasteItCleaned.Plugin.Localization;
 using PasteItCleaned.Core.Helpers;
-using System;
 
 namespace PasteItCleaned.Plugin.Helpers
 {

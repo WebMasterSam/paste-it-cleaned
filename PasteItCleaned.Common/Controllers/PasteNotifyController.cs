@@ -49,21 +49,25 @@ namespace PasteItCleaned.Plugin.Controllers
                     {
                         if (this.ApiKeyFitsWithDomain(objApiKey, domain))
                         {
-                            var pasteTypeObj = obj.pasteType.Trim().ToLower() == "image" ? SourceType.Image : SourceType.Text;
-                            var ip = HttpContext.Features.Get<IHttpConnectionFeature>()?.RemoteIpAddress.ToString();
-                            var referer = Request.Headers["Referer"].ToString();
-                            var hitHash = _hitService.GetByHash(objApiKey.ClientId, DateTime.UtcNow.Date, obj.hash);
-                            var price = 0.0M;
+                            var clientId = objApiKey != null ? objApiKey.ClientId : Guid.Empty;
 
-                            if (hitHash == null)
+                            if (clientId != Guid.Empty)
                             {
-                                price = PricingHelper.GetHitPrice(objApiKey.ClientId, pasteTypeObj);
-                                this.DecreaseBalance(objApiKey.ClientId, price);
+                                var pasteTypeObj = obj.pasteType.Trim().ToLower() == "image" ? SourceType.Image : SourceType.Text;
+                                var ip = HttpContext.Features.Get<IHttpConnectionFeature>()?.RemoteIpAddress.ToString();
+                                var referer = Request.Headers["Referer"].ToString();
+                                var hitHash = _hitService.GetByHash(clientId, DateTime.UtcNow.Date, obj.hash);
+                                var price = 0.0M;
+
+                                if (hitHash == null)
+                                {
+                                    price = PricingHelper.GetHitPrice(clientId, pasteTypeObj);
+                                    this.DecreaseBalance(clientId, price);
+                                }
+
+                                _hitService.Create(new Hit { ClientId = clientId, Date = DateTime.UtcNow, Hash = obj.hash, Ip = ip, Price = price, Referer = referer, Type = pasteTypeObj.ToString() });
+                                _hitDailyService.CreateOrIncrease(clientId, DateTime.UtcNow, pasteTypeObj.ToString(), price);
                             }
-
-                            _hitService.Create(new Hit { ClientId = objApiKey.ClientId, Date = DateTime.UtcNow, Hash = obj.hash, Ip = ip, Price = price, Referer = referer, Type = pasteTypeObj.ToString() });
-                            _hitDailyService.CreateOrIncrease(objApiKey.ClientId, DateTime.UtcNow, pasteTypeObj.ToString(), price);
-
 
                             return Ok(new PluginSuccess(""));
                         }

@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 
 using Swashbuckle.AspNetCore.Swagger;
 
@@ -60,12 +61,21 @@ namespace PasteItCleaned.IIS
                 options.SupportedUICultures = supportedCultures;
             });
 
+            services.AddLogging(logging => logging.AddConsole());
+
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddTransient<IApiKeyService, ApiKeyService>();
+            services.AddTransient<IClientService, ClientService>();
+            services.AddTransient<IConfigService, ConfigService>();
             services.AddTransient<IDomainService, DomainService>();
             services.AddTransient<IErrorService, ErrorService>();
             services.AddTransient<IHitDailyService, HitDailyService>();
             services.AddTransient<IHitService, HitService>();
+            services.AddTransient<IInvoiceService, InvoiceService>();
+            services.AddTransient<IPaymentMethodService, PaymentMethodService>();
+            services.AddTransient<IPaymentService, PaymentService>();
+            services.AddTransient<IUserService, UserService>();
+            services.AddTransient<ITimeZoneService, TimeZoneService>();
 
             services.AddDbContext<PasteItCleanedDbContext>(options => options.UseMySQL(Configuration.GetConnectionString("Default"), x => x.MigrationsAssembly("PasteItCleaned.Backend.Data")));
 

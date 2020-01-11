@@ -26,9 +26,12 @@ namespace PasteItCleaned.Backend.Services
         {
             var client = _unitOfWork.Clients.Get(clientId);
 
-            client.Balance -= amount;
+            if (client != null)
+                {
+                client.Balance -= amount;
 
-            _unitOfWork.Commit();
+                _unitOfWork.Commit();
+            }
 
             return client;
         }

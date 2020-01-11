@@ -97,11 +97,10 @@ namespace PasteItCleaned.Plugin.Controllers
 
         public Config GetConfigFromDb(Guid clientId, string config)
         {
-            var configs = _configService.List(clientId);
-            var configObj = configs.Find((c) => { return c.Name.ToLower().Trim() == config.ToLower().Trim(); });
-            var configDefaultObj = configs.Find((c) => { return c.Name.ToLower().Trim() == "default"; });
+            var configObj = _configService.GetByName(clientId, config);
+            var configDefaultObj = _configService.GetByName(clientId, "Default");
 
-            return configObj != null ? configObj : configDefaultObj;
+            return configObj != null ? configObj : configDefaultObj != null ? configDefaultObj : new Config { ClientId = clientId, Name = "Default", EmbedExternalImages = false, RemoveClassNames = true, RemoveEmptyTags = true, RemoveIframes = true, RemoveSpanTags = true, RemoveTagAttributes = true };
         }
 
 

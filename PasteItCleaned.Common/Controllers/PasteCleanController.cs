@@ -68,14 +68,16 @@ namespace PasteItCleaned.Plugin.Controllers
                     {
                         if (this.ApiKeyFitsWithDomain(objApiKey, domain))
                         {
-                            if (this.BalanceIsSufficient(objApiKey.ClientId))
+                            var clientId = objApiKey != null ? objApiKey.ClientId : Guid.Empty;
+
+                            if (this.BalanceIsSufficient(clientId))
                             {
                                 var config = CleanerConfigHelper.GetConfigFromHeaders(this.HttpContext);
-                                var configObj = this.GetConfigFromDb(objApiKey.ClientId, config);
+                                var configObj = this.GetConfigFromDb(clientId, config);
                                 var ip = HttpContext.Features.Get<IHttpConnectionFeature>()?.RemoteIpAddress.ToString();
                                 var referer = Request.Headers["Referer"].ToString();
 
-                                return Ok(new PluginSuccess(Clean(html, obj.rtf, objApiKey.ClientId, configObj, ip, referer, obj.hash, obj.keepStyles)));
+                                return Ok(new PluginSuccess(Clean(html, obj.rtf, clientId, configObj, ip, referer, obj.hash, obj.keepStyles)));
                             }
                             else
                                 return Ok(new PluginError(ErrorHelper.GetAccountIsUnpaid()));
@@ -103,23 +105,26 @@ namespace PasteItCleaned.Plugin.Controllers
             {
                 if (cleaner.CanClean(html))
                 {
-                    var hitHash = _hitService.GetByHash(clientId, DateTime.UtcNow.Date, hash);
-                    var price = 0.0M;
-
-                    try
+                    if (clientId != Guid.Empty)
                     {
-                        if (hitHash == null)
+                        var hitHash = _hitService.GetByHash(clientId, DateTime.UtcNow.Date, hash);
+                        var price = 0.0M;
+
+                        try
                         {
-                            price = PricingHelper.GetHitPrice(clientId, cleaner.GetSourceType());
-                            this.DecreaseBalance(clientId, price);
-                        }
+                            if (hitHash == null)
+                            {
+                                price = PricingHelper.GetHitPrice(clientId, cleaner.GetSourceType());
+                                this.DecreaseBalance(clientId, price);
+                            }
 
-                        _hitService.Create(new Hit { ClientId = clientId, Date = DateTime.UtcNow, Hash = hash, Ip = ip, Price = price, Referer = referer, Type = cleaner.GetSourceType().ToString() });
-                        _hitDailyService.CreateOrIncrease(clientId, DateTime.UtcNow, cleaner.GetSourceType().ToString(), price);
-                    }
-                    catch (Exception ex)
-                    {
-                        this.LogError(ex);
+                            _hitService.Create(new Hit { ClientId = clientId, Date = DateTime.UtcNow, Hash = hash, Ip = ip, Price = price, Referer = referer, Type = cleaner.GetSourceType().ToString() });
+                            _hitDailyService.CreateOrIncrease(clientId, DateTime.UtcNow, cleaner.GetSourceType().ToString(), price);
+                        }
+                        catch (Exception ex)
+                        {
+                            this.LogError(ex);
+                        }
                     }
 
                     return cleaner.Clean(html, rtf, config, keepStyles);

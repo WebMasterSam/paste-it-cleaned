@@ -10,7 +10,7 @@ namespace PasteItCleaned.Backend.Core.Repositories
         List<Config> List(Guid clientId);
 
         Config Get(Guid configId);
-        Config GetByName(string name);
+        Config GetByName(Guid clientId, string name);
 
         void LogicalDelete(Guid configId);
     }

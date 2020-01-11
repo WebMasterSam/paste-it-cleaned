@@ -26,9 +26,10 @@ namespace PasteItCleaned.Backend.Data.Repositories
                 .FirstOrDefault();
         }
 
-        public Config GetByName(string name)
+        public Config GetByName(Guid clientId, string name)
         {
             return Context.Configs
+                .Where(m => m.ClientId == clientId)
                 .Where(m => m.Name == name)
                 .Where(m => !m.Deleted)
                 .FirstOrDefault();
