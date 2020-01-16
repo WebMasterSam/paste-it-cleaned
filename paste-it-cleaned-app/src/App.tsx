@@ -212,7 +212,6 @@ class App extends React.Component<AppProps, AppState> {
                 const email: string = value.attributes!.email
                 const culture: string = 'en-US'
                 replaceCurrentSession(isValid, userName, firstName, lastName, email, culture)
-                console.log(CurrentSession)
             })
             .catch(e => {
                 replaceCurrentSession(false, '', '', '', '', 'en-US')

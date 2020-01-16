@@ -6,7 +6,7 @@ import Dashboard from './Dashboard'
 
 import { createData } from '../../helpers/AnalyticsHelper'
 import { createData as createDataBilling } from '../../helpers/BillingHelper'
-import { Hit, ActionResult, Invoice } from '../../entities/api.js'
+import { Hit, ActionResult, Invoice } from '../../entities/api'
 
 export class DashboardController extends BaseController {
     private component?: Dashboard = undefined

@@ -4,42 +4,37 @@ import { Paper, Typography } from '@material-ui/core'
 import FileCopyIcon from '@material-ui/icons/FileCopy'
 
 import FormWrapper from '../../../components/FormWrapper'
-import { createData } from '../../../helpers/AnalyticsHelper'
+
+import HitsTable from './components/HitsTable'
+import { Hit } from '../../../entities/api'
+import { AnalyticsHitsController } from './AnalyticsHitsController'
 
 import './AnalyticsHits.less'
-import HitsTable from './components/HitsTable'
 
 export interface AnalyticsHitsProps {}
-export interface AnalyticsHitsState {}
-
-const rows = [
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Word', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Word', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Word', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Word', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Word', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Word', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Word', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Word', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Word', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Word', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Word', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Word', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Word', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Word', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Word', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Word', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Word', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Word', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Word', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Excel', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '123.144.255.366', 'PowerPoint', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '123.144.255.366', 'Web', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '123.144.255.366', 'Text', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '123.144.255.366', 'Image', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-]
+export interface AnalyticsHitsState {
+    hits: Hit[]
+    hitsLoading: boolean
+    hitsError: boolean
+}
 
 class AnalyticsHits extends React.Component<AnalyticsHitsProps, AnalyticsHitsState> {
+    private controller?: AnalyticsHitsController = undefined
+
+    constructor(props: AnalyticsHitsProps) {
+        super(props)
+        this.controller = new AnalyticsHitsController(this)
+        this.state = {
+            hits: [],
+            hitsLoading: false,
+            hitsError: false,
+        }
+    }
+
+    componentDidMount() {
+        this.controller!.initialize()
+    }
+
     render() {
         return (
             <Paper className="paper wide">
@@ -48,7 +43,7 @@ class AnalyticsHits extends React.Component<AnalyticsHitsProps, AnalyticsHitsSta
                 </Typography>
 
                 <FormWrapper>
-                    <HitsTable loading={false} error={false} rows={rows} full={true} />
+                    <HitsTable loading={this.state.hitsLoading} error={this.state.hitsError} rows={this.state.hits} full={true} />
                 </FormWrapper>
             </Paper>
         )

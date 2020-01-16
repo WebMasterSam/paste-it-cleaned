@@ -1,11 +1,11 @@
 import React, { Fragment } from 'react'
+import moment from 'moment'
+import { CartesianGrid, XAxis, YAxis, Legend, Tooltip, LineChart, Line, ResponsiveContainer } from 'recharts'
 
 import { Paper, Typography, Button } from '@material-ui/core'
 import FileCopyIcon from '@material-ui/icons/FileCopy'
 import SkipPreviousIcon from '@material-ui/icons/SkipPrevious'
 import SkipNextIcon from '@material-ui/icons/SkipNext'
-
-import { CartesianGrid, XAxis, YAxis, Legend, Tooltip, LineChart, Line, ResponsiveContainer } from 'recharts'
 
 import { WordIcon } from '../../../icons/Word'
 import { ExcelIcon } from '../../../icons/Excel'
@@ -15,148 +15,50 @@ import { WebIcon } from '../../../icons/Web'
 import { TextIcon } from '../../../icons/Text'
 import { ImageIcon } from '../../../icons/Image'
 
+import { HitDaily } from '../../../entities/api'
+import { AnalyticsUsageController } from './AnalyticsUsageController'
+import ButtonWithLoading from '../../../components/ButtonWithLoading'
+
 import './AnalyticsUsage.less'
+import { Skeleton } from '@material-ui/lab'
 
 export interface AnalyticsUsageProps {}
 export interface AnalyticsUsageState {
-    year: number
-    month: number
+    startDate: Date
+    endDate: Date
+    hitsDaily: HitDaily[]
+    hitsDailyLoading: boolean
+    hitsDailyError: boolean
+    officeUsage: any[]
+    websiteUsage: any[]
+    localUsage: any[]
 }
-
-function createDataOffice(num: number) {
-    return {
-        name: num.toString(),
-        Word: Math.floor(Math.random() * 20),
-        Excel: Math.floor(Math.random() * 20),
-        PowerPoint: Math.floor(Math.random() * 20),
-    }
-}
-
-function createDataWeb(num: number) {
-    return {
-        name: num.toString(),
-        Web: Math.floor(Math.random() * 20),
-    }
-}
-
-function createDataLocal(num: number) {
-    return {
-        name: num.toString(),
-        Text: Math.floor(Math.random() * 20),
-        Image: Math.floor(Math.random() * 20),
-    }
-}
-
-const dataOffice = [
-    createDataOffice(1),
-    createDataOffice(2),
-    createDataOffice(3),
-    createDataOffice(4),
-    createDataOffice(5),
-    createDataOffice(6),
-    createDataOffice(7),
-    createDataOffice(8),
-    createDataOffice(9),
-    createDataOffice(10),
-    createDataOffice(11),
-    createDataOffice(12),
-    createDataOffice(13),
-    createDataOffice(14),
-    createDataOffice(15),
-    createDataOffice(16),
-    createDataOffice(17),
-    createDataOffice(18),
-    createDataOffice(19),
-    createDataOffice(20),
-    createDataOffice(21),
-    createDataOffice(22),
-    createDataOffice(23),
-    createDataOffice(24),
-    createDataOffice(25),
-    createDataOffice(26),
-    createDataOffice(27),
-    createDataOffice(28),
-    createDataOffice(29),
-    createDataOffice(30),
-    createDataOffice(31),
-]
-
-const dataWeb = [
-    createDataWeb(1),
-    createDataWeb(2),
-    createDataWeb(3),
-    createDataWeb(4),
-    createDataWeb(5),
-    createDataWeb(6),
-    createDataWeb(7),
-    createDataWeb(8),
-    createDataWeb(9),
-    createDataWeb(10),
-    createDataWeb(11),
-    createDataWeb(12),
-    createDataWeb(13),
-    createDataWeb(14),
-    createDataWeb(15),
-    createDataWeb(16),
-    createDataWeb(17),
-    createDataWeb(18),
-    createDataWeb(19),
-    createDataWeb(20),
-    createDataWeb(21),
-    createDataWeb(22),
-    createDataWeb(23),
-    createDataWeb(24),
-    createDataWeb(25),
-    createDataWeb(26),
-    createDataWeb(27),
-    createDataWeb(28),
-    createDataWeb(29),
-    createDataWeb(30),
-    createDataWeb(31),
-]
-
-const dataLocal = [
-    createDataLocal(1),
-    createDataLocal(2),
-    createDataLocal(3),
-    createDataLocal(4),
-    createDataLocal(5),
-    createDataLocal(6),
-    createDataLocal(7),
-    createDataLocal(8),
-    createDataLocal(9),
-    createDataLocal(10),
-    createDataLocal(11),
-    createDataLocal(12),
-    createDataLocal(13),
-    createDataLocal(14),
-    createDataLocal(15),
-    createDataLocal(16),
-    createDataLocal(17),
-    createDataLocal(18),
-    createDataLocal(19),
-    createDataLocal(20),
-    createDataLocal(21),
-    createDataLocal(22),
-    createDataLocal(23),
-    createDataLocal(24),
-    createDataLocal(25),
-    createDataLocal(26),
-    createDataLocal(27),
-    createDataLocal(28),
-    createDataLocal(29),
-    createDataLocal(30),
-    createDataLocal(31),
-]
 
 class AnalyticsUsage extends React.Component<AnalyticsUsageProps, AnalyticsUsageState> {
-    constructor(props: AnalyticsUsageState) {
+    private controller?: AnalyticsUsageController = undefined
+
+    constructor(props: AnalyticsUsageProps) {
         super(props)
-        var curDate = new Date()
-        this.state = { year: curDate.getFullYear(), month: curDate.getMonth() }
+        this.controller = new AnalyticsUsageController(this)
+        this.state = {
+            hitsDaily: [],
+            hitsDailyLoading: false,
+            hitsDailyError: false,
+            startDate: moment()
+                .startOf('month')
+                .toDate(),
+            endDate: moment()
+                .endOf('month')
+                .toDate(),
+            officeUsage: [],
+            websiteUsage: [],
+            localUsage: [],
+        }
     }
 
-    handleChange(event: React.ChangeEvent<{ name?: string; value: unknown }>, child: React.ReactNode) {}
+    componentDidMount() {
+        this.controller!.initialize()
+    }
 
     render() {
         return (
@@ -173,15 +75,22 @@ class AnalyticsUsage extends React.Component<AnalyticsUsageProps, AnalyticsUsage
         return (
             <Fragment>
                 <div className="filters">
-                    <Button variant="outlined" startIcon={<SkipPreviousIcon />}>
-                        Prev
-                    </Button>
+                    {this.state.startDate >
+                        moment()
+                            .subtract(5, 'years')
+                            .toDate() && (
+                        <ButtonWithLoading loading={this.state.hitsDailyLoading} variant="outlined" startIcon={<SkipPreviousIcon />} onClick={this.controller!.previous}>
+                            Prev
+                        </ButtonWithLoading>
+                    )}
                     <Typography variant="body1" className="filter-month-label" component="span">
-                        December 2018
+                        {moment(this.state.startDate).format('MMMM YYYY')}
                     </Typography>
-                    <Button variant="outlined" endIcon={<SkipNextIcon />}>
-                        Next
-                    </Button>
+                    {this.state.endDate < new Date() && (
+                        <ButtonWithLoading loading={this.state.hitsDailyLoading} variant="outlined" endIcon={<SkipNextIcon />} onClick={this.controller!.next}>
+                            Next
+                        </ButtonWithLoading>
+                    )}
                 </div>
             </Fragment>
         )
@@ -195,7 +104,7 @@ class AnalyticsUsage extends React.Component<AnalyticsUsageProps, AnalyticsUsage
                 </Typography>
                 {this.getMonthSubtitle()}
                 <ResponsiveContainer width="100%" height={400}>
-                    <LineChart data={dataOffice} margin={{ top: 30, right: 50, left: 0, bottom: 10 }}>
+                    <LineChart data={this.state.officeUsage} margin={{ top: 30, right: 50, left: 0, bottom: 10 }}>
                         {this.getCartesianGrid()}
                         {this.getXAxis()}
                         {this.getYAxis()}
@@ -218,7 +127,7 @@ class AnalyticsUsage extends React.Component<AnalyticsUsageProps, AnalyticsUsage
                 </Typography>
                 {this.getMonthSubtitle()}
                 <ResponsiveContainer width="100%" height={400}>
-                    <LineChart data={dataWeb} margin={{ top: 30, right: 50, left: 0, bottom: 10 }}>
+                    <LineChart data={this.state.websiteUsage} margin={{ top: 30, right: 50, left: 0, bottom: 10 }}>
                         {this.getCartesianGrid()}
                         {this.getXAxis()}
                         {this.getYAxis()}
@@ -239,7 +148,7 @@ class AnalyticsUsage extends React.Component<AnalyticsUsageProps, AnalyticsUsage
                 </Typography>
                 {this.getMonthSubtitle()}
                 <ResponsiveContainer width="100%" height={400}>
-                    <LineChart data={dataLocal} margin={{ top: 30, right: 50, left: 0, bottom: 10 }}>
+                    <LineChart data={this.state.localUsage} margin={{ top: 30, right: 50, left: 0, bottom: 10 }}>
                         {this.getCartesianGrid()}
                         {this.getXAxis()}
                         {this.getYAxis()}
@@ -256,7 +165,7 @@ class AnalyticsUsage extends React.Component<AnalyticsUsageProps, AnalyticsUsage
     private getMonthSubtitle() {
         return (
             <Typography variant="subtitle1" component="p" align="center">
-                December 2018
+                {moment(this.state.startDate).format('MMMM YYYY')}
             </Typography>
         )
     }
@@ -288,7 +197,7 @@ class AnalyticsUsage extends React.Component<AnalyticsUsageProps, AnalyticsUsage
                 itemStyle={{ lineHeight: 0.6 }}
                 labelStyle={{ marginBottom: 10, fontWeight: 'bold' }}
                 labelFormatter={(label: string | number) => {
-                    var theDate = new Date(this.state.year, this.state.month, label as number)
+                    var theDate = new Date(this.state.startDate.getFullYear(), this.state.startDate.getMonth(), label as number)
                     return theDate.toLocaleDateString()
                 }}
             />

@@ -23,11 +23,11 @@ namespace PasteItCleaned.Backend.Common.Controllers
 
         // GET dashboard/hits/
         [HttpGet("hits")]
-        [ProducesResponseType(typeof(List<Hit>), 200)]
+        [ProducesResponseType(typeof(PagedList<Hit>), 200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public ActionResult<List<Hit>> GetDashboardHits([FromHeader]string authorization)
+        public ActionResult<PagedList<Hit>> GetDashboardHits([FromHeader]string authorization)
         {
             var client = this.GetOrCreateClient(authorization);
 

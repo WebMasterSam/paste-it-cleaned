@@ -16,7 +16,7 @@ export function createData(timeStamp: Date, ip: string, type: string, userAgent:
         </a>
     )
     var userAgentNode = userAgent
-    var priceNode = '$' + price.toString()
+    var priceNode = price > 0 ? '$' + price.toString() : '-'
     var typeNode = <span className="hit-type">?</span>
 
     switch (type.toLowerCase()) {

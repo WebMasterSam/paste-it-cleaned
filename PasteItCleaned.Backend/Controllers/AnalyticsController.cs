@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using PasteItCleaned.Core.Models;
 using PasteItCleaned.Core.Services;
 
 namespace PasteItCleaned.Backend.Common.Controllers
@@ -20,16 +21,16 @@ namespace PasteItCleaned.Backend.Common.Controllers
 
         // GET analytics/hits/
         [HttpGet("hits")]
-        [ProducesResponseType(typeof(ActionResult), 200)]
+        [ProducesResponseType(typeof(PagedList<Hit>), 200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public ActionResult GetHits([FromHeader]string authorization)
+        public ActionResult<PagedList<Hit>> GetHits([FromHeader]string authorization, [FromQuery]int page, [FromQuery]int pageSize)
         {
             try
             {
                 var client = this.GetOrCreateClient(authorization);
-                var hits = _hitService.List(client.ClientId, "", DateTime.MinValue, DateTime.MaxValue, 0, 100);
+                var hits = _hitService.List(client.ClientId, "", DateTime.MinValue, DateTime.MaxValue, page, pageSize);
 
                 return Ok(hits);
             }
@@ -39,6 +40,33 @@ namespace PasteItCleaned.Backend.Common.Controllers
                 return BadRequest("A technical error has occured when calling this API method.");
             }
         }
+
+        // GET dashboard/hits/
+        [HttpGet("hits/daily")]
+        [ProducesResponseType(typeof(List<HitDaily>), 200)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(500)]
+        public ActionResult<List<HitDaily>> GetDashboardHitsDaily([FromHeader]string authorization, [FromQuery]DateTime startDate, [FromQuery]DateTime endDate)
+        {
+            var client = this.GetOrCreateClient(authorization);
+
+            if (client == null)
+                return StatusCode(401);
+
+            try
+            {
+                var hits = _hitDailyService.List(client.ClientId, startDate, endDate);
+
+                return Ok(hits);
+            }
+            catch (Exception ex)
+            {
+                Log.LogError("Exception", ex);
+                return StatusCode(500);
+            }
+        }
+
     }
 
     public class AnalyticsRequest

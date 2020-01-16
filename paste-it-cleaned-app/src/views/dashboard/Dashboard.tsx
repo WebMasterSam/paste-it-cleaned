@@ -1,8 +1,6 @@
 import React, { Fragment } from 'react'
 
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, AreaChart, Area } from 'recharts'
-
-import Auth from '@aws-amplify/auth'
 import { Grid, Card, Paper, Typography, LinearProgress } from '@material-ui/core'
 
 import SettingsIcon from '@material-ui/icons/Settings'
@@ -13,9 +11,6 @@ import BugReportIcon from '@material-ui/icons/BugReport'
 
 import FormWrapper from '../../components/FormWrapper'
 import HitsTable from '../analytics/hits/components/HitsTable'
-
-import { createData } from '../../helpers/AnalyticsHelper'
-import { createData as createDataBilling } from '../../helpers/BillingHelper'
 
 import PageWrapper from '../../components/PageWrapper'
 import BillingTable from '../account/billing/components/BillingTable'

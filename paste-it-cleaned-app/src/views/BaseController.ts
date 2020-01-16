@@ -29,6 +29,10 @@ export class BaseController {
     }
 
     culturedEndpoint(url: string) {
-        return url + '?culture=' + CurrentSession.Culture
+        if (url.indexOf('?') === -1) {
+            return url + '?culture=' + CurrentSession.Culture
+        } else {
+            return url + '&culture=' + CurrentSession.Culture
+        }
     }
 }
