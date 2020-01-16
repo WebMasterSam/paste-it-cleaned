@@ -3,7 +3,7 @@ import React, { Fragment } from 'react'
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, AreaChart, Area } from 'recharts'
 
 import Auth from '@aws-amplify/auth'
-import { Grid, Card, Paper, Typography } from '@material-ui/core'
+import { Grid, Card, Paper, Typography, LinearProgress } from '@material-ui/core'
 
 import SettingsIcon from '@material-ui/icons/Settings'
 import FileCopyIcon from '@material-ui/icons/FileCopy'
@@ -20,11 +20,23 @@ import { createData as createDataBilling } from '../../helpers/BillingHelper'
 import PageWrapper from '../../components/PageWrapper'
 import BillingTable from '../account/billing/components/BillingTable'
 
+import { DashboardController } from './DashboardController'
+import { Hit, Invoice } from '../../entities/api'
+
 import './Dashboard.less'
-import { DashboardController } from '../../controllers/DashboardController'
-import { CurrentSession } from '../../session/Session'
 
 export interface DashboardProps {}
+export interface DashboardState {
+    hits: Hit[]
+    hitsLoading: boolean
+    hitsError: boolean
+    hitsDaily: Hit[]
+    hitsDailyLoading: boolean
+    hitsDailyError: boolean
+    invoices: Invoice[]
+    invoicesLoading: boolean
+    invoicesError: boolean
+}
 
 function createDataChart(num: number) {
     return {
@@ -67,34 +79,33 @@ const dataWeb = [
     createDataChart(31),
 ]
 
-const rows = [
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Word', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Word', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '1.1.2.3', 'Excel', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '123.144.255.366', 'PowerPoint', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '123.144.255.366', 'Web', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '123.144.255.366', 'Text', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-    createData(new Date(2019, 5, 26, 11, 12, 0), '123.144.255.366', 'Image', 'useragent. micosoft, android, blah bla// window / 8.0', 0.05),
-]
+class Dashboard extends React.Component<DashboardProps, DashboardState> {
+    private controller?: DashboardController = undefined
 
-const rowsB = [createDataBilling('1', '100010334', 1.25, 'pending', new Date(2019, 5, 26, 11, 12, 0)), createDataBilling('2', '100010335', 2.25, 'paid', new Date(2019, 4, 26, 11, 12, 0))]
+    constructor(props: DashboardProps) {
+        super(props)
+        this.controller = new DashboardController(this)
+        this.state = {
+            hits: [],
+            hitsLoading: false,
+            hitsError: false,
+            hitsDaily: [],
+            hitsDailyLoading: false,
+            hitsDailyError: false,
+            invoices: [],
+            invoicesLoading: false,
+            invoicesError: false,
+        }
+    }
 
-class Dashboard extends React.Component<DashboardProps> {
     componentDidMount() {
-        console.log(CurrentSession)
-        var c = new DashboardController()
-
-        c.getHits(
-            (json: any) => {
-                console.log(json)
-            },
-            () => {}
-        )
+        this.controller!.initialize()
     }
 
     render() {
         return (
             <Fragment>
+                {(this.state.hitsLoading || this.state.hitsDailyLoading || this.state.invoicesLoading) && <LinearProgress />}
                 <div style={{ background: 'linear-gradient(160deg,#2c2c2c,#1f1f1f)' }}>
                     <ResponsiveContainer width="100%" height={400}>
                         <AreaChart data={dataWeb} margin={{ top: 30, right: 50, left: 0, bottom: 10 }}>
@@ -144,7 +155,7 @@ class Dashboard extends React.Component<DashboardProps> {
                                 </Typography>
 
                                 <FormWrapper>
-                                    <HitsTable rows={rows} full={false} />
+                                    <HitsTable loading={this.state.hitsLoading} error={this.state.hitsError} rows={this.state.hits} full={false} />
                                 </FormWrapper>
                             </Paper>
                         </Grid>
@@ -155,7 +166,7 @@ class Dashboard extends React.Component<DashboardProps> {
                                 </Typography>
 
                                 <FormWrapper>
-                                    <BillingTable rows={rowsB} full={false} />
+                                    <BillingTable loading={this.state.invoicesLoading} error={this.state.invoicesError} rows={this.state.invoices} full={false} />
                                 </FormWrapper>
                             </Paper>
                         </Grid>

@@ -38,6 +38,7 @@ namespace PasteItCleaned.Backend.Data.Repositories
             return Context.ApiKeys
                 .Where(m => m.ClientId == clientId)
                 .Where(m => !m.Deleted)
+                .OrderByDescending(m => m.CreatedOn)
                 .ToList();
         }
 

@@ -27,7 +27,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public ActionResult<List<Hit>> GetHits([FromHeader]string authorization)
+        public ActionResult<List<Hit>> GetDashboardHits([FromHeader]string authorization)
         {
             var client = this.GetOrCreateClient(authorization);
 
@@ -36,7 +36,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
 
             try
             {
-                var hits = _hitService.List(client.ClientId, "", DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow, 0, 20);
+                var hits = _hitService.List(client.ClientId, "", DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow, 1, 20);
 
                 return Ok(hits);
             }
@@ -49,11 +49,11 @@ namespace PasteItCleaned.Backend.Common.Controllers
 
         // GET dashboard/hits/
         [HttpGet("hits/daily")]
-        [ProducesResponseType(typeof(List<Hit>), 200)]
+        [ProducesResponseType(typeof(List<HitDaily>), 200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public ActionResult<List<HitDaily>> GetHitsDaily([FromHeader]string authorization, [FromQuery]DateTime startDate, [FromQuery]DateTime endDate)
+        public ActionResult<List<HitDaily>> GetDashboardHitsDaily([FromHeader]string authorization, [FromQuery]DateTime startDate, [FromQuery]DateTime endDate)
         {
             var client = this.GetOrCreateClient(authorization);
 
@@ -62,7 +62,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
 
             try
             {
-                var hits = _hitDailyService.List(client.ClientId, startDate, endDate, 0, 20);
+                var hits = _hitDailyService.List(client.ClientId, startDate, endDate);
 
                 return Ok(hits);
             }
@@ -79,7 +79,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public ActionResult<List<Invoice>> GetInvoices([FromHeader]string authorization)
+        public ActionResult<List<Invoice>> GetDashboardInvoices([FromHeader]string authorization)
         {
             var client = this.GetOrCreateClient(authorization);
 
@@ -88,7 +88,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
 
             try
             {
-                var invoices = _invoiceService.List(client.ClientId, 0, 20);
+                var invoices = _invoiceService.List(client.ClientId, 1, 20);
 
                 return Ok(invoices);
             }

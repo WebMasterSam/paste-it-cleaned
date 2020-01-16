@@ -76,8 +76,9 @@ namespace PasteItCleaned.Plugin.Controllers
                                 var configObj = this.GetConfigFromDb(clientId, config);
                                 var ip = HttpContext.Features.Get<IHttpConnectionFeature>()?.RemoteIpAddress.ToString();
                                 var referer = Request.Headers["Referer"].ToString();
+                                var userAgent = Request.Headers["User-Agent"].ToString();
 
-                                return Ok(new PluginSuccess(Clean(html, obj.rtf, clientId, configObj, ip, referer, obj.hash, obj.keepStyles)));
+                                return Ok(new PluginSuccess(Clean(html, obj.rtf, clientId, configObj, ip, referer, userAgent, obj.hash, obj.keepStyles)));
                             }
                             else
                                 return Ok(new PluginError(ErrorHelper.GetAccountIsUnpaid()));
@@ -99,7 +100,7 @@ namespace PasteItCleaned.Plugin.Controllers
             }
         }
 
-        private string Clean(string html, string rtf, Guid clientId, Config config, string ip, string referer, int hash, bool keepStyles)
+        private string Clean(string html, string rtf, Guid clientId, Config config, string ip, string referer, string userAgent, int hash, bool keepStyles)
         {
             foreach (BaseCleaner cleaner in Cleaners)
             {
@@ -118,7 +119,7 @@ namespace PasteItCleaned.Plugin.Controllers
                                 this.DecreaseBalance(clientId, price);
                             }
 
-                            _hitService.Create(new Hit { ClientId = clientId, Date = DateTime.UtcNow, Hash = hash, Ip = ip, Price = price, Referer = referer, Type = cleaner.GetSourceType().ToString() });
+                            _hitService.Create(new Hit { ClientId = clientId, Date = DateTime.UtcNow, Hash = hash, Ip = ip, Price = price, Referer = referer, UserAgent = userAgent, Type = cleaner.GetSourceType().ToString() });
                             _hitDailyService.CreateOrIncrease(clientId, DateTime.UtcNow.Date, cleaner.GetSourceType().ToString(), price);
                         }
                         catch (Exception ex)

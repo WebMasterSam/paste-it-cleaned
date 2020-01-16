@@ -27,7 +27,8 @@ namespace PasteItCleaned.Backend.Data.Repositories
         public PagedList<Client> List(int page, int pageSize)
         {
             var query = Context.Clients
-                .Where(m => !m.Deleted);
+                .Where(m => !m.Deleted)
+                .OrderByDescending(m => m.CreatedOn);
 
             return this.PagedList(query, page, pageSize);
         }

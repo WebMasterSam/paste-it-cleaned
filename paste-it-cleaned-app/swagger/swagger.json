@@ -1,0 +1,285 @@
+{
+    "swagger": "2.0",
+    "info": { "version": "v1", "title": "PasteItCleaned Backend" },
+    "paths": {
+        "/account": {
+            "get": {
+                "tags": ["Account"],
+                "operationId": "GetAccount",
+                "consumes": [],
+                "produces": [],
+                "parameters": [{ "name": "authorization", "in": "header", "required": false, "type": "string" }],
+                "responses": { "200": { "description": "Success" } }
+            },
+            "post": {
+                "tags": ["Account"],
+                "operationId": "PostAccount",
+                "consumes": ["application/json-patch+json", "application/json", "text/json", "application/*+json"],
+                "produces": [],
+                "parameters": [
+                    { "name": "authorization", "in": "header", "required": false, "type": "string" },
+                    { "name": "obj", "in": "body", "required": false, "schema": { "$ref": "#/definitions/AccountRequest" } }
+                ],
+                "responses": { "200": { "description": "Success" } }
+            }
+        },
+        "/account/user": {
+            "get": {
+                "tags": ["Account"],
+                "operationId": "GetUser",
+                "consumes": [],
+                "produces": [],
+                "parameters": [{ "name": "authorization", "in": "header", "required": false, "type": "string" }],
+                "responses": { "200": { "description": "Success" } }
+            }
+        },
+        "/analytics/hits": {
+            "get": {
+                "tags": ["Analytics"],
+                "operationId": "GetHits",
+                "consumes": [],
+                "produces": ["text/plain", "application/json", "text/json"],
+                "parameters": [{ "name": "authorization", "in": "header", "required": false, "type": "string" }],
+                "responses": { "200": { "description": "Success", "schema": { "$ref": "#/definitions/ActionResult" } }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "500": { "description": "Server Error" } }
+            }
+        },
+        "/billing/invoices/{id}": {
+            "get": {
+                "tags": ["Billing"],
+                "operationId": "GetInvoice",
+                "consumes": [],
+                "produces": ["text/plain", "application/json", "text/json"],
+                "parameters": [
+                    { "name": "authorization", "in": "header", "required": false, "type": "string" },
+                    { "name": "id", "in": "path", "required": true, "type": "string" }
+                ],
+                "responses": { "200": { "description": "Success", "schema": { "$ref": "#/definitions/ActionResult" } }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "500": { "description": "Server Error" } }
+            }
+        },
+        "/billing/invoices": {
+            "get": {
+                "tags": ["Billing"],
+                "operationId": "GetInvoices",
+                "consumes": [],
+                "produces": ["text/plain", "application/json", "text/json"],
+                "parameters": [{ "name": "authorization", "in": "header", "required": false, "type": "string" }],
+                "responses": { "200": { "description": "Success", "schema": { "$ref": "#/definitions/ActionResult" } }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "500": { "description": "Server Error" } }
+            }
+        },
+        "/billing/payment-method": {
+            "get": {
+                "tags": ["Billing"],
+                "operationId": "GetPaymentMethod",
+                "consumes": [],
+                "produces": ["text/plain", "application/json", "text/json"],
+                "parameters": [{ "name": "authorization", "in": "header", "required": false, "type": "string" }],
+                "responses": { "200": { "description": "Success", "schema": { "$ref": "#/definitions/ActionResult" } }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "500": { "description": "Server Error" } }
+            },
+            "post": {
+                "tags": ["Billing"],
+                "operationId": "PostPaymentMethod",
+                "consumes": ["application/json-patch+json", "application/json", "text/json", "application/*+json"],
+                "produces": ["text/plain", "application/json", "text/json"],
+                "parameters": [
+                    { "name": "authorization", "in": "header", "required": false, "type": "string" },
+                    { "name": "obj", "in": "body", "required": false, "schema": { "$ref": "#/definitions/BillingRequest" } }
+                ],
+                "responses": { "200": { "description": "Success", "schema": { "$ref": "#/definitions/ActionResult" } }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "500": { "description": "Server Error" } }
+            }
+        },
+        "/dashboard/hits": {
+            "get": {
+                "tags": ["Dashboard"],
+                "operationId": "GetDashboardHits",
+                "consumes": [],
+                "produces": ["text/plain", "application/json", "text/json"],
+                "parameters": [{ "name": "authorization", "in": "header", "required": false, "type": "string" }],
+                "responses": {
+                    "200": { "description": "Success", "schema": { "uniqueItems": false, "type": "array", "items": { "$ref": "#/definitions/Hit" } } },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden" },
+                    "500": { "description": "Server Error" }
+                }
+            }
+        },
+        "/dashboard/hits/daily": {
+            "get": {
+                "tags": ["Dashboard"],
+                "operationId": "GetDashboardHitsDaily",
+                "consumes": [],
+                "produces": ["text/plain", "application/json", "text/json"],
+                "parameters": [
+                    { "name": "authorization", "in": "header", "required": false, "type": "string" },
+                    { "name": "startDate", "in": "query", "required": false, "type": "string", "format": "date-time" },
+                    { "name": "endDate", "in": "query", "required": false, "type": "string", "format": "date-time" }
+                ],
+                "responses": {
+                    "200": { "description": "Success", "schema": { "uniqueItems": false, "type": "array", "items": { "$ref": "#/definitions/HitDaily" } } },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden" },
+                    "500": { "description": "Server Error" }
+                }
+            }
+        },
+        "/dashboard/invoices": {
+            "get": {
+                "tags": ["Dashboard"],
+                "operationId": "GetDashboardInvoices",
+                "consumes": [],
+                "produces": ["text/plain", "application/json", "text/json"],
+                "parameters": [{ "name": "authorization", "in": "header", "required": false, "type": "string" }],
+                "responses": {
+                    "200": { "description": "Success", "schema": { "uniqueItems": false, "type": "array", "items": { "$ref": "#/definitions/Invoice" } } },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden" },
+                    "500": { "description": "Server Error" }
+                }
+            }
+        },
+        "/plugin/api-keys": {
+            "get": {
+                "tags": ["Plugin"],
+                "operationId": "GetApiKeys",
+                "consumes": [],
+                "produces": ["text/plain", "application/json", "text/json"],
+                "parameters": [],
+                "responses": { "200": { "description": "Success", "schema": { "$ref": "#/definitions/ActionResult" } }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "500": { "description": "Server Error" } }
+            }
+        },
+        "/plugin/api-keys/{id}": {
+            "get": {
+                "tags": ["Plugin"],
+                "operationId": "GetApiKey",
+                "consumes": [],
+                "produces": ["text/plain", "application/json", "text/json"],
+                "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }],
+                "responses": { "200": { "description": "Success", "schema": { "$ref": "#/definitions/ActionResult" } }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "500": { "description": "Server Error" } }
+            }
+        },
+        "/plugin/api-keys/{apiKeyid}": {
+            "delete": {
+                "tags": ["Plugin"],
+                "operationId": "DeleteApiKey",
+                "consumes": [],
+                "produces": ["text/plain", "application/json", "text/json"],
+                "parameters": [{ "name": "apiKeyid", "in": "path", "required": true, "type": "string", "format": "uuid" }],
+                "responses": { "200": { "description": "Success", "schema": { "$ref": "#/definitions/ActionResult" } }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "500": { "description": "Server Error" } }
+            }
+        },
+        "/plugin/api-keys/{apiKeyid}/domains/{domainId}": {
+            "delete": {
+                "tags": ["Plugin"],
+                "operationId": "DeleteApiKeyDomain",
+                "consumes": [],
+                "produces": ["text/plain", "application/json", "text/json"],
+                "parameters": [
+                    { "name": "apiKeyid", "in": "path", "required": true, "type": "string", "format": "uuid" },
+                    { "name": "domainId", "in": "path", "required": true, "type": "string", "format": "uuid" }
+                ],
+                "responses": { "200": { "description": "Success", "schema": { "$ref": "#/definitions/ActionResult" } }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "500": { "description": "Server Error" } }
+            }
+        },
+        "/plugin/api-keys/{apiKeyid}/domains": {
+            "post": {
+                "tags": ["Plugin"],
+                "operationId": "CreateApiKeDomain",
+                "consumes": ["application/json-patch+json", "application/json", "text/json", "application/*+json"],
+                "produces": ["text/plain", "application/json", "text/json"],
+                "parameters": [
+                    { "name": "obj", "in": "body", "required": false, "schema": { "$ref": "#/definitions/PluginConfigRequest" } },
+                    { "name": "apiKeyid", "in": "path", "required": true, "type": "string" }
+                ],
+                "responses": { "200": { "description": "Success", "schema": { "$ref": "#/definitions/ActionResult" } }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "500": { "description": "Server Error" } }
+            }
+        },
+        "/plugin/config": {
+            "get": {
+                "tags": ["Plugin"],
+                "operationId": "GetConfig",
+                "consumes": [],
+                "produces": ["text/plain", "application/json", "text/json"],
+                "parameters": [],
+                "responses": { "200": { "description": "Success", "schema": { "$ref": "#/definitions/ActionResult" } }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "500": { "description": "Server Error" } }
+            },
+            "put": {
+                "tags": ["Plugin"],
+                "operationId": "UpdateConfig",
+                "consumes": ["application/json-patch+json", "application/json", "text/json", "application/*+json"],
+                "produces": ["text/plain", "application/json", "text/json"],
+                "parameters": [{ "name": "obj", "in": "body", "required": false, "schema": { "$ref": "#/definitions/PluginConfigRequest" } }],
+                "responses": { "200": { "description": "Success", "schema": { "$ref": "#/definitions/ActionResult" } }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "500": { "description": "Server Error" } }
+            }
+        },
+        "/timezones": {
+            "get": {
+                "tags": ["TimeZone"],
+                "operationId": "GetTimeZones",
+                "consumes": [],
+                "produces": ["text/plain", "application/json", "text/json"],
+                "parameters": [],
+                "responses": { "200": { "description": "Success", "schema": { "$ref": "#/definitions/ActionResult" } }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "500": { "description": "Server Error" } }
+            }
+        },
+        "/timezones/{country}": {
+            "get": {
+                "tags": ["TimeZone"],
+                "operationId": "GetTimeZonesByCountry",
+                "consumes": [],
+                "produces": ["text/plain", "application/json", "text/json"],
+                "parameters": [{ "name": "country", "in": "path", "required": true, "type": "string" }],
+                "responses": { "200": { "description": "Success", "schema": { "$ref": "#/definitions/ActionResult" } }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "500": { "description": "Server Error" } }
+            }
+        }
+    },
+    "definitions": {
+        "AccountRequest": { "type": "object", "properties": { "any": { "type": "string" } } },
+        "ActionResult": { "type": "object", "properties": {} },
+        "BillingRequest": { "type": "object", "properties": { "any": { "type": "string" } } },
+        "Hit": {
+            "type": "object",
+            "properties": {
+                "hitId": { "format": "uuid", "type": "string" },
+                "clientId": { "format": "uuid", "type": "string" },
+                "date": { "format": "date-time", "type": "string" },
+                "hash": { "format": "int32", "type": "integer" },
+                "ip": { "type": "string" },
+                "price": { "format": "double", "type": "number" },
+                "type": { "type": "string" },
+                "referer": { "type": "string" },
+                "userAgent": { "type": "string" }
+            }
+        },
+        "HitDaily": {
+            "type": "object",
+            "properties": {
+                "hitDailyId": { "format": "uuid", "type": "string" },
+                "clientId": { "format": "uuid", "type": "string" },
+                "date": { "format": "date-time", "type": "string" },
+                "countExcel": { "format": "int32", "type": "integer" },
+                "countWord": { "format": "int32", "type": "integer" },
+                "countPowerPoint": { "format": "int32", "type": "integer" },
+                "countWeb": { "format": "int32", "type": "integer" },
+                "countText": { "format": "int32", "type": "integer" },
+                "countImage": { "format": "int32", "type": "integer" },
+                "countOther": { "format": "int32", "type": "integer" },
+                "totalPrice": { "format": "double", "type": "number" }
+            }
+        },
+        "Invoice": {
+            "type": "object",
+            "properties": {
+                "invoiceId": { "format": "uuid", "type": "string" },
+                "clientId": { "format": "uuid", "type": "string" },
+                "number": { "format": "int32", "type": "integer" },
+                "date": { "format": "date-time", "type": "string" },
+                "price": { "format": "double", "type": "number" },
+                "taxes": { "format": "double", "type": "number" },
+                "total": { "format": "double", "type": "number" },
+                "paid": { "type": "boolean" },
+                "paidOn": { "format": "date-time", "type": "string" },
+                "createdOn": { "format": "date-time", "type": "string" }
+            }
+        },
+        "PluginConfigRequest": { "type": "object", "properties": { "any": { "type": "string" } } }
+    }
+}

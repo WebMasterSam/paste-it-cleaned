@@ -1,5 +1,6 @@
 ﻿using PasteItCleaned.Core.Models;
 using System;
+using System.Collections.Generic;
 
 namespace PasteItCleaned.Backend.Core.Repositories
 {
@@ -7,7 +8,7 @@ namespace PasteItCleaned.Backend.Core.Repositories
     {
         int Count(Guid clientId, string type, DateTime startDate, DateTime endDate);
 
-        PagedList<HitDaily> List(Guid clientId, DateTime startDate, DateTime endDate, int page, int pageSize);
+        List<HitDaily> List(Guid clientId, DateTime startDate, DateTime endDate);
 
         HitDaily Get(Guid clientId, DateTime date);
 

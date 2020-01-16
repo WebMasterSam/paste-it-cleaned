@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using PasteItCleaned.Core.Models;
+﻿using PasteItCleaned.Core.Models;
 using PasteItCleaned.Backend.Core.Repositories;
 using System.Linq;
 using System;
+using System.Collections.Generic;
 
 namespace PasteItCleaned.Backend.Data.Repositories
 {
@@ -48,14 +48,13 @@ namespace PasteItCleaned.Backend.Data.Repositories
                 .FirstOrDefault();
         }
 
-        public PagedList<HitDaily> List(Guid clientId, DateTime startDate, DateTime endDate, int page, int pageSize)
+        public List<HitDaily> List(Guid clientId, DateTime startDate, DateTime endDate)
         {
-            var query = Context.HitsDaily
+            return Context.HitsDaily
                 .Where(m => m.ClientId == clientId)
                 .Where(m => m.Date >= startDate)
-                .Where(m => m.Date <= endDate);
-
-            return this.PagedList(query, page, pageSize);
+                .Where(m => m.Date <= endDate)
+                .OrderByDescending(m => m.Date).ToList();
         }
     }
 }

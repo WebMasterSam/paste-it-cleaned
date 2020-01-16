@@ -2,6 +2,7 @@
 using PasteItCleaned.Core.Models;
 using PasteItCleaned.Core.Services;
 using System;
+using System.Collections.Generic;
 
 namespace PasteItCleaned.Backend.Services
 {
@@ -49,9 +50,9 @@ namespace PasteItCleaned.Backend.Services
             return hitDaily;
         }
 
-        public PagedList<HitDaily> List(Guid clientId, DateTime startDate, DateTime endDate, int page, int pageSize)
+        public List<HitDaily> List(Guid clientId, DateTime startDate, DateTime endDate)
         {
-            return _unitOfWork.HitsDaily.List(clientId, startDate, endDate, page, pageSize);
+            return _unitOfWork.HitsDaily.List(clientId, startDate, endDate);
         }
     }
 }

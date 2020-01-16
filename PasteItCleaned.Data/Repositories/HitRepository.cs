@@ -43,7 +43,8 @@ namespace PasteItCleaned.Backend.Data.Repositories
                 .Where(m => m.ClientId == clientId)
                 .Where(m => m.Type == type || string.IsNullOrWhiteSpace(type))
                 .Where(m => m.Date >= startDate)
-                .Where(m => m.Date <= endDate);
+                .Where(m => m.Date <= endDate)
+                .OrderByDescending(m => m.Date);
 
             return this.PagedList(query, page, pageSize);
         }

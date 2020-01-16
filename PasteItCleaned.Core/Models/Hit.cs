@@ -31,5 +31,8 @@ namespace PasteItCleaned.Core.Models
 
         [Column("referer")]
         public string Referer { get; set; }
+
+        [Column("useragent")]
+        public string UserAgent { get; set; }
     }
 }

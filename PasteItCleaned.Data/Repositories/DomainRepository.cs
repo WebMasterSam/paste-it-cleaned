@@ -40,6 +40,7 @@ namespace PasteItCleaned.Backend.Data.Repositories
             return Context.Domains
                 .Where(m => m.ApiKeyId == apiKeyId)
                 .Where(m => !m.Deleted)
+                .OrderBy(m => m.Name)
                 .ToList();
         }
 

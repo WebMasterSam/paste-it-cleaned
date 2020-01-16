@@ -56,6 +56,7 @@ namespace PasteItCleaned.Plugin.Controllers
                                 var pasteTypeObj = obj.pasteType.Trim().ToLower() == "image" ? SourceType.Image : SourceType.Text;
                                 var ip = HttpContext.Features.Get<IHttpConnectionFeature>()?.RemoteIpAddress.ToString();
                                 var referer = Request.Headers["Referer"].ToString();
+                                var userAgent = Request.Headers["User-Agent"].ToString();
                                 var hitHash = _hitService.GetByHash(clientId, DateTime.UtcNow.Date, obj.hash);
                                 var price = 0.0M;
 
@@ -65,7 +66,7 @@ namespace PasteItCleaned.Plugin.Controllers
                                     this.DecreaseBalance(clientId, price);
                                 }
 
-                                _hitService.Create(new Hit { ClientId = clientId, Date = DateTime.UtcNow, Hash = obj.hash, Ip = ip, Price = price, Referer = referer, Type = pasteTypeObj.ToString() });
+                                _hitService.Create(new Hit { ClientId = clientId, Date = DateTime.UtcNow, Hash = obj.hash, Ip = ip, Price = price, Referer = referer, UserAgent = userAgent, Type = pasteTypeObj.ToString() });
                                 _hitDailyService.CreateOrIncrease(clientId, DateTime.UtcNow.Date, pasteTypeObj.ToString(), price);
                             }
 

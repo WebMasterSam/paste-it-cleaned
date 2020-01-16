@@ -66,7 +66,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public ActionResult Post([FromHeader]string authorization, [FromBody] BillingRequest obj)
+        public ActionResult PostPaymentMethod([FromHeader]string authorization, [FromBody] BillingRequest obj)
         {
             Console.WriteLine("BillingController::Post");
 

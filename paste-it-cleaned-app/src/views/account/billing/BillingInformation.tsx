@@ -18,7 +18,7 @@ import BillingTable from './components/BillingTable'
 
 export interface BillingInformationProps {}
 
-const rows = [createData('1', '100010334', 1.25, 'pending', new Date(2019, 5, 26, 11, 12, 0)), createData('2', '100010335', 2.25, 'paid', new Date(2019, 4, 26, 11, 12, 0))]
+const rows = [createData('1', 100010334, 1.25, false, new Date(2019, 5, 26, 11, 12, 0))]
 
 function BillingInformation() {
     return (
@@ -126,7 +126,7 @@ function BillingInformation() {
                         </Typography>
 
                         <FormWrapper>
-                            <BillingTable rows={rows} full={true} />
+                            <BillingTable loading={false} error={false} rows={rows} full={true} />
                         </FormWrapper>
                     </Paper>
                 </Grid>

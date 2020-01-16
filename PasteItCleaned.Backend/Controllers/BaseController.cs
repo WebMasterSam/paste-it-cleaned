@@ -46,9 +46,9 @@ namespace PasteItCleaned.Backend.Common.Controllers
 
                     _apiKeyService.Create(new ApiKey { ClientId = client.ClientId, CreatedOn = DateTime.Now, Key = ApiKeyHelper.GenerateApiKey(), ExpiresOn = DateTime.Now.AddYears(10) });
                     _userService.Create(new User { ClientId = client.ClientId, CreatedOn = DateTime.Now, CognitoId = cognitoId, CognitoUsername = cognitoUsername });
-
-                    return client;
                 }
+
+                return _clientService.Get(user.ClientId);
             }
 
             return null;

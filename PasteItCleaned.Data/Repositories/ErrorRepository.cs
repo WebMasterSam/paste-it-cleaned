@@ -36,7 +36,8 @@ namespace PasteItCleaned.Backend.Data.Repositories
         public PagedList<Error> List(Guid clientId, int page, int pageSize)
         {
             var query = Context.Errors
-                .Where(m => m.ClientId == clientId);
+                .Where(m => m.ClientId == clientId)
+                .OrderByDescending(m => m.CreatedOn);
 
             return this.PagedList(query, page, pageSize);
         }

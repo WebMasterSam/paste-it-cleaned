@@ -40,6 +40,7 @@ namespace PasteItCleaned.Backend.Data.Repositories
             return Context.Configs
                 .Where(m => m.ClientId == clientId)
                 .Where(m => !m.Deleted)
+                .OrderBy(m => m.Name)
                 .ToList();
         }
 

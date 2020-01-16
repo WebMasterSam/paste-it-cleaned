@@ -21,7 +21,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public ActionResult GetAll()
+        public ActionResult GetTimeZones()
         {
             try
             {
@@ -42,7 +42,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public ActionResult GetAllByCountry(string country)
+        public ActionResult GetTimeZonesByCountry(string country)
         {
             try
             {

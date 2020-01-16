@@ -10,7 +10,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
     {
         // GET account
         [HttpGet()]
-        public ActionResult Get([FromHeader]string authorization)
+        public ActionResult GetAccount([FromHeader]string authorization)
         {
             Console.WriteLine("AccountController::Get");
 
@@ -32,7 +32,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
 
         // POST account
         [HttpPost()]
-        public ActionResult Post([FromHeader]string authorization, [FromBody] AccountRequest obj)
+        public ActionResult PostAccount([FromHeader]string authorization, [FromBody] AccountRequest obj)
         {
             Console.WriteLine("AccountController::Post");
 

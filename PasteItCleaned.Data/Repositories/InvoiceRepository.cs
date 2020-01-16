@@ -33,7 +33,8 @@ namespace PasteItCleaned.Backend.Data.Repositories
 
         public PagedList<Invoice> List(Guid clientId, int page, int pageSize)
         {
-            var query = Context.Invoices.Where(m => m.ClientId == clientId);
+            var query = Context.Invoices.Where(m => m.ClientId == clientId)
+                .OrderByDescending(m => m.CreatedOn);
 
             return this.PagedList(query, page, pageSize);
         }
