@@ -2,7 +2,7 @@
 
 namespace PasteItCleaned.Backend.Entities
 {
-    public class Hit
+    public class HitEntity
     {
         public Guid HitId { get; set; }
         public DateTime Date { get; set; }

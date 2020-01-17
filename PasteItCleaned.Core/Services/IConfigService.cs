@@ -13,7 +13,7 @@ namespace PasteItCleaned.Core.Services
 
         Config Create(Config config);
 
-        Config Update(Config configToUpdate, Config config);
+        Config Update(Config config);
 
         void Delete(Guid configId);
     }

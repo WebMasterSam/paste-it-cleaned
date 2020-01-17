@@ -1,8 +1,11 @@
 {
-    "dashboard": {
-        "endpoint": "https://localhost:44399/dashboard"
-    },
-    "analytics": {
-        "endpoint": "https://localhost:44399/analytics"
+    "endpoints": {
+        "base": "https://localhost:44399",
+        "account": "/account",
+        "analytics": "/analytics",
+        "billing": "/billing",
+        "dashboard": "/dashboard",
+        "timezones": "/timezones",
+        "plugin": "/plugin"
     }
 }

@@ -2,7 +2,7 @@
 
 namespace PasteItCleaned.Backend.Entities
 {
-    public class User
+    public class UserEntity
     {
         public Guid UserId { get; set; }
         public string CognitoId { get; set; }

@@ -16,19 +16,20 @@ import PageWrapper from '../../components/PageWrapper'
 import BillingTable from '../account/billing/components/BillingTable'
 
 import { DashboardController } from './DashboardController'
-import { Hit, Invoice } from '../../entities/api'
+import { HitEntity, InvoiceEntity } from '../../entities/api'
 
 import './Dashboard.less'
 
 export interface DashboardProps {}
 export interface DashboardState {
-    hits: Hit[]
+    isLoaded: boolean
+    hits: HitEntity[]
     hitsLoading: boolean
     hitsError: boolean
-    hitsDaily: Hit[]
+    hitsDaily: HitEntity[]
     hitsDailyLoading: boolean
     hitsDailyError: boolean
-    invoices: Invoice[]
+    invoices: InvoiceEntity[]
     invoicesLoading: boolean
     invoicesError: boolean
 }
@@ -81,6 +82,7 @@ class Dashboard extends React.Component<DashboardProps, DashboardState> {
         super(props)
         this.controller = new DashboardController(this)
         this.state = {
+            isLoaded: false,
             hits: [],
             hitsLoading: false,
             hitsError: false,

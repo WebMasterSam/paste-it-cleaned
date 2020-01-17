@@ -2,7 +2,7 @@
 
 namespace PasteItCleaned.Backend.Entities
 {
-    public class Config
+    public class ConfigEntity
     {
         public Guid ConfigId { get; set; }
         public string Name { get; set; }

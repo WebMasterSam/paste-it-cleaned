@@ -2,7 +2,7 @@
 
 namespace PasteItCleaned.Backend.Entities
 {
-    public class Client
+    public class ClientEntity
     {
         public Guid ClientId { get; set; }
         public decimal Balance { get; set; }

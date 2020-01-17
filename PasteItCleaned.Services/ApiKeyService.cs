@@ -50,13 +50,13 @@ namespace PasteItCleaned.Backend.Services
             return _unitOfWork.ApiKeys.List(clientId);
         }
 
-        public ApiKey Update(ApiKey apiKeyToUpdate, ApiKey apiKey)
+        public ApiKey Update(ApiKey apiKey)
         {
-            apiKeyToUpdate.ExpiresOn = apiKey.ExpiresOn;
+            apiKey.UpdatedOn = DateTime.UtcNow;
 
             _unitOfWork.Commit();
 
-            return apiKeyToUpdate;
+            return apiKey;
         }
     }
 }

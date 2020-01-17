@@ -3,7 +3,7 @@ import moment from 'moment'
 import backend from '../../../config/backend.json'
 import { BaseController } from '../../BaseController'
 
-import { HitDaily } from '../../../entities/api'
+import { HitDailyEntity } from '../../../entities/api'
 import AnalyticsUsage from './AnalyticsUsage'
 
 export class AnalyticsUsageController extends BaseController {
@@ -27,18 +27,18 @@ export class AnalyticsUsageController extends BaseController {
 
     initializeHitsDaily = (startDate: Date, endDate: Date) => {
         this.component!.setState({ hitsDailyLoading: true })
-        this.getHitsDaily(
+        this.getHitsDailyBackend(
             startDate,
             endDate,
-            (json: HitDaily[]) => {
+            (json: HitDailyEntity[]) => {
                 this.component!.setState({ hitsDaily: json })
                 this.createOfficeUsage()
                 this.createWebsiteUsage()
                 this.createLocalUsage()
-                this.component!.setState({ hitsDailyLoading: false })
+                this.component!.setState({ hitsDailyLoading: false, isLoaded: true })
             },
             (e: any) => {
-                this.component!.setState({ hitsDailyLoading: false, hitsDailyError: true })
+                this.component!.setState({ hitsDailyLoading: false, hitsDailyError: true, isLoaded: true })
             }
         )
     }
@@ -124,11 +124,11 @@ export class AnalyticsUsageController extends BaseController {
         this.initializeHitsDaily(newStartDate, newEndDate)
     }
 
-    getHitsDaily = (startDate: Date, endDate: Date, success?: (json: any) => void, error?: (e: any) => void) => {
+    private getHitsDailyBackend = (startDate: Date, endDate: Date, success?: (json: any) => void, error?: (e: any) => void) => {
         this.callBackend(this.endpoint(`/hits/daily?startDate=${moment(startDate).format('YYYY-MM-DD')}&endDate=${moment(endDate).format('YYYY-MM-DD')}`), 'GET', success, error)
     }
 
-    endpoint(path: string) {
-        return this.culturedEndpoint(backend.analytics.endpoint + path)
+    private endpoint(path: string) {
+        return this.culturedEndpoint(backend.endpoints.analytics + path)
     }
 }

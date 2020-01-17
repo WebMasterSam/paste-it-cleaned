@@ -32,13 +32,13 @@ namespace PasteItCleaned.Backend.Services
             return user;
         }
 
-        public User Update(User userToUpdate, User user)
+        public User Update(User user)
         {
-            userToUpdate.UpdatedOn = DateTime.Now;
+            user.UpdatedOn = DateTime.Now;
 
             _unitOfWork.Commit();
 
-            return userToUpdate;
+            return user;
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace PasteItCleaned.Backend.Entities
 {
-    public class Invoice
+    public class InvoiceEntity
     {
         public Guid InvoiceId { get; set; }
         public int Number { get; set; }
@@ -12,6 +12,6 @@ namespace PasteItCleaned.Backend.Entities
         public decimal Total { get; set; }
         public bool Paid { get; set; }
         public DateTime? PaidOn { get; set; }
-        public Payment Payment { get; set; }
+        public PaymentEntity Payment { get; set; }
     }
 }

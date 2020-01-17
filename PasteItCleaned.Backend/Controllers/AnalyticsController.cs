@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using PasteItCleaned.Core.Models;
 using PasteItCleaned.Core.Services;
 
 namespace PasteItCleaned.Backend.Common.Controllers
@@ -13,7 +11,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
         private readonly IHitService _hitService;
         private readonly IHitDailyService _hitDailyService;
 
-        public AnalyticsController(IApiKeyService apiKeyService, IClientService clientService, IUserService userService, IHitService hitService, IHitDailyService hitDailyService, ILogger<AnalyticsController> logger) : base(apiKeyService, clientService, userService, logger)
+        public AnalyticsController(IApiKeyService apiKeyService, IClientService clientService, IUserService userService, IHitService hitService, IHitDailyService hitDailyService, IConfigService configService, ILogger<AnalyticsController> logger) : base(apiKeyService, clientService, userService, configService, logger)
         {
             this._hitService = hitService;
             this._hitDailyService = hitDailyService;
@@ -21,15 +19,19 @@ namespace PasteItCleaned.Backend.Common.Controllers
 
         // GET analytics/hits/
         [HttpGet("hits")]
-        [ProducesResponseType(typeof(PagedList<Hit>), 200)]
+        [ProducesResponseType(typeof(PagedListHitEntity), 200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public ActionResult<PagedList<Hit>> GetHits([FromHeader]string authorization, [FromQuery]int page, [FromQuery]int pageSize)
+        public ActionResult<PagedListHitEntity> GetAnalyticsHits([FromHeader]string authorization, [FromQuery]int page, [FromQuery]int pageSize)
         {
+            var client = this.GetOrCreateClient(authorization);
+
+            if (client == null)
+                return StatusCode(401);
+
             try
             {
-                var client = this.GetOrCreateClient(authorization);
                 var hits = _hitService.List(client.ClientId, "", DateTime.MinValue, DateTime.MaxValue, page, pageSize);
 
                 return Ok(hits);
@@ -43,11 +45,11 @@ namespace PasteItCleaned.Backend.Common.Controllers
 
         // GET dashboard/hits/
         [HttpGet("hits/daily")]
-        [ProducesResponseType(typeof(List<HitDaily>), 200)]
+        [ProducesResponseType(typeof(ListHitDailyEntity), 200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public ActionResult<List<HitDaily>> GetDashboardHitsDaily([FromHeader]string authorization, [FromQuery]DateTime startDate, [FromQuery]DateTime endDate)
+        public ActionResult<ListHitDailyEntity> GetAnalyticsHitsDaily([FromHeader]string authorization, [FromQuery]DateTime startDate, [FromQuery]DateTime endDate)
         {
             var client = this.GetOrCreateClient(authorization);
 

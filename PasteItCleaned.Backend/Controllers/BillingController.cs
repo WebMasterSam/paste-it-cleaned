@@ -2,6 +2,7 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using PasteItCleaned.Backend.Entities;
 using PasteItCleaned.Common.Localization;
 using PasteItCleaned.Core.Services;
 
@@ -14,7 +15,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
         private readonly IPaymentService _paymentService;
         private readonly IPaymentMethodService _paymentMethodService;
 
-        public BillingController(IApiKeyService apiKeyService, IClientService clientService, IUserService userService, IInvoiceService invoiceService, IPaymentService paymentService, IPaymentMethodService paymentMethodService, ILogger<BillingController> logger) : base(apiKeyService, clientService, userService, logger)
+        public BillingController(IApiKeyService apiKeyService, IClientService clientService, IUserService userService, IInvoiceService invoiceService, IPaymentService paymentService, IPaymentMethodService paymentMethodService, IConfigService configService, ILogger<BillingController> logger) : base(apiKeyService, clientService, userService, configService, logger)
         {
             this._invoiceService = invoiceService;
             this._paymentService = paymentService;
@@ -23,11 +24,11 @@ namespace PasteItCleaned.Backend.Common.Controllers
 
         // GET billing/invoices/{id}
         [HttpGet("invoices/{id}")]
-        [ProducesResponseType(typeof(ActionResult), 200)]
+        [ProducesResponseType(typeof(InvoiceEntity), 200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public ActionResult GetInvoice([FromHeader]string authorization)
+        public ActionResult<InvoiceEntity> GetInvoice([FromHeader]string authorization)
         {
             Console.WriteLine("BillingController::GetInvoice");
 
@@ -36,11 +37,11 @@ namespace PasteItCleaned.Backend.Common.Controllers
 
         // GET billing/invoices
         [HttpGet("invoices")]
-        [ProducesResponseType(typeof(ActionResult), 200)]
+        [ProducesResponseType(typeof(ListInvoiceEntity), 200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public ActionResult GetInvoices([FromHeader]string authorization)
+        public ActionResult<ListInvoiceEntity> GetInvoices([FromHeader]string authorization)
         {
             Console.WriteLine("BillingController::GetInvoices");
 
@@ -49,11 +50,11 @@ namespace PasteItCleaned.Backend.Common.Controllers
 
         // GET billing/payment-method
         [HttpGet("payment-method")]
-        [ProducesResponseType(typeof(ActionResult), 200)]
+        [ProducesResponseType(typeof(PaymentMethodEntity), 200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public ActionResult GetPaymentMethod([FromHeader]string authorization)
+        public ActionResult<PaymentMethodEntity> GetPaymentMethod([FromHeader]string authorization)
         {
             Console.WriteLine("BillingController::GetPaymentMethod");
 
@@ -62,11 +63,11 @@ namespace PasteItCleaned.Backend.Common.Controllers
 
         // POST billing/payment-method
         [HttpPost("payment-method")]
-        [ProducesResponseType(typeof(ActionResult), 200)]
+        [ProducesResponseType(typeof(PaymentMethodEntity), 200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public ActionResult PostPaymentMethod([FromHeader]string authorization, [FromBody] BillingRequest obj)
+        public ActionResult<PaymentMethodEntity> PostPaymentMethod([FromHeader]string authorization, [FromBody] BillingRequest obj)
         {
             Console.WriteLine("BillingController::Post");
 

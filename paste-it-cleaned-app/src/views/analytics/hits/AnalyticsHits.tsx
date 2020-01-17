@@ -6,14 +6,15 @@ import FileCopyIcon from '@material-ui/icons/FileCopy'
 import FormWrapper from '../../../components/FormWrapper'
 
 import HitsTable from './components/HitsTable'
-import { Hit } from '../../../entities/api'
+import { HitEntity } from '../../../entities/api'
 import { AnalyticsHitsController } from './AnalyticsHitsController'
 
 import './AnalyticsHits.less'
 
 export interface AnalyticsHitsProps {}
 export interface AnalyticsHitsState {
-    hits: Hit[]
+    isLoaded: boolean
+    hits: HitEntity[]
     hitsLoading: boolean
     hitsError: boolean
 }
@@ -25,6 +26,7 @@ class AnalyticsHits extends React.Component<AnalyticsHitsProps, AnalyticsHitsSta
         super(props)
         this.controller = new AnalyticsHitsController(this)
         this.state = {
+            isLoaded: false,
             hits: [],
             hitsLoading: false,
             hitsError: false,

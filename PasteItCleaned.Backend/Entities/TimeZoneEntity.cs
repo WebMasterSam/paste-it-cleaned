@@ -2,7 +2,7 @@
 
 namespace PasteItCleaned.Backend.Entities
 {
-    public class TimeZone
+    public class TimeZoneEntity
     {
         public string Name { get; set; }
         public string DisplayName { get; set; }

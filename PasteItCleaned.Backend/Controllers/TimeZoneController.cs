@@ -10,18 +10,18 @@ namespace PasteItCleaned.Backend.Common.Controllers
     {
         private ITimeZoneService _timeZoneService = null;
 
-        public TimeZoneController(IApiKeyService apiKeyService, IClientService clientService, IUserService userService, ITimeZoneService timeZoneService, ILogger<DashboardController> logger) : base(apiKeyService, clientService, userService, logger)
+        public TimeZoneController(IApiKeyService apiKeyService, IClientService clientService, IUserService userService, ITimeZoneService timeZoneService, IConfigService configService, ILogger<DashboardController> logger) : base(apiKeyService, clientService, userService, configService, logger)
         {
             this._timeZoneService = timeZoneService;
         }
 
         // GET timezones
         [HttpGet()]
-        [ProducesResponseType(typeof(ActionResult), 200)]
+        [ProducesResponseType(typeof(ListTimeZoneEntity), 200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public ActionResult GetTimeZones()
+        public ActionResult<ListTimeZoneEntity> GetTimeZones()
         {
             try
             {
@@ -38,11 +38,11 @@ namespace PasteItCleaned.Backend.Common.Controllers
 
         // GET timezones/{country}/
         [HttpGet("{country}")]
-        [ProducesResponseType(typeof(ActionResult), 200)]
+        [ProducesResponseType(typeof(ListTimeZoneEntity), 200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public ActionResult GetTimeZonesByCountry(string country)
+        public ActionResult<ListTimeZoneEntity> GetTimeZonesByCountry(string country)
         {
             try
             {

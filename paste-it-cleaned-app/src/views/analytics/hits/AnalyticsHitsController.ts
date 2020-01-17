@@ -4,7 +4,7 @@ import backend from '../../../config/backend.json'
 import { BaseController } from '../../BaseController'
 
 import { createData } from '../../../helpers/AnalyticsHelper'
-import { Hit, ActionResult } from '../../../entities/api'
+import { HitEntity, ActionResult } from '../../../entities/api'
 import AnalyticsHits from './AnalyticsHits'
 
 export class AnalyticsHitsController extends BaseController {
@@ -21,12 +21,12 @@ export class AnalyticsHitsController extends BaseController {
 
     initializeHits = (page: number, pageSize: number) => {
         this.component!.setState({ hitsLoading: true })
-        this.getHits(
+        this.getHitsBackend(
             page,
             pageSize,
             (json: ActionResult) => {
                 let hits: any[] = []
-                json.results.forEach((hit: Hit) => {
+                json.results.forEach((hit: HitEntity) => {
                     hits.push(createData(moment(hit.date!).toDate(), hit.ip!, hit.type!, hit.userAgent!, hit.price!))
                 })
                 this.component!.setState({ hits, hitsLoading: false })
@@ -37,11 +37,11 @@ export class AnalyticsHitsController extends BaseController {
         )
     }
 
-    getHits = (page: number, pageSize: number, success?: (json: any) => void, error?: (e: any) => void) => {
+    private getHitsBackend = (page: number, pageSize: number, success?: (json: any) => void, error?: (e: any) => void) => {
         this.callBackend(this.endpoint(`/hits?page=${page}&pageSize=${pageSize}`), 'GET', success, error)
     }
 
-    endpoint(path: string) {
-        return this.culturedEndpoint(backend.analytics.endpoint + path)
+    private endpoint(path: string) {
+        return this.culturedEndpoint(backend.endpoints.analytics + path)
     }
 }

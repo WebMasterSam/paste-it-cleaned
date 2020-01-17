@@ -32,13 +32,11 @@ namespace PasteItCleaned.Backend.Services
             return _unitOfWork.Payments.GetByInvoice(invoiceId);
         }
 
-        public Payment Update(Payment paymentToUpdate, Payment payment)
+        public Payment Update(Payment payment)
         {
-            paymentToUpdate.TrxNumber = payment.TrxNumber;
-
             _unitOfWork.Commit();
 
-            return paymentToUpdate;
+            return payment;
         }
     }
 }

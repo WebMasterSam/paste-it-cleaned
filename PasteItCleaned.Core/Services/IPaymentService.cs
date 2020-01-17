@@ -10,6 +10,6 @@ namespace PasteItCleaned.Core.Services
 
         Payment Create(Payment payment);
 
-        Payment Update(Payment paymentToUpdate, Payment payment);
+        Payment Update(Payment payment);
     }
 }

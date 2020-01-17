@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using PasteItCleaned.Core.Models;
 using PasteItCleaned.Core.Services;
 
 namespace PasteItCleaned.Backend.Common.Controllers
@@ -14,7 +12,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
         private readonly IHitDailyService _hitDailyService;
         private readonly IInvoiceService _invoiceService;
 
-        public DashboardController(IApiKeyService apiKeyService, IClientService clientService, IUserService userService, IHitService hitService, IHitDailyService hitDailyService, IInvoiceService invoiceService, ILogger<DashboardController> logger) : base(apiKeyService, clientService, userService, logger)
+        public DashboardController(IApiKeyService apiKeyService, IClientService clientService, IUserService userService, IHitService hitService, IHitDailyService hitDailyService, IInvoiceService invoiceService, IConfigService configService, ILogger<DashboardController> logger) : base(apiKeyService, clientService, userService, configService, logger)
         {
             this._hitService = hitService;
             this._hitDailyService = hitDailyService;
@@ -23,11 +21,11 @@ namespace PasteItCleaned.Backend.Common.Controllers
 
         // GET dashboard/hits/
         [HttpGet("hits")]
-        [ProducesResponseType(typeof(PagedList<Hit>), 200)]
+        [ProducesResponseType(typeof(PagedListHitEntity), 200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public ActionResult<PagedList<Hit>> GetDashboardHits([FromHeader]string authorization)
+        public ActionResult<PagedListHitEntity> GetDashboardHits([FromHeader]string authorization)
         {
             var client = this.GetOrCreateClient(authorization);
 
@@ -49,11 +47,11 @@ namespace PasteItCleaned.Backend.Common.Controllers
 
         // GET dashboard/hits/
         [HttpGet("hits/daily")]
-        [ProducesResponseType(typeof(List<HitDaily>), 200)]
+        [ProducesResponseType(typeof(ListHitDailyEntity), 200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public ActionResult<List<HitDaily>> GetDashboardHitsDaily([FromHeader]string authorization, [FromQuery]DateTime startDate, [FromQuery]DateTime endDate)
+        public ActionResult<ListHitDailyEntity> GetDashboardHitsDaily([FromHeader]string authorization, [FromQuery]DateTime startDate, [FromQuery]DateTime endDate)
         {
             var client = this.GetOrCreateClient(authorization);
 
@@ -75,11 +73,11 @@ namespace PasteItCleaned.Backend.Common.Controllers
 
         // GET dashboard/invoices/
         [HttpGet("invoices")]
-        [ProducesResponseType(typeof(List<Invoice>), 200)]
+        [ProducesResponseType(typeof(ListInvoiceEntity), 200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public ActionResult<List<Invoice>> GetDashboardInvoices([FromHeader]string authorization)
+        public ActionResult<ListInvoiceEntity> GetDashboardInvoices([FromHeader]string authorization)
         {
             var client = this.GetOrCreateClient(authorization);
 

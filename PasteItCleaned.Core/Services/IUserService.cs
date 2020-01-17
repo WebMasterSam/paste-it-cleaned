@@ -1,5 +1,4 @@
 ﻿using PasteItCleaned.Core.Models;
-using System;
 
 namespace PasteItCleaned.Core.Services
 {
@@ -11,6 +10,6 @@ namespace PasteItCleaned.Core.Services
 
         User Create(User user);
 
-        User Update(User userToUpdate, User user);
+        User Update(User user);
     }
 }

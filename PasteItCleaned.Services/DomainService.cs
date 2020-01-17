@@ -45,14 +45,13 @@ namespace PasteItCleaned.Backend.Services
             return _unitOfWork.Domains.List(apiKeyId);
         }
 
-        public Domain Update(Domain domainToUpdate, Domain domain)
+        public Domain Update(Domain domain)
         {
-            domainToUpdate.Name = domain.Name;
-            domainToUpdate.UpdatedOn = DateTime.Now;
+            domain.UpdatedOn = DateTime.Now;
 
             _unitOfWork.Commit();
 
-            return domainToUpdate;
+            return domain;
         }
     }
 }

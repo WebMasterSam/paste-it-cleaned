@@ -53,22 +53,13 @@ namespace PasteItCleaned.Backend.Services
             return _unitOfWork.Clients.List(page, pageSize);
         }
 
-        public Client Update(Client clientToUpdate, Client client)
+        public Client Update(Client client)
         {
-            clientToUpdate.Address = client.Address;
-            clientToUpdate.Balance = client.Balance;
-            clientToUpdate.BusinessName = client.BusinessName;
-            clientToUpdate.City = client.City;
-            clientToUpdate.Country = client.Country;
-            clientToUpdate.FirstName = client.FirstName;
-            clientToUpdate.LastName = client.LastName;
-            clientToUpdate.PhoneNumber = client.PhoneNumber;
-            clientToUpdate.State = client.State;
-            clientToUpdate.UpdatedOn = DateTime.Now;
+            client.UpdatedOn = DateTime.Now;
 
             _unitOfWork.Commit();
 
-            return clientToUpdate;
+            return client;
         }
     }
 }

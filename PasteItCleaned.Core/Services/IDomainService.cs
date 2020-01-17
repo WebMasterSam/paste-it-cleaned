@@ -13,7 +13,7 @@ namespace PasteItCleaned.Core.Services
 
         Domain Create(Domain domain);
 
-        Domain Update(Domain domainToUpdate, Domain domain);
+        Domain Update(Domain domain);
 
         void Delete(Guid domainId);
     }

@@ -5,55 +5,37 @@ import SettingsIcon from '@material-ui/icons/Settings'
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline'
 
 import TooltipHelp from '../../../components/TooltipHelp'
+import { ConfigEntity } from '../../../entities/api'
+import { PluginConfigController } from './PluginConfigController'
 
 import './PluginConfig.less'
+import { Skeleton } from '@material-ui/lab'
+import LoadingError from '../../../components/LoadingError'
 
 export interface PluginConfigProps {}
 export interface PluginConfigState {
-    embedExternalImages: boolean
-    removeEmptyTags: boolean
-    removeSpanTags: boolean
-    removeClassNames: boolean
-    removeIframes: boolean
-    removeTagAttributes: boolean
+    isLoaded: boolean
+    config: ConfigEntity
+    configLoading: boolean
+    configError: boolean
 }
 
 class PluginConfig extends React.Component<PluginConfigProps, PluginConfigState> {
+    private controller?: PluginConfigController = undefined
+
     constructor(props: PluginConfigProps) {
         super(props)
+        this.controller = new PluginConfigController(this)
         this.state = {
-            embedExternalImages: true,
-            removeEmptyTags: true,
-            removeSpanTags: true,
-            removeClassNames: true,
-            removeIframes: true,
-            removeTagAttributes: true,
+            isLoaded: false,
+            config: {} as ConfigEntity,
+            configLoading: false,
+            configError: false,
         }
     }
 
-    handleChange(config: string, value: boolean) {
-        switch (config) {
-            case 'embedExternalImages':
-                this.setState({ embedExternalImages: value })
-                break
-            case 'removeEmptyTags':
-                this.setState({ removeEmptyTags: value })
-                break
-            case 'removeSpanTags':
-                this.setState({ removeSpanTags: value })
-                break
-            case 'removeClassNames':
-                this.setState({ removeClassNames: value })
-                break
-            case 'removeIframes':
-                this.setState({ removeIframes: value })
-                break
-            case 'removeTagAttributes':
-                this.setState({ removeTagAttributes: value })
-                break
-        }
-
-        // save backend
+    componentDidMount() {
+        this.controller!.initialize()
     }
 
     render() {
@@ -64,48 +46,63 @@ class PluginConfig extends React.Component<PluginConfigProps, PluginConfigState>
                         <SettingsIcon /> Plugin configuration
                     </Typography>
                     <br />
-                    <div className="alert alert-info">
-                        <ErrorOutlineIcon /> Those settings takes effects immediately when changed.
-                    </div>
-                    <Grid container spacing={3}>
-                        <Grid item xs={12}>
-                            <TooltipHelp title={'Downloads all the external images and embed them as "data-uri" in the cleaned HTML.'} placement="right">
-                                <FormControlLabel
-                                    control={<Switch checked={this.state.embedExternalImages} onChange={() => this.handleChange('embedExternalImages', !this.state.embedExternalImages)} color="primary" />}
-                                    label="Embed external images"
-                                />
-                            </TooltipHelp>
+                    {this.state.configLoading ? (
+                        <React.Fragment>
+                            <Skeleton variant="text" height={80} />
+                            <Skeleton variant="text" height={40} />
+                            <Skeleton variant="text" height={40} />
+                            <Skeleton variant="text" height={40} />
+                            <Skeleton variant="text" height={40} />
+                            <Skeleton variant="text" height={40} />
+                            <Skeleton variant="text" height={40} />
+                            <Skeleton variant="text" height={40} />
+                            <Skeleton variant="text" height={40} />
+                        </React.Fragment>
+                    ) : this.state.configError ? (
+                        <React.Fragment>
+                            <LoadingError />
+                        </React.Fragment>
+                    ) : (
+                        <React.Fragment>
+                            {' '}
+                            <div className="alert alert-info">
+                                <ErrorOutlineIcon /> Those settings takes effects immediately when changed.
+                            </div>
+                            <Grid container spacing={3}>
+                                <Grid item xs={12}>
+                                    <TooltipHelp title={'Downloads all the external images and embed them as "data-uri" in the cleaned HTML.'} placement="right">
+                                        <FormControlLabel control={<Switch checked={this.state.config.embedExternalImages} onChange={() => this.controller!.handleChange('embedExternalImages')} color="primary" />} label="Embed external images" />
+                                    </TooltipHelp>
 
-                            <TooltipHelp title={'Removes all empty tags from the pasted source to clean up the code.'} placement="right">
-                                <FormControlLabel
-                                    control={<Switch checked={this.state.removeEmptyTags} onChange={() => this.handleChange('removeEmptyTags', !this.state.removeEmptyTags)} value="checkedB" color="primary" />}
-                                    label="Remove empty tags"
-                                />
-                            </TooltipHelp>
+                                    <TooltipHelp title={'Removes all empty tags from the pasted source to clean up the code.'} placement="right">
+                                        <FormControlLabel control={<Switch checked={this.state.config.removeEmptyTags} onChange={() => this.controller!.handleChange('removeEmptyTags')} value="checkedB" color="primary" />} label="Remove empty tags" />
+                                    </TooltipHelp>
 
-                            <TooltipHelp title={'Removes all span tags from pasted source.'} placement="right">
-                                <FormControlLabel control={<Switch checked={this.state.removeSpanTags} onChange={() => this.handleChange('removeSpanTags', !this.state.removeSpanTags)} value="checkedB" color="primary" />} label="Remove span tags" />
-                            </TooltipHelp>
+                                    <TooltipHelp title={'Removes all span tags from pasted source.'} placement="right">
+                                        <FormControlLabel control={<Switch checked={this.state.config.removeSpanTags} onChange={() => this.controller!.handleChange('removeSpanTags')} value="checkedB" color="primary" />} label="Remove span tags" />
+                                    </TooltipHelp>
 
-                            <TooltipHelp title={'Removes all class names to avoid any side effect when the cleaned text is shown in a web page.'} placement="right">
-                                <FormControlLabel
-                                    control={<Switch checked={this.state.removeClassNames} onChange={() => this.handleChange('removeClassNames', !this.state.removeClassNames)} value="checkedB" color="primary" />}
-                                    label="Remove class names"
-                                />
-                            </TooltipHelp>
+                                    <TooltipHelp title={'Removes all class names to avoid any side effect when the cleaned text is shown in a web page.'} placement="right">
+                                        <FormControlLabel
+                                            control={<Switch checked={this.state.config.removeClassNames} onChange={() => this.controller!.handleChange('removeClassNames')} value="checkedB" color="primary" />}
+                                            label="Remove class names"
+                                        />
+                                    </TooltipHelp>
 
-                            <TooltipHelp title={'Removes all iframes from the pasted source.'} placement="right">
-                                <FormControlLabel control={<Switch checked={this.state.removeIframes} onChange={() => this.handleChange('removeIframes', !this.state.removeIframes)} value="checkedB" color="primary" />} label="Remove iframes" />
-                            </TooltipHelp>
+                                    <TooltipHelp title={'Removes all iframes from the pasted source.'} placement="right">
+                                        <FormControlLabel control={<Switch checked={this.state.config.removeIframes} onChange={() => this.controller!.handleChange('removeIframes')} value="checkedB" color="primary" />} label="Remove iframes" />
+                                    </TooltipHelp>
 
-                            <TooltipHelp title={'Removes all attributes from the HTML tags, except for the most basic ones like "style".'} placement="right">
-                                <FormControlLabel
-                                    control={<Switch checked={this.state.removeTagAttributes} onChange={() => this.handleChange('removeTagAttributes', !this.state.removeTagAttributes)} value="checkedB" color="primary" />}
-                                    label="Remove tag attributes"
-                                />
-                            </TooltipHelp>
-                        </Grid>
-                    </Grid>
+                                    <TooltipHelp title={'Removes all attributes from the HTML tags, except for the most basic ones like "style".'} placement="right">
+                                        <FormControlLabel
+                                            control={<Switch checked={this.state.config.removeTagAttributes} onChange={() => this.controller!.handleChange('removeTagAttributes')} value="checkedB" color="primary" />}
+                                            label="Remove tag attributes"
+                                        />
+                                    </TooltipHelp>
+                                </Grid>
+                            </Grid>
+                        </React.Fragment>
+                    )}
                 </Paper>
             </React.Fragment>
         )

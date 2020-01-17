@@ -14,7 +14,7 @@ namespace PasteItCleaned.Core.Services
 
         ApiKey Create(ApiKey apiKey);
 
-        ApiKey Update(ApiKey apiKeyToUpdate, ApiKey apiKey);
+        ApiKey Update(ApiKey apiKey);
 
         void Delete(Guid apiKeyId);
     }

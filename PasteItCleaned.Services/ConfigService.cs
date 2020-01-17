@@ -45,20 +45,13 @@ namespace PasteItCleaned.Backend.Services
             return _unitOfWork.Configs.List(clientId);
         }
 
-        public Config Update(Config configToUpdate, Config config)
+        public Config Update(Config config)
         {
-            configToUpdate.Name = config.Name;
-            configToUpdate.EmbedExternalImages = config.EmbedExternalImages;
-            configToUpdate.RemoveClassNames = config.RemoveClassNames;
-            configToUpdate.RemoveEmptyTags = config.RemoveEmptyTags;
-            configToUpdate.RemoveIframes = config.RemoveIframes;
-            configToUpdate.RemoveSpanTags = config.RemoveSpanTags;
-            configToUpdate.RemoveTagAttributes = config.RemoveTagAttributes;
-            configToUpdate.UpdatedOn = DateTime.Now;
+            config.UpdatedOn = DateTime.UtcNow;
 
             _unitOfWork.Commit();
 
-            return configToUpdate;
+            return config;
         }
     }
 }

@@ -11,7 +11,7 @@ namespace PasteItCleaned.Core.Services
 
         Client Create(Client client);
 
-        Client Update(Client clientToUpdate, Client client);
+        Client Update(Client client);
 
         Client DecreaseBalance(Guid clientId, decimal amount);
 

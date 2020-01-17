@@ -6,7 +6,7 @@ namespace PasteItCleaned.Core.Models
 {
     public class Config
     {
-        [Column("config_id")]
+        [Column("config_id", TypeName = "char(36)")]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public Guid ConfigId { get; set; }
@@ -14,7 +14,7 @@ namespace PasteItCleaned.Core.Models
         [Column("config_name")]
         public string Name { get; set; }
 
-        [Column("client_id")]
+        [Column("client_id", TypeName = "char(36)")]
         public Guid ClientId { get; set; }
 
         [Column("embed_external_images", TypeName = "bit(1)")]

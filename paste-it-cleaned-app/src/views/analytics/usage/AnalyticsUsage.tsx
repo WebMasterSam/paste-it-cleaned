@@ -2,7 +2,7 @@ import React, { Fragment } from 'react'
 import moment from 'moment'
 import { CartesianGrid, XAxis, YAxis, Legend, Tooltip, LineChart, Line, ResponsiveContainer } from 'recharts'
 
-import { Paper, Typography, Button } from '@material-ui/core'
+import { Paper, Typography } from '@material-ui/core'
 import FileCopyIcon from '@material-ui/icons/FileCopy'
 import SkipPreviousIcon from '@material-ui/icons/SkipPrevious'
 import SkipNextIcon from '@material-ui/icons/SkipNext'
@@ -15,18 +15,18 @@ import { WebIcon } from '../../../icons/Web'
 import { TextIcon } from '../../../icons/Text'
 import { ImageIcon } from '../../../icons/Image'
 
-import { HitDaily } from '../../../entities/api'
+import { HitDailyEntity } from '../../../entities/api'
 import { AnalyticsUsageController } from './AnalyticsUsageController'
 import ButtonWithLoading from '../../../components/ButtonWithLoading'
 
 import './AnalyticsUsage.less'
-import { Skeleton } from '@material-ui/lab'
 
 export interface AnalyticsUsageProps {}
 export interface AnalyticsUsageState {
+    isLoaded: boolean
     startDate: Date
     endDate: Date
-    hitsDaily: HitDaily[]
+    hitsDaily: HitDailyEntity[]
     hitsDailyLoading: boolean
     hitsDailyError: boolean
     officeUsage: any[]
@@ -41,6 +41,7 @@ class AnalyticsUsage extends React.Component<AnalyticsUsageProps, AnalyticsUsage
         super(props)
         this.controller = new AnalyticsUsageController(this)
         this.state = {
+            isLoaded: false,
             hitsDaily: [],
             hitsDailyLoading: false,
             hitsDailyError: false,
