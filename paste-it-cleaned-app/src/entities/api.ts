@@ -117,8 +117,18 @@ export type DomainEntity = {
     [key: string]: any;
 };
 
-export type PluginConfigRequest = {
-    'config' ? : ConfigEntity;
+export type PluginApiKeyRequest = {
+    'apiKey' ? : ApiKeyEntity;
+} & {
+    [key: string]: any;
+};
+
+export type ActionResult = {} & {
+    [key: string]: any;
+};
+
+export type PluginApiKeyDomainRequest = {
+    'domainName' ? : string;
 } & {
     [key: string]: any;
 };
@@ -136,7 +146,9 @@ export type ConfigEntity = {
     [key: string]: any;
 };
 
-export type ActionResult = {} & {
+export type PluginConfigRequest = {
+    'config' ? : ConfigEntity;
+} & {
     [key: string]: any;
 };
 
@@ -1229,7 +1241,6 @@ export class BackendEntity {
 
     CreateApiKeyURL(parameters: {
         'authorization' ? : string,
-        'obj' ? : PluginConfigRequest,
     } & CommonRequestOptions): string {
         let queryParameters: QueryParameters = {};
         const domain = parameters.$domain ? parameters.$domain : this.domain;
@@ -1256,11 +1267,9 @@ export class BackendEntity {
      * @method
      * @name BackendEntity#CreateApiKey
      * @param {string} authorization - 
-     * @param {} obj - 
      */
     CreateApiKey(parameters: {
         'authorization' ? : string,
-        'obj' ? : PluginConfigRequest,
     } & CommonRequestOptions): Promise < ResponseWithBody < 200, ApiKeyEntity > | ResponseWithBody < 401, void > | ResponseWithBody < 403, void > | ResponseWithBody < 500, void >> {
         const domain = parameters.$domain ? parameters.$domain : this.domain;
         let path = '/plugin/api-keys';
@@ -1274,14 +1283,10 @@ export class BackendEntity {
         let form: any = {};
         return new Promise((resolve, reject) => {
             headers['Accept'] = 'text/plain, application/json, text/json';
-            headers['Content-Type'] = 'application/json-patch+json';
+            headers['Content-Type'] = '';
 
             if (parameters['authorization'] !== undefined) {
                 headers['authorization'] = parameters['authorization'];
-            }
-
-            if (parameters['obj'] !== undefined) {
-                body = parameters['obj'];
             }
 
             if (parameters.$queryParameters) {
@@ -1378,6 +1383,96 @@ export class BackendEntity {
             }
 
             this.request('GET', domain + path, body, headers, queryParameters, form, reject, resolve, parameters);
+        });
+    }
+
+    UpdateApiKeyURL(parameters: {
+        'authorization' ? : string,
+        'req' ? : PluginApiKeyRequest,
+        'apiKeyId': string,
+    } & CommonRequestOptions): string {
+        let queryParameters: QueryParameters = {};
+        const domain = parameters.$domain ? parameters.$domain : this.domain;
+        let path = '/plugin/api-keys/{apiKeyId}';
+        if (parameters.$path) {
+            path = (typeof(parameters.$path) === 'function') ? parameters.$path(path) : parameters.$path;
+        }
+
+        path = path.replace(
+            '{apiKeyId}',
+            `${encodeURIComponent(this.convertParameterCollectionFormat(
+                        parameters['apiKeyId'],
+                        ''
+                    ).toString())}`
+        );
+
+        if (parameters.$queryParameters) {
+            queryParameters = {
+                ...queryParameters,
+                ...parameters.$queryParameters
+            };
+        }
+
+        let keys = Object.keys(queryParameters);
+        return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '');
+    }
+
+    /**
+     * 
+     * @method
+     * @name BackendEntity#UpdateApiKey
+     * @param {string} authorization - 
+     * @param {} req - 
+     * @param {string} apiKeyId - 
+     */
+    UpdateApiKey(parameters: {
+        'authorization' ? : string,
+        'req' ? : PluginApiKeyRequest,
+        'apiKeyId': string,
+    } & CommonRequestOptions): Promise < ResponseWithBody < 200, ApiKeyEntity > | ResponseWithBody < 400, void > | ResponseWithBody < 401, void > | ResponseWithBody < 403, void > | ResponseWithBody < 404, void > | ResponseWithBody < 500, void >> {
+        const domain = parameters.$domain ? parameters.$domain : this.domain;
+        let path = '/plugin/api-keys/{apiKeyId}';
+        if (parameters.$path) {
+            path = (typeof(parameters.$path) === 'function') ? parameters.$path(path) : parameters.$path;
+        }
+
+        let body: any;
+        let queryParameters: QueryParameters = {};
+        let headers: RequestHeaders = {};
+        let form: any = {};
+        return new Promise((resolve, reject) => {
+            headers['Accept'] = 'text/plain, application/json, text/json';
+            headers['Content-Type'] = 'application/json-patch+json';
+
+            if (parameters['authorization'] !== undefined) {
+                headers['authorization'] = parameters['authorization'];
+            }
+
+            if (parameters['req'] !== undefined) {
+                body = parameters['req'];
+            }
+
+            path = path.replace(
+                '{apiKeyId}',
+                `${encodeURIComponent(this.convertParameterCollectionFormat(
+                    parameters['apiKeyId'],
+                    ''
+                ).toString())}`
+            );
+
+            if (parameters['apiKeyId'] === undefined) {
+                reject(new Error('Missing required  parameter: apiKeyId'));
+                return;
+            }
+
+            if (parameters.$queryParameters) {
+                queryParameters = {
+                    ...queryParameters,
+                    ...parameters.$queryParameters
+                };
+            }
+
+            this.request('PUT', domain + path, body, headers, queryParameters, form, reject, resolve, parameters);
         });
     }
 
@@ -1573,8 +1668,8 @@ export class BackendEntity {
 
     CreateApiKeyDomainURL(parameters: {
         'authorization' ? : string,
-        'obj' ? : PluginConfigRequest,
-        'apiKeyid': string,
+        'apiKeyId': string,
+        'req' ? : PluginApiKeyDomainRequest,
     } & CommonRequestOptions): string {
         let queryParameters: QueryParameters = {};
         const domain = parameters.$domain ? parameters.$domain : this.domain;
@@ -1584,9 +1679,9 @@ export class BackendEntity {
         }
 
         path = path.replace(
-            '{apiKeyid}',
+            '{apiKeyId}',
             `${encodeURIComponent(this.convertParameterCollectionFormat(
-                        parameters['apiKeyid'],
+                        parameters['apiKeyId'],
                         ''
                     ).toString())}`
         );
@@ -1609,13 +1704,13 @@ export class BackendEntity {
      * @method
      * @name BackendEntity#CreateApiKeyDomain
      * @param {string} authorization - 
-     * @param {} obj - 
-     * @param {string} apiKeyid - 
+     * @param {string} apiKeyId - 
+     * @param {} req - 
      */
     CreateApiKeyDomain(parameters: {
         'authorization' ? : string,
-        'obj' ? : PluginConfigRequest,
-        'apiKeyid': string,
+        'apiKeyId': string,
+        'req' ? : PluginApiKeyDomainRequest,
     } & CommonRequestOptions): Promise < ResponseWithBody < 200, DomainEntity > | ResponseWithBody < 401, void > | ResponseWithBody < 403, void > | ResponseWithBody < 404, void > | ResponseWithBody < 500, void >> {
         const domain = parameters.$domain ? parameters.$domain : this.domain;
         let path = '/plugin/api-keys/{apiKeyid}/domains';
@@ -1635,21 +1730,21 @@ export class BackendEntity {
                 headers['authorization'] = parameters['authorization'];
             }
 
-            if (parameters['obj'] !== undefined) {
-                body = parameters['obj'];
-            }
-
             path = path.replace(
-                '{apiKeyid}',
+                '{apiKeyId}',
                 `${encodeURIComponent(this.convertParameterCollectionFormat(
-                    parameters['apiKeyid'],
+                    parameters['apiKeyId'],
                     ''
                 ).toString())}`
             );
 
-            if (parameters['apiKeyid'] === undefined) {
-                reject(new Error('Missing required  parameter: apiKeyid'));
+            if (parameters['apiKeyId'] === undefined) {
+                reject(new Error('Missing required  parameter: apiKeyId'));
                 return;
+            }
+
+            if (parameters['req'] !== undefined) {
+                body = parameters['req'];
             }
 
             if (parameters.$queryParameters) {

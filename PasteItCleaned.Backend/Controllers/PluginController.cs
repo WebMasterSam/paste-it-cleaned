@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PasteItCleaned.Backend.Entities;
-using PasteItCleaned.Common.Localization;
 using PasteItCleaned.Core.Helpers;
 using PasteItCleaned.Core.Models;
 using PasteItCleaned.Core.Services;
@@ -94,7 +93,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
         }
 
         // PUT api-keys/{apiKeyId}
-        [HttpPost("api-keys/{apiKeyId}")]
+        [HttpPut("api-keys/{apiKeyId}")]
         [ProducesResponseType(typeof(ApiKeyEntity), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
@@ -119,14 +118,20 @@ namespace PasteItCleaned.Backend.Common.Controllers
                 var apiKey = _apiKeyService.Get(req.apiKey.ApiKeyId);
                 var domains = _domainService.List(req.apiKey.ApiKeyId);
 
+                if (apiKey == null)
+                    return StatusCode(404);
+
                 apiKey.ExpiresOn = req.apiKey.ExpiresOn;
                 apiKey.UpdatedOn = DateTime.UtcNow;
+
+                _apiKeyService.Update(apiKey);
 
                 var apiKeyEntity = new ApiKeyEntity();
 
                 apiKeyEntity.ApiKeyId = apiKey.ApiKeyId;
                 apiKeyEntity.ExpiresOn = apiKey.ExpiresOn;
                 apiKeyEntity.Key = apiKey.Key;
+                apiKeyEntity.Domains = new List<DomainEntity>();
 
                 foreach (Domain domain in domains)
                 {

@@ -2,6 +2,7 @@ import backend from '../../../config/backend.json'
 import { BaseController } from '../../BaseController'
 import { ConfigEntity, ApiKeyEntity, DomainEntity } from '../../../entities/api'
 import ApiKeys from './ApiKeys'
+import moment from 'moment'
 
 export class ApiKeysController extends BaseController {
     private component?: ApiKeys = undefined
@@ -85,6 +86,18 @@ export class ApiKeysController extends BaseController {
             },
             (e: any) => {
                 this.showErrorSnackbar('An error occured while adding the domain.')
+            }
+        )
+    }
+
+    updateApiKey = (key: ApiKeyEntity) => {
+        this.updateApiKeyBackend(
+            key,
+            (domain: DomainEntity) => {
+                this.refreshApiKeys(() => this.showSuccessSnackbar('Api key updated successfuly.'))
+            },
+            (e: any) => {
+                this.showErrorSnackbar('An error occured while updating the api key.')
             }
         )
     }
@@ -177,6 +190,18 @@ export class ApiKeysController extends BaseController {
         })
     }
 
+    handleUpdateApiKeyExpiresOn = (date: Date | null) => {
+        this.component!.setState({
+            modalUpdateApiKey: {
+                ...this.component!.state.modalUpdateApiKey,
+                keyEntity: {
+                    ...this.component!.state.modalUpdateApiKey.keyEntity!,
+                    expiresOn: (date ? moment(date) : moment()).toISOString(),
+                },
+            },
+        })
+    }
+
     hideUpdateApiKey = () => {
         this.component!.setState({
             modalUpdateApiKey: {
@@ -242,8 +267,8 @@ export class ApiKeysController extends BaseController {
         this.callBackendWithoutResponse(this.endpoint(`/api-keys/${apiKeyId}`), 'DELETE', success, error)
     }
 
-    private updateApiKeyBackend = (config: ConfigEntity, success?: (json: any) => void, error?: (e: any) => void) => {
-        this.callBackendWithPayload(this.endpoint(`/api-keys`), 'PUT', { config }, success, error)
+    private updateApiKeyBackend = (apiKey: ApiKeyEntity, success?: (json: any) => void, error?: (e: any) => void) => {
+        this.callBackendWithPayload(this.endpoint(`/api-keys/${apiKey.apiKeyId!}`), 'PUT', { apiKey }, success, error)
     }
 
     private endpoint(path: string) {

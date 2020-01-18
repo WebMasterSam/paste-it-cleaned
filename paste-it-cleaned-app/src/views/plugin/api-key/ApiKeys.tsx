@@ -1,14 +1,18 @@
+import 'date-fns'
+
 import React, { Fragment } from 'react'
 import moment from 'moment'
 
+import DateFnsUtils from '@date-io/date-fns'
 import VpnKeyIcon from '@material-ui/icons/VpnKey'
 import AddIcon from '@material-ui/icons/Add'
 import DeleteIcon from '@material-ui/icons/Delete'
 import EditIcon from '@material-ui/icons/Edit'
 import { Skeleton } from '@material-ui/lab'
 import MuiAlert from '@material-ui/lab/Alert'
+import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers'
 
-import { Paper, Typography, Grid, Chip, Button, LinearProgress, TextField, Snackbar } from '@material-ui/core'
+import { Paper, Typography, Grid, Chip, Button, LinearProgress, TextField } from '@material-ui/core'
 
 import { ApiKeyEntity, DomainEntity } from '../../../entities/api'
 import { ApiKeysController } from './ApiKeysController'
@@ -16,9 +20,11 @@ import ButtonWithLoading from '../../../components/ButtonWithLoading'
 import LoadingError from '../../../components/LoadingError'
 import AddModal from '../../../components/AddModal'
 
-import './ApiKeys.less'
 import ConfirmationModal from '../../../components/ConfirmationModal'
 import Snack from '../../../components/Snack'
+import UpdateModal from '../../../components/UpdateModal'
+
+import './ApiKeys.less'
 
 export interface ApiKeysProps {}
 export interface ApiKeysState {
@@ -102,7 +108,6 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
     render() {
         return (
             <Fragment>
-                {!this.state.isLoaded && <LinearProgress />}
                 <Typography variant="h2" className="override-h2" component="h2">
                     <VpnKeyIcon /> Api keys
                 </Typography>
@@ -150,7 +155,7 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
                                                             <Typography variant="caption" className="override-caption" component="span" style={{ color: '#ddd' }}>
                                                                 Expires on{' '}
                                                                 <span style={{ whiteSpace: 'nowrap' }}>
-                                                                    {moment(key.expiresOn!).format('YYYY-MM-DD')} <EditIcon onClick={() => {}} cursor="pointer" />
+                                                                    {moment(key.expiresOn!).format('YYYY-MM-DD')} <EditIcon onClick={() => this.controller!.showUpdateApiKey({ ...key })} cursor="pointer" />
                                                                 </span>
                                                             </Typography>
                                                         </Grid>
@@ -174,21 +179,27 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
                                                             </Grid>
                                                         </Grid>
                                                         <Grid item>
-                                                            {key.domains!.length > 0 ? (
-                                                                key.domains!.map(d => (
-                                                                    <Chip
-                                                                        key={d.domainId!}
-                                                                        size="small"
-                                                                        variant="default"
-                                                                        color="primary"
-                                                                        label={d.name!}
-                                                                        className="chip-spaced"
-                                                                        deleteIcon={<DeleteIcon />}
-                                                                        onDelete={() => this.controller!.showDeleteDomain(key, d)}
-                                                                    />
-                                                                ))
+                                                            {moment(key.expiresOn!) > moment() ? (
+                                                                key.domains!.length > 0 ? (
+                                                                    key.domains!.map(d => (
+                                                                        <Chip
+                                                                            key={d.domainId!}
+                                                                            size="small"
+                                                                            variant="default"
+                                                                            color="primary"
+                                                                            label={d.name!}
+                                                                            className="chip-spaced"
+                                                                            deleteIcon={<DeleteIcon />}
+                                                                            onDelete={() => this.controller!.showDeleteDomain(key, d)}
+                                                                        />
+                                                                    ))
+                                                                ) : (
+                                                                    <span style={{ color: '#f44336' }}>Please add a domain to activate the api key.</span>
+                                                                )
+                                                            ) : key.domains!.length > 0 ? (
+                                                                key.domains!.map(d => <Chip key={d.domainId!} size="small" variant="default" style={{ color: '#fff', backgroundColor: '#f44336' }} label={d.name!} className="chip-spaced" />)
                                                             ) : (
-                                                                <span style={{ color: '#f44336' }}>Please add a domain to activate the api key.</span>
+                                                                <span style={{ color: '#f44336' }}>You cannot add domains to an expired key.</span>
                                                             )}
                                                         </Grid>
                                                         <Grid item style={{ height: '45px', display: 'flex' }}>
@@ -219,7 +230,9 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
                     confirmActive={!this.state.modalAddDomain.error && this.state.modalAddDomain.domainName.length > 0}
                 >
                     <React.Fragment>
-                        <MuiAlert severity="info">{this.state.modalAddDomain.keyEntity && this.state.modalAddDomain.keyEntity!.key}</MuiAlert>
+                        <MuiAlert severity="info">
+                            Api key <b>{this.state.modalAddDomain.keyEntity && this.state.modalAddDomain.keyEntity!.key}</b>
+                        </MuiAlert>
                         <p>Enter the domain name without (ex: domain.com) you want to add to this api key.</p>
                         <p>Please note that by default "localhost" is already working and that the "www" version of your domain will also work.</p>
                         <TextField
@@ -235,6 +248,40 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
                     </React.Fragment>
                 </AddModal>
 
+                <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                    <UpdateModal
+                        title="Update api key's expiration date"
+                        open={this.state.modalUpdateApiKey.visible}
+                        onCancel={this.controller!.hideUpdateApiKey}
+                        onConfirm={() => {
+                            this.controller!.updateApiKey(this.state.modalUpdateApiKey.keyEntity!)
+                            this.controller!.hideUpdateApiKey()
+                        }}
+                        confirmActive={true}
+                    >
+                        <React.Fragment>
+                            <MuiAlert severity="info">
+                                Api key <b>{this.state.modalUpdateApiKey.keyEntity && this.state.modalUpdateApiKey.keyEntity!.key}</b>
+                            </MuiAlert>
+                            <p>Please select a new expiration date for the api key.</p>
+                            {this.state.modalUpdateApiKey.keyEntity && (
+                                <KeyboardDatePicker
+                                    margin="normal"
+                                    id="date-picker-dialog"
+                                    label="Expiration date"
+                                    format="yyyy-MM-dd"
+                                    value={this.state.modalUpdateApiKey.keyEntity!.expiresOn}
+                                    onChange={this.controller!.handleUpdateApiKeyExpiresOn}
+                                    fullWidth
+                                    KeyboardButtonProps={{
+                                        'aria-label': 'change date',
+                                    }}
+                                />
+                            )}
+                        </React.Fragment>
+                    </UpdateModal>
+                </MuiPickersUtilsProvider>
+
                 <ConfirmationModal
                     title="Delete api key"
                     open={this.state.modalDeleteApiKey.visible}
@@ -246,7 +293,7 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
                 >
                     <React.Fragment>
                         <MuiAlert severity="info">
-                            Api key: <b>{this.state.modalDeleteApiKey.keyEntity && this.state.modalDeleteApiKey.keyEntity!.key}</b>
+                            Api key <b>{this.state.modalDeleteApiKey.keyEntity && this.state.modalDeleteApiKey.keyEntity!.key}</b>
                         </MuiAlert>
                         <p>Are you sure you want to delete this api key ?</p>
                         <p style={{ color: 'red' }}>All associated editors will refuse to clean pasted data immediately.</p>
@@ -264,9 +311,9 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
                 >
                     <React.Fragment>
                         <MuiAlert severity="info">
-                            Api key: <b>{this.state.modalDeleteDomain.keyEntity && this.state.modalDeleteDomain.keyEntity!.key}</b>
+                            Api key <b>{this.state.modalDeleteDomain.keyEntity && this.state.modalDeleteDomain.keyEntity!.key}</b>
                             <br />
-                            Domain: <b>{this.state.modalDeleteDomain.domainEntity && this.state.modalDeleteDomain.domainEntity!.name}</b>
+                            Domain <b>{this.state.modalDeleteDomain.domainEntity && this.state.modalDeleteDomain.domainEntity!.name}</b>
                         </MuiAlert>
                         <p>Are you sure you want to delete this domain ?</p>
                         <p style={{ color: 'red' }}>All associated editors will refuse to clean pasted data immediately.</p>

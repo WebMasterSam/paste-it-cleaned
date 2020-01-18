@@ -200,7 +200,7 @@
                     "500": { "description": "Server Error" }
                 }
             },
-            "post": {
+            "put": {
                 "tags": ["Plugin"],
                 "operationId": "UpdateApiKey",
                 "consumes": ["application/json-patch+json", "application/json", "text/json", "application/*+json"],
