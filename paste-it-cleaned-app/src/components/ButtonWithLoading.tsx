@@ -11,10 +11,11 @@ export type ButtonWithLoadingProps = ButtonProps & {
 
 class ButtonWithLoading extends React.Component<ButtonWithLoadingProps> {
     render() {
+        var { children, loading, ...rest } = this.props
         return (
-            <Button {...this.props} disabled={this.props.loading} className="button-with-loading">
-                {this.props.loading && <CircularProgress />}
-                {this.props.children}
+            <Button {...rest} disabled={loading} className="button-with-loading">
+                {loading && <CircularProgress />}
+                {children}
             </Button>
         )
     }

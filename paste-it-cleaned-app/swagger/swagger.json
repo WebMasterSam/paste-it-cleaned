@@ -176,12 +176,9 @@
             "post": {
                 "tags": ["Plugin"],
                 "operationId": "CreateApiKey",
-                "consumes": ["application/json-patch+json", "application/json", "text/json", "application/*+json"],
+                "consumes": [],
                 "produces": ["text/plain", "application/json", "text/json"],
-                "parameters": [
-                    { "name": "authorization", "in": "header", "required": false, "type": "string" },
-                    { "name": "obj", "in": "body", "required": false, "schema": { "$ref": "#/definitions/PluginConfigRequest" } }
-                ],
+                "parameters": [{ "name": "authorization", "in": "header", "required": false, "type": "string" }],
                 "responses": { "200": { "description": "Success", "schema": { "$ref": "#/definitions/ApiKeyEntity" } }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "500": { "description": "Server Error" } }
             }
         },
@@ -197,6 +194,25 @@
                 ],
                 "responses": {
                     "200": { "description": "Success", "schema": { "$ref": "#/definitions/ApiKeyEntity" } },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden" },
+                    "404": { "description": "Not Found" },
+                    "500": { "description": "Server Error" }
+                }
+            },
+            "post": {
+                "tags": ["Plugin"],
+                "operationId": "UpdateApiKey",
+                "consumes": ["application/json-patch+json", "application/json", "text/json", "application/*+json"],
+                "produces": ["text/plain", "application/json", "text/json"],
+                "parameters": [
+                    { "name": "authorization", "in": "header", "required": false, "type": "string" },
+                    { "name": "req", "in": "body", "required": false, "schema": { "$ref": "#/definitions/PluginApiKeyRequest" } },
+                    { "name": "apiKeyId", "in": "path", "required": true, "type": "string" }
+                ],
+                "responses": {
+                    "200": { "description": "Success", "schema": { "$ref": "#/definitions/ApiKeyEntity" } },
+                    "400": { "description": "Bad Request" },
                     "401": { "description": "Unauthorized" },
                     "403": { "description": "Forbidden" },
                     "404": { "description": "Not Found" },
@@ -249,8 +265,8 @@
                 "produces": ["text/plain", "application/json", "text/json"],
                 "parameters": [
                     { "name": "authorization", "in": "header", "required": false, "type": "string" },
-                    { "name": "obj", "in": "body", "required": false, "schema": { "$ref": "#/definitions/PluginConfigRequest" } },
-                    { "name": "apiKeyid", "in": "path", "required": true, "type": "string" }
+                    { "name": "apiKeyId", "in": "path", "required": true, "type": "string", "format": "uuid" },
+                    { "name": "req", "in": "body", "required": false, "schema": { "$ref": "#/definitions/PluginApiKeyDomainRequest" } }
                 ],
                 "responses": {
                     "200": { "description": "Success", "schema": { "$ref": "#/definitions/DomainEntity" } },
@@ -395,7 +411,9 @@
             }
         },
         "DomainEntity": { "type": "object", "properties": { "domainId": { "format": "uuid", "type": "string" }, "name": { "type": "string" } } },
-        "PluginConfigRequest": { "type": "object", "properties": { "config": { "$ref": "#/definitions/ConfigEntity" } } },
+        "PluginApiKeyRequest": { "type": "object", "properties": { "apiKey": { "$ref": "#/definitions/ApiKeyEntity" } } },
+        "ActionResult": { "type": "object", "properties": {} },
+        "PluginApiKeyDomainRequest": { "type": "object", "properties": { "domainName": { "type": "string" } } },
         "ConfigEntity": {
             "type": "object",
             "properties": {
@@ -409,7 +427,7 @@
                 "removeTagAttributes": { "type": "boolean" }
             }
         },
-        "ActionResult": { "type": "object", "properties": {} },
+        "PluginConfigRequest": { "type": "object", "properties": { "config": { "$ref": "#/definitions/ConfigEntity" } } },
         "TimeZoneEntity": { "type": "object", "properties": { "name": { "type": "string" }, "displayName": { "type": "string" }, "offset": { "type": "string" } } }
     }
 }

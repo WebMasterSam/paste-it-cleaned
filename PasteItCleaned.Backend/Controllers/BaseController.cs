@@ -65,6 +65,13 @@ namespace PasteItCleaned.Backend.Common.Controllers
             return null;
         }
 
+        protected BadRequestObjectResult LogAndReturnBadRequest(Exception ex)
+        {
+            Log.LogError("Exception", ex);
+
+            return BadRequest("A technical error has occured when calling this API method.");
+        }
+
         protected ILogger Log { get; }
     }
 }

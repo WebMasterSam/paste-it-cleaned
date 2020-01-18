@@ -29,6 +29,31 @@ export class BaseController {
             })
     }
 
+    callBackendWithoutResponse = (url: string, method: string, success?: () => void, error?: (e: any) => void) => {
+        Auth.currentSession()
+            .then(v => v.getAccessToken().getJwtToken())
+            .then(t => {
+                fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        Authorization: `Bearer ${t}`,
+                    },
+                    mode: 'cors',
+                    cache: 'no-cache',
+                })
+                    .then(t => {
+                        success && success()
+                    })
+                    .catch(e => {
+                        console.log(e)
+                        error && error(e)
+                    })
+            })
+    }
+
     callBackendWithPayload = (url: string, method: string, payload: any, success?: (json: any) => void, error?: (e: any) => void) => {
         Auth.currentSession()
             .then(v => v.getAccessToken().getJwtToken())

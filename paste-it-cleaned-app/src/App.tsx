@@ -21,7 +21,7 @@ import PluginIntegration from './views/plugin/integration/PluginIntegration'
 import AnalyticsUsage from './views/analytics/usage/AnalyticsUsage'
 import Dashboard from './views/dashboard/Dashboard'
 import PageWrapper from './components/PageWrapper'
-import { CurrentSession, replaceCurrentSession } from './session/Session'
+import { replaceCurrentSession } from './session/Session'
 
 import * as amplifyConfig from './config/aws-amplify.json'
 

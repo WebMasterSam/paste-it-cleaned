@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using PasteItCleaned.Backend.Entities;
 using PasteItCleaned.Common.Localization;
 using PasteItCleaned.Core.Helpers;
+using PasteItCleaned.Core.Models;
 using PasteItCleaned.Core.Services;
 
 namespace PasteItCleaned.Backend.Common.Controllers
@@ -39,13 +40,26 @@ namespace PasteItCleaned.Backend.Common.Controllers
             try
             {
                 var apiKeys = _apiKeyService.List(client.ClientId);
+                var apiKeysEntity = new ListApiKeyEntity();
 
-                return Ok(apiKeys);
+                foreach (var apiKey in apiKeys)
+                {
+                    var apiKeyEntity = new ApiKeyEntity { ApiKeyId = apiKey.ApiKeyId, ExpiresOn = apiKey.ExpiresOn, Key = apiKey.Key, Domains = new List<DomainEntity>() };
+                    var domains = _domainService.List(apiKey.ApiKeyId);
+
+                    foreach (Domain domain in domains)
+                    {
+                        apiKeyEntity.Domains.Add(new DomainEntity { DomainId = domain.DomainId, Name = domain.Name });
+                    }
+
+                    apiKeysEntity.Add(apiKeyEntity);
+                }
+
+                return Ok(apiKeysEntity);
             }
             catch (Exception ex)
             {
-                Log.LogError("Exception", ex);
-                return BadRequest("A technical error has occured when calling this API method.");
+                return this.LogAndReturnBadRequest(ex);
             }
         }
 
@@ -55,7 +69,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(500)]
-        public ActionResult<ApiKeyEntity> CreateApiKey([FromHeader]string authorization, [FromBody] PluginConfigRequest obj)
+        public ActionResult<ApiKeyEntity> CreateApiKey([FromHeader]string authorization)
         {
             var client = this.GetOrCreateClient(authorization);
 
@@ -75,8 +89,55 @@ namespace PasteItCleaned.Backend.Common.Controllers
             }
             catch (Exception ex)
             {
-                Log.LogError("Exception", ex);
-                return BadRequest("A technical error has occured when calling this API method.");
+                return this.LogAndReturnBadRequest(ex);
+            }
+        }
+
+        // PUT api-keys/{apiKeyId}
+        [HttpPost("api-keys/{apiKeyId}")]
+        [ProducesResponseType(typeof(ApiKeyEntity), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public ActionResult<ApiKeyEntity> UpdateApiKey([FromHeader]string authorization, [FromBody] PluginApiKeyRequest req)
+        {
+            var client = this.GetOrCreateClient(authorization);
+
+            if (client == null)
+                return StatusCode(401);
+
+            if (req == null)
+                return StatusCode(400);
+
+            if (req.apiKey == null)
+                return StatusCode(400);
+
+            try
+            {
+                var apiKey = _apiKeyService.Get(req.apiKey.ApiKeyId);
+                var domains = _domainService.List(req.apiKey.ApiKeyId);
+
+                apiKey.ExpiresOn = req.apiKey.ExpiresOn;
+                apiKey.UpdatedOn = DateTime.UtcNow;
+
+                var apiKeyEntity = new ApiKeyEntity();
+
+                apiKeyEntity.ApiKeyId = apiKey.ApiKeyId;
+                apiKeyEntity.ExpiresOn = apiKey.ExpiresOn;
+                apiKeyEntity.Key = apiKey.Key;
+
+                foreach (Domain domain in domains)
+                {
+                    apiKeyEntity.Domains.Add(new DomainEntity { DomainId = domain.DomainId, Name = domain.Name });
+                }
+
+                return Ok(apiKey);
+            }
+            catch (Exception ex)
+            {
+                return this.LogAndReturnBadRequest(ex);
             }
         }
 
@@ -97,16 +158,27 @@ namespace PasteItCleaned.Backend.Common.Controllers
             try
             {
                 var apiKey = _apiKeyService.Get(apiKeyId);
-                
+                var domains = _domainService.List(apiKeyId);
+
                 if (apiKey == null)
                     return NotFound();
 
-                return Ok(apiKey);
+                var apiKeyEntity = new ApiKeyEntity();
+
+                apiKeyEntity.ApiKeyId = apiKey.ApiKeyId;
+                apiKeyEntity.ExpiresOn = apiKey.ExpiresOn;
+                apiKeyEntity.Key = apiKey.Key;
+
+                foreach (Domain domain in domains)
+                {
+                    apiKeyEntity.Domains.Add(new DomainEntity { DomainId = domain.DomainId, Name = domain.Name });
+                }
+
+                return Ok(apiKeyEntity);
             }
             catch (Exception ex)
             {
-                Log.LogError("Exception", ex);
-                return BadRequest("A technical error has occured when calling this API method.");
+                return this.LogAndReturnBadRequest(ex);
             }
         }
 
@@ -137,8 +209,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
             }
             catch (Exception ex)
             {
-                Log.LogError("Exception", ex);
-                return BadRequest("A technical error has occured when calling this API method.");
+                return this.LogAndReturnBadRequest(ex);
             }
         }
 
@@ -174,8 +245,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
             }
             catch (Exception ex)
             {
-                Log.LogError("Exception", ex);
-                return BadRequest("A technical error has occured when calling this API method.");
+                return this.LogAndReturnBadRequest(ex);
             }
         }
 
@@ -186,11 +256,36 @@ namespace PasteItCleaned.Backend.Common.Controllers
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public ActionResult<DomainEntity> CreateApiKeyDomain([FromHeader]string authorization, [FromBody] PluginConfigRequest obj)
+        public ActionResult<DomainEntity> CreateApiKeyDomain([FromHeader]string authorization, [FromRoute]Guid apiKeyId, [FromBody] PluginApiKeyDomainRequest req)
         {
-            Console.WriteLine("PluginController::CreateApiKeDomain");
+            var client = this.GetOrCreateClient(authorization);
 
-            return Ok(T.Get("App.Up"));
+            if (client == null)
+                return StatusCode(401);
+
+            try
+            {
+                var apiKey = _apiKeyService.Get(apiKeyId);
+                var domain = _domainService.GetByName(apiKeyId, req.domainName);
+
+                if (apiKey == null)
+                    return NotFound();
+
+                if (domain == null) {
+                    domain = _domainService.Create(new Domain { ApiKeyId = apiKeyId, CreatedOn = DateTime.UtcNow, Name = req.domainName });
+                }
+
+                var domainEntity = new DomainEntity();
+
+                domainEntity.DomainId = domain.DomainId;
+                domainEntity.Name = domain.Name;
+
+                return Ok(domainEntity);
+            }
+            catch (Exception ex)
+            {
+                return this.LogAndReturnBadRequest(ex);
+            }
         }
 
         // GET plugin/config
@@ -218,8 +313,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
             }
             catch (Exception ex)
             {
-                Log.LogError("Exception", ex);
-                return BadRequest("A technical error has occured when calling this API method.");
+                return this.LogAndReturnBadRequest(ex);
             }
         }
 
@@ -258,8 +352,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
             }
             catch (Exception ex)
             {
-                Log.LogError("Exception", ex);
-                return BadRequest("A technical error has occured when calling this API method.");
+                return this.LogAndReturnBadRequest(ex);
             }
         }
     }
@@ -267,5 +360,15 @@ namespace PasteItCleaned.Backend.Common.Controllers
     public class PluginConfigRequest
     {
         public ConfigEntity config { get; set; }
+    }
+
+    public class PluginApiKeyRequest
+    {
+        public ApiKeyEntity apiKey { get; set; }
+    }
+
+    public class PluginApiKeyDomainRequest
+    {
+        public string domainName { get; set; }
     }
 }
