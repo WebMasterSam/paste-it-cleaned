@@ -5,8 +5,8 @@ import i18next from 'i18next'
 import App from './App'
 import LanguageDetector from 'i18next-browser-languagedetector'
 
-import en_US from './i18n/en-US.json'
-import fr_CA from './i18n/fr-CA.json'
+import en_US from './i18n/en/app.json'
+import fr_CA from './i18n/fr/app.json'
 
 i18next
     .use(LanguageDetector)

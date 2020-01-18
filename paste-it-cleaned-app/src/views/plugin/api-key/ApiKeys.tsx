@@ -240,7 +240,7 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
                             onChange={this.controller!.handleAddDomainTyping}
                             name="domain"
                             type="text"
-                            label="Domain name"
+                            label={i18n.t('views.apiKeys.modals.addDomain.domainName')}
                             fullWidth
                             value={this.state.modalAddDomain.domainName}
                             error={this.state.modalAddDomain.error}
@@ -264,7 +264,7 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
                             <MuiAlert severity="info">
                                 {i18n.t('views.apiKeys.apiKey')} <b>{this.state.modalUpdateApiKey.keyEntity && this.state.modalUpdateApiKey.keyEntity!.key}</b>
                             </MuiAlert>
-                            <p>Please select a new expiration date for the api key.</p>
+                            <p>{i18n.t('views.apiKeys.modals.updateApiKey.pleaseSelect')}</p>
                             {this.state.modalUpdateApiKey.keyEntity && (
                                 <KeyboardDatePicker
                                     margin="normal"

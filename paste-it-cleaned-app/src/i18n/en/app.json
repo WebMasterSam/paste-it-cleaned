@@ -1,0 +1,61 @@
+{
+	"common": {
+		"active": "Active",
+		"expired": "Expired",
+		"inactive": "Inactive"
+	},
+	"views": {
+		"apiKeys": {
+			"addDomain": "Add domain",
+			"apiKey": "Api key",
+			"cannotAddToExpired": "You cannot add domains to an expired key.",
+			"domain": "Domain",
+			"expiresOn": "Expires on",
+			"generateNewKey": "Generate new key",
+			"messages": {
+				"error": {
+					"addApiKey": "An error occured while generating the api key.",
+					"addDomain": "An error occured while adding the domain.",
+					"deleteApiKey": "An error occured while deleting the api key.",
+					"deleteDomain": "An error occured while deleting the domain.",
+					"updateApiKey": "An error occured while updating the api key."
+				},
+				"success": {
+					"addApiKey": "Api key generated successfully.",
+					"addDomain": "Domain added successfully.",
+					"deleteApiKey": "Api key deleted successfully.",
+					"deleteDomain": "Domain deleted successfully.",
+					"updateApiKey": "Api key updated successfuly."
+				}
+			},
+			"modals": {
+				"addDomain": {
+					"domainName": "Domain name",
+					"domainNameError": "Domain name is invalid. Please enter something like 'domain.com'.",
+					"enterDomain": "Enter the domain name (ex: domain.com) you want to add to this api key.",
+					"note": "Please note that by default \"localhost\" is already working and that the \"www\" version of your domain will also work.",
+					"title": "Add domain to api key"
+				},
+				"common": {
+					"associatedWillStopWorking": "All associated editors will refuse to clean pasted data immediately."
+				},
+				"deleteApiKey": {
+					"areYouSure": "Are you sure you want to delete this api key ?",
+					"title": "Delete api key"
+				},
+				"deleteDomain": {
+					"areYouSure": "Are you sure you want to delete this domain ?",
+					"title": "Delete domain"
+				},
+				"updateApiKey": {
+					"expirationDate": "Expiration date",
+					"pleaseSelect": "Please select a new expiration date for the api key.",
+					"title": "Update api key's expiration date"
+				}
+			},
+			"pleaseAddDomain": "Please add a domain to activate the api key.",
+			"title": "Api keys",
+			"youHaveReached": "You have reached the maximum api keys. If you want to create a new one, please delete one of your current api keys before doing so."
+		}
+	}
+}
