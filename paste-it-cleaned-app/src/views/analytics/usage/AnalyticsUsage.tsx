@@ -17,7 +17,7 @@ import { ImageIcon } from '../../../icons/Image'
 
 import { HitDailyEntity } from '../../../entities/api'
 import { AnalyticsUsageController } from './AnalyticsUsageController'
-import ButtonWithLoading from '../../../components/ButtonWithLoading'
+import ButtonWithLoading from '../../../components/forms/ButtonWithLoading'
 
 import './AnalyticsUsage.less'
 

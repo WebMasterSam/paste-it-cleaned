@@ -5,7 +5,7 @@ import { TextField, Paper, Grid, Button, Typography, Select, MenuItem, InputLabe
 import CreditCardIcon from '@material-ui/icons/CreditCard'
 import HistoryIcon from '@material-ui/icons/History'
 
-import FormWrapper from '../../../components/FormWrapper'
+import FormWrapper from '../../../components/forms/FormWrapper'
 import { createData } from '../../../helpers/BillingHelper'
 
 import { VisaIcon } from '../../../icons/Visa'

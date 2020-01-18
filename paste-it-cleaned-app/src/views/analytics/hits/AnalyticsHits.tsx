@@ -3,7 +3,7 @@ import React from 'react'
 import { Paper, Typography } from '@material-ui/core'
 import FileCopyIcon from '@material-ui/icons/FileCopy'
 
-import FormWrapper from '../../../components/FormWrapper'
+import FormWrapper from '../../../components/forms/FormWrapper'
 
 import HitsTable from './components/HitsTable'
 import { HitEntity } from '../../../entities/api'

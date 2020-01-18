@@ -1,6 +1,6 @@
 import React from 'react'
 import { TextField, Paper, Grid, Button, Typography, Select, MenuItem, InputLabel, FormControl } from '@material-ui/core'
-import FormWrapper from '../../../components/FormWrapper'
+import FormWrapper from '../../../components/forms/FormWrapper'
 import BusinessIcon from '@material-ui/icons/Business'
 import ContactMailIcon from '@material-ui/icons/ContactMail'
 import VpnKeyIcon from '@material-ui/icons/VpnKey'

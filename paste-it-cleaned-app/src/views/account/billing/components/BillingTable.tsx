@@ -2,7 +2,7 @@ import React, { Fragment } from 'react'
 
 import { Table, TableHead, TableRow, TableBody, TableCell, TablePagination } from '@material-ui/core'
 import { Skeleton } from '@material-ui/lab'
-import LoadingError from '../../../../components/LoadingError'
+import LoadingError from '../../../../components/forms/LoadingError'
 
 export interface HitsTableProps {
     rows: any[]

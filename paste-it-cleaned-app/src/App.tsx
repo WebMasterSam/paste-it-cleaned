@@ -6,10 +6,10 @@ import { createMuiTheme, createStyles, ThemeProvider, withStyles, WithStyles } f
 import CssBaseline from '@material-ui/core/CssBaseline'
 import Hidden from '@material-ui/core/Hidden'
 
-import Navigator from './components/Navigator'
-import Header from './components/Header'
+import Navigator from './components/app/Navigator'
+import Header from './components/app/Header'
 import AccountInformation from './views/account/information/AccountInformation'
-import Footer from './components/Footer'
+import Footer from './components/app/Footer'
 
 import { withAuthenticator } from './auth/Auth/AuthenticatorWrapper'
 import { Url } from './shared/Urls'
@@ -20,7 +20,7 @@ import PluginConfig from './views/plugin/config/PluginConfig'
 import PluginIntegration from './views/plugin/integration/PluginIntegration'
 import AnalyticsUsage from './views/analytics/usage/AnalyticsUsage'
 import Dashboard from './views/dashboard/Dashboard'
-import PageWrapper from './components/PageWrapper'
+import PageWrapper from './components/forms/PageWrapper'
 import { replaceCurrentSession } from './session/Session'
 
 import * as amplifyConfig from './config/aws-amplify.json'

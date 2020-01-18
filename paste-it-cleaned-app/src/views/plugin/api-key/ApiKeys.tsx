@@ -2,6 +2,7 @@ import 'date-fns'
 
 import React, { Fragment } from 'react'
 import moment from 'moment'
+import i18n from 'i18next'
 
 import DateFnsUtils from '@date-io/date-fns'
 import VpnKeyIcon from '@material-ui/icons/VpnKey'
@@ -12,17 +13,17 @@ import { Skeleton } from '@material-ui/lab'
 import MuiAlert from '@material-ui/lab/Alert'
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers'
 
-import { Paper, Typography, Grid, Chip, Button, LinearProgress, TextField } from '@material-ui/core'
+import { Paper, Typography, Grid, Chip, Button, TextField } from '@material-ui/core'
 
 import { ApiKeyEntity, DomainEntity } from '../../../entities/api'
 import { ApiKeysController } from './ApiKeysController'
-import ButtonWithLoading from '../../../components/ButtonWithLoading'
-import LoadingError from '../../../components/LoadingError'
-import AddModal from '../../../components/AddModal'
+import ButtonWithLoading from '../../../components/forms/ButtonWithLoading'
+import LoadingError from '../../../components/forms/LoadingError'
+import AddModal from '../../../components/modals/AddModal'
 
-import ConfirmationModal from '../../../components/ConfirmationModal'
-import Snack from '../../../components/Snack'
-import UpdateModal from '../../../components/UpdateModal'
+import ConfirmationModal from '../../../components/modals/ConfirmationModal'
+import Snack from '../../../components/forms/Snack'
+import UpdateModal from '../../../components/modals/UpdateModal'
 
 import './ApiKeys.less'
 
@@ -109,7 +110,7 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
         return (
             <Fragment>
                 <Typography variant="h2" className="override-h2" component="h2">
-                    <VpnKeyIcon /> Api keys
+                    <VpnKeyIcon /> {i18n.t('views.apiKeys.title')}
                 </Typography>
                 <br />
                 {this.state.apiKeysError ? (
@@ -120,11 +121,11 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
                     <React.Fragment>
                         {this.state.apiKeys.length < 10 ? (
                             <ButtonWithLoading loading={this.state.apiKeyLoading} variant="contained" color="primary" onClick={this.controller!.createApiKey}>
-                                Generate new key
+                                {i18n.t('views.apiKeys.generateNewKey')}
                             </ButtonWithLoading>
                         ) : (
                             <React.Fragment>
-                                <p>You have reached the maximum api keys. If you want to create a new one, please delete one of your current api keys before doing so.</p>
+                                <p>{i18n.t('views.apiKeys.generateNewKey')}</p>
                                 <br />
                             </React.Fragment>
                         )}
@@ -144,16 +145,16 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
                                                     <Grid container direction="column" justify="space-between" alignItems="flex-start" style={{ height: '100%' }}>
                                                         <Grid item>
                                                             {moment(key.expiresOn!) < moment() ? (
-                                                                <Chip size="small" label="Expired" className="chip-red" />
+                                                                <Chip size="small" label={i18n.t('common.expired')} className="chip-red" />
                                                             ) : key.domains!.length > 0 ? (
-                                                                <Chip size="small" label="Active" className="chip-green" />
+                                                                <Chip size="small" label={i18n.t('common.active')} className="chip-green" />
                                                             ) : (
-                                                                <Chip size="small" label="Inactive" />
+                                                                <Chip size="small" label={i18n.t('common.inactive')} />
                                                             )}
                                                         </Grid>
                                                         <Grid item>
                                                             <Typography variant="caption" className="override-caption" component="span" style={{ color: '#ddd' }}>
-                                                                Expires on{' '}
+                                                                {i18n.t('views.apiKeys.expiresOn')}{' '}
                                                                 <span style={{ whiteSpace: 'nowrap' }}>
                                                                     {moment(key.expiresOn!).format('YYYY-MM-DD')} <EditIcon onClick={() => this.controller!.showUpdateApiKey({ ...key })} cursor="pointer" />
                                                                 </span>
@@ -194,18 +195,18 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
                                                                         />
                                                                     ))
                                                                 ) : (
-                                                                    <span style={{ color: '#f44336' }}>Please add a domain to activate the api key.</span>
+                                                                    <span style={{ color: '#f44336' }}>{i18n.t('views.apiKeys.pleaseAddDomain')}</span>
                                                                 )
                                                             ) : key.domains!.length > 0 ? (
                                                                 key.domains!.map(d => <Chip key={d.domainId!} size="small" variant="default" style={{ color: '#fff', backgroundColor: '#f44336' }} label={d.name!} className="chip-spaced" />)
                                                             ) : (
-                                                                <span style={{ color: '#f44336' }}>You cannot add domains to an expired key.</span>
+                                                                <span style={{ color: '#f44336' }}>{i18n.t('views.apiKeys.cannotAddToExpired')}</span>
                                                             )}
                                                         </Grid>
                                                         <Grid item style={{ height: '45px', display: 'flex' }}>
                                                             {moment(key.expiresOn!) > moment() && (
                                                                 <Button color="primary" size="small" variant="outlined" style={{ alignSelf: 'flex-end' }} onClick={() => this.controller!.showAddDomain(key)}>
-                                                                    <AddIcon /> Add domain
+                                                                    <AddIcon /> {i18n.t('views.apiKeys.addDomain')}
                                                                 </Button>
                                                             )}
                                                         </Grid>
@@ -220,7 +221,7 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
                 )}
 
                 <AddModal
-                    title="Add domain to api key"
+                    title={i18n.t('views.apiKeys.modals.addDomain.title')}
                     open={this.state.modalAddDomain.visible}
                     onCancel={this.controller!.hideAddDomain}
                     onConfirm={() => {
@@ -231,10 +232,10 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
                 >
                     <React.Fragment>
                         <MuiAlert severity="info">
-                            Api key <b>{this.state.modalAddDomain.keyEntity && this.state.modalAddDomain.keyEntity!.key}</b>
+                            {i18n.t('views.apiKeys.apiKey')} <b>{this.state.modalAddDomain.keyEntity && this.state.modalAddDomain.keyEntity!.key}</b>
                         </MuiAlert>
-                        <p>Enter the domain name without (ex: domain.com) you want to add to this api key.</p>
-                        <p>Please note that by default "localhost" is already working and that the "www" version of your domain will also work.</p>
+                        <p>{i18n.t('views.apiKeys.modals.addDomain.enterDomain')}</p>
+                        <p>{i18n.t('views.apiKeys.modals.addDomain.note')}</p>
                         <TextField
                             onChange={this.controller!.handleAddDomainTyping}
                             name="domain"
@@ -243,14 +244,14 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
                             fullWidth
                             value={this.state.modalAddDomain.domainName}
                             error={this.state.modalAddDomain.error}
-                            helperText={this.state.modalAddDomain.error && "Domain name is invalid. Please enter something like 'domain.com'."}
+                            helperText={this.state.modalAddDomain.error && i18n.t('views.apiKeys.modals.addDomain.domainNameError')}
                         />
                     </React.Fragment>
                 </AddModal>
 
                 <MuiPickersUtilsProvider utils={DateFnsUtils}>
                     <UpdateModal
-                        title="Update api key's expiration date"
+                        title={i18n.t('views.apiKeys.modals.updateApiKey.title')}
                         open={this.state.modalUpdateApiKey.visible}
                         onCancel={this.controller!.hideUpdateApiKey}
                         onConfirm={() => {
@@ -261,14 +262,14 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
                     >
                         <React.Fragment>
                             <MuiAlert severity="info">
-                                Api key <b>{this.state.modalUpdateApiKey.keyEntity && this.state.modalUpdateApiKey.keyEntity!.key}</b>
+                                {i18n.t('views.apiKeys.apiKey')} <b>{this.state.modalUpdateApiKey.keyEntity && this.state.modalUpdateApiKey.keyEntity!.key}</b>
                             </MuiAlert>
                             <p>Please select a new expiration date for the api key.</p>
                             {this.state.modalUpdateApiKey.keyEntity && (
                                 <KeyboardDatePicker
                                     margin="normal"
                                     id="date-picker-dialog"
-                                    label="Expiration date"
+                                    label={i18n.t('views.apiKeys.modals.updateApiKey.expirationDate')}
                                     format="yyyy-MM-dd"
                                     value={this.state.modalUpdateApiKey.keyEntity!.expiresOn}
                                     onChange={this.controller!.handleUpdateApiKeyExpiresOn}
@@ -283,7 +284,7 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
                 </MuiPickersUtilsProvider>
 
                 <ConfirmationModal
-                    title="Delete api key"
+                    title={i18n.t('views.apiKeys.modals.deleteApiKey.title')}
                     open={this.state.modalDeleteApiKey.visible}
                     onCancel={this.controller!.hideDeleteApiKey}
                     onConfirm={() => {
@@ -293,15 +294,15 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
                 >
                     <React.Fragment>
                         <MuiAlert severity="info">
-                            Api key <b>{this.state.modalDeleteApiKey.keyEntity && this.state.modalDeleteApiKey.keyEntity!.key}</b>
+                            {i18n.t('views.apiKeys.apiKey')} <b>{this.state.modalDeleteApiKey.keyEntity && this.state.modalDeleteApiKey.keyEntity!.key}</b>
                         </MuiAlert>
-                        <p>Are you sure you want to delete this api key ?</p>
-                        <p style={{ color: 'red' }}>All associated editors will refuse to clean pasted data immediately.</p>
+                        <p>{i18n.t('views.apiKeys.modals.deleteApiKey.areYouSure')}</p>
+                        <p style={{ color: 'red' }}>{i18n.t('views.apiKeys.modals.common.associatedWillStopWorking')}</p>
                     </React.Fragment>
                 </ConfirmationModal>
 
                 <ConfirmationModal
-                    title="Delete domain"
+                    title={i18n.t('views.apiKeys.modals.deleteDomain.title')}
                     open={this.state.modalDeleteDomain.visible}
                     onCancel={this.controller!.hideDeleteDomain}
                     onConfirm={() => {
@@ -311,12 +312,12 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
                 >
                     <React.Fragment>
                         <MuiAlert severity="info">
-                            Api key <b>{this.state.modalDeleteDomain.keyEntity && this.state.modalDeleteDomain.keyEntity!.key}</b>
+                            {i18n.t('views.apiKeys.apiKey')} <b>{this.state.modalDeleteDomain.keyEntity && this.state.modalDeleteDomain.keyEntity!.key}</b>
                             <br />
-                            Domain <b>{this.state.modalDeleteDomain.domainEntity && this.state.modalDeleteDomain.domainEntity!.name}</b>
+                            {i18n.t('views.apiKeys.domain')} <b>{this.state.modalDeleteDomain.domainEntity && this.state.modalDeleteDomain.domainEntity!.name}</b>
                         </MuiAlert>
-                        <p>Are you sure you want to delete this domain ?</p>
-                        <p style={{ color: 'red' }}>All associated editors will refuse to clean pasted data immediately.</p>
+                        <p>{i18n.t('views.apiKeys.modals.deleteDomain.areYouSure')}</p>
+                        <p style={{ color: 'red' }}>{i18n.t('views.apiKeys.modals.common.associatedWillStopWorking')}</p>
                     </React.Fragment>
                 </ConfirmationModal>
 

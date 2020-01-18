@@ -9,10 +9,10 @@ import AssessmentIcon from '@material-ui/icons/Assessment'
 import CreditCardIcon from '@material-ui/icons/CreditCard'
 import BugReportIcon from '@material-ui/icons/BugReport'
 
-import FormWrapper from '../../components/FormWrapper'
+import FormWrapper from '../../components/forms/FormWrapper'
 import HitsTable from '../analytics/hits/components/HitsTable'
 
-import PageWrapper from '../../components/PageWrapper'
+import PageWrapper from '../../components/forms/PageWrapper'
 import BillingTable from '../account/billing/components/BillingTable'
 
 import { DashboardController } from './DashboardController'

@@ -4,13 +4,13 @@ import { FormControlLabel, Switch, Grid, Paper, Typography } from '@material-ui/
 import SettingsIcon from '@material-ui/icons/Settings'
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline'
 
-import TooltipHelp from '../../../components/TooltipHelp'
+import TooltipHelp from '../../../components/forms/TooltipHelp'
 import { ConfigEntity } from '../../../entities/api'
 import { PluginConfigController } from './PluginConfigController'
 
 import './PluginConfig.less'
 import { Skeleton } from '@material-ui/lab'
-import LoadingError from '../../../components/LoadingError'
+import LoadingError from '../../../components/forms/LoadingError'
 
 export interface PluginConfigProps {}
 export interface PluginConfigState {

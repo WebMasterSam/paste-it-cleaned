@@ -1,8 +1,9 @@
 import backend from '../../../config/backend.json'
 import { BaseController } from '../../BaseController'
-import { ConfigEntity, ApiKeyEntity, DomainEntity } from '../../../entities/api'
+import { ApiKeyEntity, DomainEntity } from '../../../entities/api'
 import ApiKeys from './ApiKeys'
 import moment from 'moment'
+import i18n from 'i18next'
 
 export class ApiKeysController extends BaseController {
     private component?: ApiKeys = undefined
@@ -44,10 +45,10 @@ export class ApiKeysController extends BaseController {
     createApiKey = () => {
         this.createApiKeyBackend(
             (apiKey: ApiKeyEntity) => {
-                this.refreshApiKeys(() => this.showSuccessSnackbar('Api key generated successfuly.'))
+                this.refreshApiKeys(() => this.showSuccessSnackbar(i18n.t('views.apiKeys.messages.success.addApiKey')))
             },
             (e: any) => {
-                this.showErrorSnackbar('An error occured while generating the api key.')
+                this.showErrorSnackbar(i18n.t('views.apiKeys.messages.error.addApiKey'))
             }
         )
     }
@@ -56,10 +57,10 @@ export class ApiKeysController extends BaseController {
         this.deleteApiKeyBackend(
             apiKeyId,
             () => {
-                this.refreshApiKeys(() => this.showSuccessSnackbar('Api key deleted successfuly.'))
+                this.refreshApiKeys(() => this.showSuccessSnackbar(i18n.t('views.apiKeys.messages.success.deleteApiKey')))
             },
             (e: any) => {
-                this.showErrorSnackbar('An error occured while deleting the api key.')
+                this.showErrorSnackbar(i18n.t('views.apiKeys.messages.error.deleteApiKey'))
             }
         )
     }
@@ -69,10 +70,10 @@ export class ApiKeysController extends BaseController {
             apiKeyId,
             domainId,
             () => {
-                this.refreshApiKeys(() => this.showSuccessSnackbar('Domain deleted successfuly.'))
+                this.refreshApiKeys(() => this.showSuccessSnackbar(i18n.t('views.apiKeys.messages.success.deleteDomain')))
             },
             (e: any) => {
-                this.showErrorSnackbar('An error occured while deleting the domain.')
+                this.showErrorSnackbar(i18n.t('views.apiKeys.messages.error.deleteDomain'))
             }
         )
     }
@@ -82,10 +83,10 @@ export class ApiKeysController extends BaseController {
             apiKeyId,
             domainName,
             (domain: DomainEntity) => {
-                this.refreshApiKeys(() => this.showSuccessSnackbar('Domain added successfuly.'))
+                this.refreshApiKeys(() => this.showSuccessSnackbar(i18n.t('views.apiKeys.messages.success.addDomain')))
             },
             (e: any) => {
-                this.showErrorSnackbar('An error occured while adding the domain.')
+                this.showErrorSnackbar(i18n.t('views.apiKeys.messages.error.addDomain'))
             }
         )
     }
@@ -94,10 +95,10 @@ export class ApiKeysController extends BaseController {
         this.updateApiKeyBackend(
             key,
             (domain: DomainEntity) => {
-                this.refreshApiKeys(() => this.showSuccessSnackbar('Api key updated successfuly.'))
+                this.refreshApiKeys(() => this.showSuccessSnackbar(i18n.t('views.apiKeys.messages.success.updateApiKey')))
             },
             (e: any) => {
-                this.showErrorSnackbar('An error occured while updating the api key.')
+                this.showErrorSnackbar(i18n.t('views.apiKeys.messages.error.updateApiKey'))
             }
         )
     }
