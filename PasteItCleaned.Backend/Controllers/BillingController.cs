@@ -43,9 +43,21 @@ namespace PasteItCleaned.Backend.Common.Controllers
         [ProducesResponseType(500)]
         public ActionResult<ListInvoiceEntity> GetInvoices([FromHeader]string authorization)
         {
-            Console.WriteLine("BillingController::GetInvoices");
+            var client = this.GetOrCreateClient(authorization);
 
-            return Ok(T.Get("App.Up"));
+            if (client == null)
+                return StatusCode(401);
+
+            try
+            {
+                var invoices = _invoiceService.List(client.ClientId, 1, 200);
+
+                return Ok(invoices);
+            }
+            catch (Exception ex)
+            {
+                return this.LogAndReturn500(ex);
+            }
         }
 
         // GET billing/payment-method

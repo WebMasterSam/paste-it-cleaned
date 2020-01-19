@@ -3,6 +3,7 @@ import React, { Fragment } from 'react'
 import { Table, TableHead, TableRow, TableBody, TableCell, TablePagination } from '@material-ui/core'
 import { Skeleton } from '@material-ui/lab'
 import LoadingError from '../../../../components/forms/LoadingError'
+import EmptyState from '../../../../components/forms/EmptyState'
 
 export interface HitsTableProps {
     rows: any[]
@@ -127,7 +128,9 @@ class BillingTable extends React.Component<HitsTableProps, HitsTableState> {
                             onChangePage={this.handleChangePage}
                             onChangeRowsPerPage={this.handleChangeRowsPerPage}
                         />
-                    ) : null}
+                    ) : (
+                        <EmptyState />
+                    )}
                 </Fragment>
             )
         }

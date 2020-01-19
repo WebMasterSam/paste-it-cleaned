@@ -40,8 +40,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
             }
             catch (Exception ex)
             {
-                Log.LogError("Exception", ex);
-                return StatusCode(500);
+                return this.LogAndReturn500(ex);
             }
         }
 
@@ -66,8 +65,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
             }
             catch (Exception ex)
             {
-                Log.LogError("Exception", ex);
-                return StatusCode(500);
+                return this.LogAndReturn500(ex);
             }
         }
 
@@ -92,8 +90,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
             }
             catch (Exception ex)
             {
-                Log.LogError("Exception", ex);
-                return StatusCode(500);
+                return this.LogAndReturn500(ex);
             }
         }
     }

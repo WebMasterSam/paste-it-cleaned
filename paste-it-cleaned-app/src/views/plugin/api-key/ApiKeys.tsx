@@ -26,6 +26,7 @@ import Snack from '../../../components/forms/Snack'
 import UpdateModal from '../../../components/modals/UpdateModal'
 
 import './ApiKeys.less'
+import EmptyState from '../../../components/forms/EmptyState'
 
 export interface ApiKeysProps {}
 export interface ApiKeysState {
@@ -125,7 +126,7 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
                             </ButtonWithLoading>
                         ) : (
                             <React.Fragment>
-                                <p>{i18n.t('views.apiKeys.generateNewKey')}</p>
+                                <p>{i18n.t('views.apiKeys.youHaveReached')}</p>
                                 <br />
                             </React.Fragment>
                         )}
@@ -217,6 +218,7 @@ class ApiKeys extends React.Component<ApiKeysProps, ApiKeysState> {
                                     ))}
                             </React.Fragment>
                         )}
+                        {!this.state.apiKeysLoading && this.state.apiKeys.length === 0 && <EmptyState />}
                     </React.Fragment>
                 )}
 

@@ -58,7 +58,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
             }
             catch (Exception ex)
             {
-                return this.LogAndReturnBadRequest(ex);
+                return this.LogAndReturn500(ex);
             }
         }
 
@@ -88,7 +88,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
             }
             catch (Exception ex)
             {
-                return this.LogAndReturnBadRequest(ex);
+                return this.LogAndReturn500(ex);
             }
         }
 
@@ -142,7 +142,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
             }
             catch (Exception ex)
             {
-                return this.LogAndReturnBadRequest(ex);
+                return this.LogAndReturn500(ex);
             }
         }
 
@@ -183,7 +183,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
             }
             catch (Exception ex)
             {
-                return this.LogAndReturnBadRequest(ex);
+                return this.LogAndReturn500(ex);
             }
         }
 
@@ -214,7 +214,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
             }
             catch (Exception ex)
             {
-                return this.LogAndReturnBadRequest(ex);
+                return this.LogAndReturn500(ex);
             }
         }
 
@@ -250,7 +250,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
             }
             catch (Exception ex)
             {
-                return this.LogAndReturnBadRequest(ex);
+                return this.LogAndReturn500(ex);
             }
         }
 
@@ -289,7 +289,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
             }
             catch (Exception ex)
             {
-                return this.LogAndReturnBadRequest(ex);
+                return this.LogAndReturn500(ex);
             }
         }
 
@@ -318,7 +318,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
             }
             catch (Exception ex)
             {
-                return this.LogAndReturnBadRequest(ex);
+                return this.LogAndReturn500(ex);
             }
         }
 
@@ -357,7 +357,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
             }
             catch (Exception ex)
             {
-                return this.LogAndReturnBadRequest(ex);
+                return this.LogAndReturn500(ex);
             }
         }
     }

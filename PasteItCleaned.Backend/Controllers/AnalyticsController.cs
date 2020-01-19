@@ -38,8 +38,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
             }
             catch (Exception ex)
             {
-                Log.LogError("Exception", ex);
-                return BadRequest("A technical error has occured when calling this API method.");
+                return this.LogAndReturn500(ex);
             }
         }
 
@@ -64,8 +63,7 @@ namespace PasteItCleaned.Backend.Common.Controllers
             }
             catch (Exception ex)
             {
-                Log.LogError("Exception", ex);
-                return StatusCode(500);
+                return this.LogAndReturn500(ex);
             }
         }
 
