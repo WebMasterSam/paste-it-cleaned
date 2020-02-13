@@ -10,9 +10,9 @@ namespace PasteItCleaned.Plugin.Cleaners.Office.Word
             return SourceType.Word;
         }
 
-        public override bool CanClean(string content)
+        public override bool CanClean(string html, string rtf)
         {
-            return content.ToLower().Contains("<meta name=Generator content=\"Microsoft Word".ToLower());
+            return html.ToLower().Contains("<meta name=Generator content=\"Microsoft Word".ToLower());
         }
 
         public override string Clean(string html, string rtf, Config config, bool keepStyles)

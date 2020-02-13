@@ -10,9 +10,9 @@ namespace PasteItCleaned.Plugin.Cleaners.Web
             return SourceType.Web;
         }
 
-        public override bool CanClean(string content)
+        public override bool CanClean(string html, string rtf)
         {
-            return true;
+            return !string.IsNullOrWhiteSpace(html);
         }
 
         public override string Clean(string html, string rtf, Config config, bool keepStyles)

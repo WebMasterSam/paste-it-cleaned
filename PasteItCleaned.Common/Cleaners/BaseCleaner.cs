@@ -13,7 +13,7 @@ namespace PasteItCleaned.Plugin.Cleaners
             return SourceType.Other;
         }
 
-        public virtual bool CanClean(string content)
+        public virtual bool CanClean(string html, string rtf)
         {
             return false;
         }

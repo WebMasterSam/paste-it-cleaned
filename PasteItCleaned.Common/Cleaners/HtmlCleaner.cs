@@ -155,9 +155,8 @@ namespace PasteItCleaned.Plugin.Cleaners
                     var attr = n.Attributes[i];
                     var valid = true;
 
-                    if (!string.IsNullOrWhiteSpace(attr.Value))
-                        if (attr.Name.Trim().ToLower() == "class")
-                            valid = false;
+                    if (attr.Name.Trim().ToLower() == "class")
+                        valid = false;
 
                     if (!valid)
                         n.Attributes.Remove(attr);
@@ -258,7 +257,10 @@ namespace PasteItCleaned.Plugin.Cleaners
             var styles = this.ParseCssClasses(content);
 
             foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+            {
                 AddInlineStylesNode(styles, node);
+                RewriteSomeStylesNode(node);
+            }
 
             return docs.Html;
         }
@@ -298,6 +300,56 @@ namespace PasteItCleaned.Plugin.Cleaners
         }
 
 
+
+        protected HtmlDocument RewriteSomeStyles(HtmlDocs docs)
+        {
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+                RewriteSomeStylesNode(node);
+
+            return docs.Html;
+        }
+
+        private void RewriteSomeStylesNode(HtmlNode node)
+        {
+            foreach (HtmlNode n in node.ChildNodes)
+            {
+                if (n.HasChildNodes)
+                    RewriteSomeStylesNode(n);
+
+                var styleAttr = this.FindOrCreateAttr(n, "style");
+
+                if (styleAttr != null)
+                {
+                    var modifiers = this.ParseCssModifiers(styleAttr.Value);
+
+                    // Handle margin styles
+                    var margin = this.GetValue(modifiers, "margin", "").Split(' ');
+                    var marginTop = this.GetValue(modifiers, "margin-top", "");
+                    var marginRight = this.GetValue(modifiers, "margin-right", "");
+                    var marginBottom = this.GetValue(modifiers, "margin-bottom", "");
+                    var marginLeft = this.GetValue(modifiers, "margin-left", "");
+
+                    var newMarginTop = !string.IsNullOrWhiteSpace(marginTop) ? marginTop : margin.Length >= 1 && !string.IsNullOrWhiteSpace(margin[0]) ? margin[0] : "initial";
+                    var newMarginRight = !string.IsNullOrWhiteSpace(marginRight) ? marginRight : margin.Length >= 2 && !string.IsNullOrWhiteSpace(margin[1]) ? margin[1] : margin.Length >= 1 && !string.IsNullOrWhiteSpace(margin[0]) ? margin[0] : "initial";
+                    var newMarginBottom = !string.IsNullOrWhiteSpace(marginBottom) ? marginBottom : margin.Length >= 3 && !string.IsNullOrWhiteSpace(margin[2]) ? margin[2] : margin.Length >= 1 && !string.IsNullOrWhiteSpace(margin[0]) ? margin[0] : "initial";
+                    var newMarginLeft = !string.IsNullOrWhiteSpace(marginLeft) ? marginLeft : margin.Length >= 4 && !string.IsNullOrWhiteSpace(margin[3]) ? margin[3] : margin.Length >= 2 && !string.IsNullOrWhiteSpace(margin[1]) ? margin[1] : margin.Length >= 1 && !string.IsNullOrWhiteSpace(margin[0]) ? margin[0] : "initial";
+                    var newMargin = string.Format("{0} {1} {2} {3}", newMarginTop, newMarginRight, newMarginBottom, newMarginLeft);
+
+                    if (newMargin == "initial initial initial initial")
+                        newMargin = "";
+
+                    this.SetValue(modifiers, "margin", newMargin);
+                    this.SetValue(modifiers, "margin-top", "");
+                    this.SetValue(modifiers, "margin-right", "");
+                    this.SetValue(modifiers, "margin-bottom", "");
+                    this.SetValue(modifiers, "margin-left", "");
+
+                    styleAttr.Value = this.GetInlineStyles(modifiers);
+                }
+            }
+        }
+
+
         protected HtmlDocument ConvertAttributesToStyles(HtmlDocs docs)
         {
             foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
@@ -328,6 +380,108 @@ namespace PasteItCleaned.Plugin.Cleaners
                         if (!string.IsNullOrWhiteSpace(heightAttr.Value))
                             styleAttr.Value += string.Format("height: {0}; ", this.GetSize(heightAttr.Value));
                     }
+                }
+            }
+        }
+
+
+        protected HtmlDocument ConvertFontFamilies(HtmlDocs docs)
+        {
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+                ConvertFontFamiliesNode(node);
+
+            return docs.Html;
+        }
+
+        private void ConvertFontFamiliesNode(HtmlNode node)
+        {
+            foreach (HtmlNode n in node.ChildNodes)
+            {
+                if (n.HasChildNodes)
+                    ConvertFontFamiliesNode(n);
+
+                var styleAttr = this.FindOrCreateAttr(n, "style");
+
+                if (styleAttr != null)
+                {
+                    var modifiers = this.ParseCssModifiers(styleAttr.Value);
+                    var fontFamily = this.GetValue(modifiers, "font-family", "").ToLower();
+
+                    if (fontFamily.Contains("courier"))
+                        this.SetValue(modifiers, "font-family", "Courier New");
+                    else if (fontFamily.Contains("times"))
+                        this.SetValue(modifiers, "font-family", "Times New Roman");
+                    else if (fontFamily.Contains("helvetica"))
+                        this.SetValue(modifiers, "font-family", "Helvetica");
+                    else if (fontFamily.Contains("symbol"))
+                        this.SetValue(modifiers, "font-family", "Symbol");
+                    else if (fontFamily.Contains("garamond"))
+                        this.SetValue(modifiers, "font-family", "Garamond");
+                    else if (fontFamily.Contains("lucida"))
+                        this.SetValue(modifiers, "font-family", "Lucida Console");
+                    else if (fontFamily.Contains("comic"))
+                        this.SetValue(modifiers, "font-family", "Comic Sans MS");
+                    else if (fontFamily.Contains("roboto"))
+                        this.SetValue(modifiers, "font-family", "Roboto");
+                    else if (fontFamily.Contains("verdana"))
+                        this.SetValue(modifiers, "font-family", "Verdana");
+                    else if (fontFamily.Contains("georgia"))
+                        this.SetValue(modifiers, "font-family", "Georgia");
+                    else if (fontFamily.Contains("palatino"))
+                        this.SetValue(modifiers, "font-family", "Palatino");
+                    else if (fontFamily.Contains("impact"))
+                        this.SetValue(modifiers, "font-family", "Impact");
+                    else if (!string.IsNullOrWhiteSpace(fontFamily))
+                        this.SetValue(modifiers, "font-family", "Arial");
+
+                    if (fontFamily.Contains("bold"))
+                        this.SetValue(modifiers, "font-weight", "bold");
+
+                    if (fontFamily.Contains("italic"))
+                        this.SetValue(modifiers, "font-style", "italic");
+
+                    if (fontFamily.Contains("oblique"))
+                        this.SetValue(modifiers, "font-style", "oblique");
+
+                    styleAttr.Value = this.GetInlineStyles(modifiers);
+                }
+            }
+        }
+
+
+        protected HtmlDocument RemoveMarginStylesAttr(HtmlDocs docs)
+        {
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+                RemoveTheseStylesAttrNode(node, new string[] { "margin" });
+
+            return docs.Html;
+        }
+
+        protected HtmlDocument RemoveTheseStylesAttr(HtmlDocs docs, string[] styles)
+        {
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+                RemoveTheseStylesAttrNode(node, styles);
+
+            return docs.Html;
+        }
+
+        private void RemoveTheseStylesAttrNode(HtmlNode node, string[] styles)
+        {
+            foreach (HtmlNode n in node.ChildNodes)
+            {
+                if (n.HasChildNodes)
+                    RemoveTheseStylesAttrNode(n, styles);
+
+                var styleAttr = this.FindOrCreateAttr(n, "style");
+
+                if (styleAttr != null)
+                {
+                    var modifiers = this.ParseCssModifiers(styleAttr.Value);
+
+                    foreach (var style in styles)
+                        this.SetValue(modifiers, style, string.Empty);
+
+                    styleAttr.Value = this.GetInlineStyles(modifiers);
                 }
             }
         }
@@ -686,7 +840,7 @@ namespace PasteItCleaned.Plugin.Cleaners
 
         protected string RemoveUselessTags(string content)
         {
-            var pattern = @"<(meta|link|/?o:|/?v:|/?style|/?title|/?div|/?std|/?head|/?html|/?body|/?script|/?col|/?colgroup|/?form|/?input|/?textarea|/?select|/?button|/?temp|!\[)[^>]*?>";
+            var pattern = @"<(meta|link|/?o:|/?v:|/?style|/?title|/?div|/?std|/?head|/?html|/?body|/?script|/?col|/?colgroup|/?form|/?input|/?textarea|/?select|/?button|/?temp|/?picture|/?def|!\[)[^>]*?>";
 
             content = content.Replace("<font", "<span");
             content = content.Replace("</font>", "</span>");
@@ -934,6 +1088,17 @@ namespace PasteItCleaned.Plugin.Cleaners
             return inlineStyles.ToString().Trim();
         }
 
+        private string GetInlineStyles(Dictionary<string, string> styles)
+        {
+            var inlineStyles = new StringBuilder();
+
+            foreach (var modifier in styles)
+                if (!string.IsNullOrWhiteSpace(modifier.Value))
+                    inlineStyles.AppendFormat("{0}: {1}; ", modifier.Key, modifier.Value);
+
+            return inlineStyles.ToString().Trim();
+        }
+
         private bool IsModifierValid(string name, string value)
         {
             if (name.ToLower().StartsWith("mso-")) return false;
@@ -1000,6 +1165,7 @@ namespace PasteItCleaned.Plugin.Cleaners
         private string CleanModifierValue(string modifierValue)
         {
             modifierValue = modifierValue.Replace("&quot;", "\"");
+            modifierValue = modifierValue.Replace("\"", "");
             modifierValue = modifierValue.Replace(".0%", "%");
             modifierValue = modifierValue.Replace(".0ch", "ch");
             modifierValue = modifierValue.Replace(".0pt", "pt");
@@ -1026,6 +1192,14 @@ namespace PasteItCleaned.Plugin.Cleaners
                 return allClasses[key];
 
             return defaultValue;
+        }
+
+        private void SetValue(Dictionary<string, string> allClasses, string key, string value)
+        {
+            if (allClasses.ContainsKey(key.ToLower()))
+                allClasses[key] = value;
+            else
+                allClasses.Add(key, value);
         }
 
         private void AddClassToList(Dictionary<string, Dictionary<string, string>> allClasses, string className, string modifierName, string modifierValue)

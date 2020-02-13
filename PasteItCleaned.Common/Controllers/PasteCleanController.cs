@@ -104,7 +104,7 @@ namespace PasteItCleaned.Plugin.Controllers
         {
             foreach (BaseCleaner cleaner in Cleaners)
             {
-                if (cleaner.CanClean(html))
+                if (cleaner.CanClean(html, rtf))
                 {
                     if (clientId != Guid.Empty)
                     {
@@ -143,6 +143,7 @@ namespace PasteItCleaned.Plugin.Controllers
                 Cleaners.Add(new OfficeWordCleaner());
                 Cleaners.Add(new OfficePowerPointCleaner());
                 Cleaners.Add(new WebCleaner());
+                Cleaners.Add(new RtfCleaner());
             }
         }
     }
