@@ -22,14 +22,15 @@ namespace PasteItCleaned.Backend.Data.Repositories
             {
                 case "excel": return rows.Sum(m => m.CountExcel);
                 case "image": return rows.Sum(m => m.CountImage);
-                case "other": return rows.Sum(m => m.CountOther);
                 case "powerpoint": return rows.Sum(m => m.CountPowerPoint);
                 case "text": return rows.Sum(m => m.CountText);
                 case "web": return rows.Sum(m => m.CountWeb);
                 case "word": return rows.Sum(m => m.CountWord);
+                case "rtf": return rows.Sum(m => m.CountRtf);
+                case "other": return rows.Sum(m => m.CountOther);
             }
 
-            return rows.Sum(m => m.CountExcel + m.CountImage + m.CountOther + m.CountPowerPoint + m.CountText + m.CountWeb + m.CountWord);
+            return rows.Sum(m => m.CountExcel + m.CountImage + m.CountPowerPoint + m.CountText + m.CountWeb + m.CountWord + m.CountRtf + m.CountOther);
         }
 
         public void DeleteByDate(DateTime priorTo)

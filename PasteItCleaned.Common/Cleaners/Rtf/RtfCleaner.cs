@@ -7,7 +7,7 @@ namespace PasteItCleaned.Plugin.Cleaners.Office.Word
     {
         public override SourceType GetSourceType()
         {
-            return SourceType.Word;
+            return SourceType.Rtf;
         }
 
         public override bool CanClean(string html, string rtf)

@@ -36,11 +36,12 @@ namespace PasteItCleaned.Backend.Services
             {
                 case "excel": hitDaily.CountExcel++; break;
                 case "image": hitDaily.CountImage++; break;
-                case "other": hitDaily.CountOther++; break;
                 case "powerpoint": hitDaily.CountPowerPoint++; break;
                 case "text": hitDaily.CountText++; break;
                 case "web": hitDaily.CountWeb++; break;
                 case "word": hitDaily.CountWord++; break;
+                case "rtf": hitDaily.CountRtf++; break;
+                case "other": hitDaily.CountOther++; break;
             }
 
             hitDaily.TotalPrice += price;

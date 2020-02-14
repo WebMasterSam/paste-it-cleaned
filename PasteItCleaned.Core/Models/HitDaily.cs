@@ -35,6 +35,9 @@ namespace PasteItCleaned.Core.Models
         [Column("count_image")]
         public int CountImage { get; set; }
 
+        [Column("count_rtf")]
+        public int CountRtf { get; set; }
+
         [Column("count_other")]
         public int CountOther { get; set; }
 

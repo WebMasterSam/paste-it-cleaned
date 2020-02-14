@@ -113,6 +113,7 @@ class BillingInformation extends React.Component<BillingInformationProps, Billin
                                 <Button variant="outlined" style={{ float: 'right' }} onClick={this.controller!.showChangePaymentMethodToPayPal}>
                                     <PayPalIcon height={50} />
                                 </Button>
+                                <p>Credit card not supported or you're in a country where PayPal is not supported ? Contact us to use an alternative billing option.</p>
                             </Paper>
                         )}
 
