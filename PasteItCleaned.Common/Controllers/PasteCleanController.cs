@@ -95,8 +95,11 @@ namespace PasteItCleaned.Plugin.Controllers
             catch (Exception ex)
             {
                 this.LogError(ex);
-
-                return Ok(new PluginSuccess(html));
+                
+                if (ConfigHelper.GetAppSetting<bool>("Logging.Debug"))
+                    return Ok(new PluginSuccess(html, ex.Message + ex.StackTrace));
+                else
+                    return Ok(new PluginSuccess(html));
             }
         }
 

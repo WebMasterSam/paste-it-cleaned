@@ -64,7 +64,7 @@ namespace PasteItCleaned.Plugin.Controllers
                     return true;
             }
 
-            return false;
+            return true; // Pour le moment, toujours true
         }
 
         protected string GetApiKeyFromHeaders(HttpContext context)
