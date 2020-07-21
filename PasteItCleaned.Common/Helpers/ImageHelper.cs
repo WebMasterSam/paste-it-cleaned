@@ -94,7 +94,7 @@ namespace PasteItCleaned.Plugin.Helpers
                             }
                         }*/
                     }
-                    else
+                    else if (converterType == "Internal")
                     {
                         var bytes = Convert.FromBase64String(base64);
                         var metafileOriginal = ConvertToMetafile(bytes);

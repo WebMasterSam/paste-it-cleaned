@@ -20,7 +20,7 @@ namespace PasteItCleaned.Plugin.Cleaners
 
         public virtual string Clean(string html, string rtf, Config config, bool keepStyles)
         {
-            return html;
+            return html.Replace(" name=\"\"", "");
         }
 
         protected string SafeExec(Func<string, string> act, string content)

@@ -37,6 +37,9 @@ namespace PasteItCleaned.Plugin.Cleaners.Web
                 htmlDoc = base.SafeExec(this.RemoveClassAttributes, htmlDoc, rtfDoc);
             }
 
+            htmlDoc = base.SafeExec(base.RemoveEmptyAttributes, htmlDoc, rtfDoc);
+            htmlDoc = base.SafeExec(base.RemoveUselessTags, htmlDoc, rtfDoc);
+
             return base.Clean(base.GetOuterHtml(htmlDoc), rtf, config, keepStyles);
         }
     }

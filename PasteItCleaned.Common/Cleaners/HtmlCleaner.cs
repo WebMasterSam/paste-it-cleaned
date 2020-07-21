@@ -8,6 +8,7 @@ using HtmlAgilityPack;
 using PasteItCleaned.Core.Entities;
 using PasteItCleaned.Plugin.Helpers;
 using PasteItCleaned.Core.Models;
+using System;
 
 namespace PasteItCleaned.Plugin.Cleaners
 {
@@ -55,10 +56,10 @@ namespace PasteItCleaned.Plugin.Cleaners
 
         protected string Compact(string content)
         {
-            content = content.Replace("\n", " ");
-            content = content.Replace("\t", " ");
-            content = content.Replace("\r", " ");
-            content = content.Replace("  ", " ");
+            //content = content.Replace("\n", " ");
+            //content = content.Replace("\t", " ");
+            //content = content.Replace("\r", " ");
+            //content = content.Replace("  ", " ");
             content = content.Trim();
 
             return content;
@@ -77,8 +78,13 @@ namespace PasteItCleaned.Plugin.Cleaners
         protected HtmlDocument ParseWithHtmlAgilityPack(string content)
         {
             var htmlDoc = new HtmlDocument();
+            var parseableContent = content;
 
-            htmlDoc.LoadHtml(content);
+            //parseableContent = parseableContent.Replace("↵", Environment.NewLine);
+            parseableContent = Regex.Replace(parseableContent, "\\<\\!DOCTYPE.+?\\>", "");
+            parseableContent = Regex.Replace(parseableContent, "\\<meta.+?\\>", "");
+
+            htmlDoc.LoadHtml(parseableContent);
 
             return htmlDoc;
         }
@@ -89,9 +95,20 @@ namespace PasteItCleaned.Plugin.Cleaners
 
             if (!string.IsNullOrWhiteSpace(content))
             {
-                var rtf = RtfPipe.Rtf.ToHtml(new RtfPipe.RtfSource(new StringReader(content)));
+                try
+                {
+                    var html = RtfPipe.Rtf.ToHtml(new RtfPipe.RtfSource(new StringReader(content)));
 
-                htmlDoc.LoadHtml(rtf);
+                    htmlDoc.LoadHtml(html);
+                }
+                catch
+                {
+                    SautinSoft.RtfToHtml r = new SautinSoft.RtfToHtml();
+                    var html = r.ConvertString(content);
+                    var htmlWithoutTrial = html.Replace("</div><div style=\"text-align:center;\">The unlicensed version of &laquo;RTF to HTML .Net&raquo;.<br><a href=\"https://www.sautinsoft.com/products/rtf-to-html/order.php\">Get the full featured version!</a></div>", "").Replace("TRIAL", "");
+
+                    htmlDoc.LoadHtml(htmlWithoutTrial);
+                }
             }
 
             return htmlDoc;
@@ -131,6 +148,60 @@ namespace PasteItCleaned.Plugin.Cleaners
                     if (!valid)
                         n.Attributes.Remove(attr);
                 }
+            }
+        }
+
+
+        protected HtmlDocument RemoveEmptyAttributes(HtmlDocs docs)
+        {
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+                RemoveEmptyAttributesNode(node);
+
+            return docs.Html;
+        }
+
+        private void RemoveEmptyAttributesNode(HtmlNode node)
+        {
+            foreach (HtmlNode n in node.ChildNodes)
+            {
+                if (n.HasChildNodes)
+                    RemoveEmptyAttributesNode(n);
+
+                for (int i = n.Attributes.Count - 1; i >= 0; i--)
+                {
+                    var attr = n.Attributes[i];
+                    var valid = false;
+
+                    if (!string.IsNullOrWhiteSpace(attr.Value))
+                        valid = true;
+
+                    if (!valid)
+                        n.Attributes.Remove(attr);
+                }
+            }
+        }
+
+
+        protected HtmlDocument RemoveUselessTags(HtmlDocs docs)
+        {
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+                RemoveUselessTagsNode(node);
+
+            return docs.Html;
+        }
+
+        private void RemoveUselessTagsNode(HtmlNode node)
+        {
+            foreach (HtmlNode n in node.ChildNodes)
+            {
+                if (n.HasChildNodes)
+                    RemoveUselessTagsNode(n);
+
+                if (n.Name.ToLower() == "style")
+                    n.ParentNode.ReplaceChild(HtmlNode.CreateNode(""), n);
+
+                if (n.Name.ToLower() == "head")
+                    n.ParentNode.ReplaceChild(HtmlNode.CreateNode(""), n);
             }
         }
 
@@ -283,9 +354,9 @@ namespace PasteItCleaned.Plugin.Cleaners
                     if (!styleAttr.Value.Trim().EndsWith(";"))
                         styleAttr.Value = styleAttr.Value.Trim() + ";";
 
-                    styleAttr.Value += this.GetInlineStylesForTag(styles, n.Name);
-                    styleAttr.Value += this.GetInlineStylesForClass(styles, classAttr.Value);
                     styleAttr.Value += this.GetInlineStylesForTagClass(styles, n.Name, classAttr.Value);
+                    styleAttr.Value += this.GetInlineStylesForClass(styles, classAttr.Value);
+                    styleAttr.Value += this.GetInlineStylesForTag(styles, n.Name);
 
                     if (!string.IsNullOrWhiteSpace(msoList))
                     {
@@ -298,7 +369,6 @@ namespace PasteItCleaned.Plugin.Cleaners
                 }
             }
         }
-
 
 
         protected HtmlDocument RewriteSomeStyles(HtmlDocs docs)
@@ -607,6 +677,9 @@ namespace PasteItCleaned.Plugin.Cleaners
                 foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
                     ConvertBulletListsNodeCreateUlOl(node);
 
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+                CleanBulletListsNode(node);
+
             return docs.Html;
         }
 
@@ -752,6 +825,31 @@ namespace PasteItCleaned.Plugin.Cleaners
 
                         return;
                     }
+                }
+            }
+        }
+
+        private void CleanBulletListsNode(HtmlNode node)
+        {
+            var childNodes = new List<HtmlNode>();
+
+            foreach (HtmlNode n in node.ChildNodes)
+                childNodes.Add(n);
+
+            for (var i = 0; i < childNodes.Count; i++)
+            {
+                HtmlNode n = childNodes[i];
+
+                if (n.HasChildNodes)
+                    CleanBulletListsNode(n);
+
+                if (n.Name.ToLower() == "li")
+                {
+                    var liHtml = n.InnerHtml;
+
+                    liHtml = Regex.Replace(liHtml, @"\<span.+\<\/span\>", "", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+
+                    n.InnerHtml = liHtml;
                 }
             }
         }

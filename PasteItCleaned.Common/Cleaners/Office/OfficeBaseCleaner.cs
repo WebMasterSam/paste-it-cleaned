@@ -24,7 +24,9 @@ namespace PasteItCleaned.Plugin.Cleaners.Office
             if (config.EmbedExternalImages)
                 htmlDoc = base.SafeExec(base.EmbedExternalImages, htmlDoc, rtfDoc);
 
+            htmlDoc = base.SafeExec(base.RemoveEmptyAttributes, htmlDoc, rtfDoc);
             htmlDoc = base.SafeExec(base.RemoveUselessAttributes, htmlDoc, rtfDoc);
+            htmlDoc = base.SafeExec(base.RemoveUselessTags, htmlDoc, rtfDoc);
 
             cleaned = base.GetOuterHtml(htmlDoc);
 
