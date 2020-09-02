@@ -15,7 +15,7 @@ namespace PasteItCleaned.Plugin.Cleaners
 {
     public class HtmlCleaner : BaseCleaner
     {
-        private string[] ValidAttributes = { "style", "colspan", "rowspan", "src", "class", "href", "target", "border", "cellspacing", "cellpadding" };
+        private string[] ValidAttributes = { "style", "colspan", "rowspan", "src", "class", "href", "target", "border", "cellspacing", "cellpadding", "span" };
 
         public override SourceType GetSourceType()
         {
@@ -44,9 +44,9 @@ namespace PasteItCleaned.Plugin.Cleaners
 
             if (!keepStyles) {
                 cleaned = base.SafeExec(this.RemoveStyleTags, cleaned);
-                cleaned = base.SafeExec(this.CompactSpaces, cleaned);
             }
 
+            cleaned = base.SafeExec(this.CompactSpaces, cleaned);
             cleaned = base.SafeExec(this.RemoveComments, cleaned);
             cleaned = base.SafeExec(this.RemoveUselessTags, cleaned);
             cleaned = base.SafeExec(this.Compact, cleaned);
@@ -72,8 +72,10 @@ namespace PasteItCleaned.Plugin.Cleaners
 
         protected string CompactSpaces(string content)
         {
+            content = content.Replace("&#160;", " ");
             content = content.Replace("&nbsp;", " ");
             content = content.Replace("  ", " ");
+            content = content.Replace("> <", "><");
             content = content.Trim();
 
             return content;
@@ -350,7 +352,7 @@ namespace PasteItCleaned.Plugin.Cleaners
         }
 
 
-        protected HtmlDocument AddDefaultOpenOfficeStyles(HtmlDocs docs)
+        protected HtmlDocument AddDefaultOpenAndLibreOfficeStyles(HtmlDocs docs)
         {
             var content = this.GetOuterHtml(docs.Html);
             var styles = this.ParseCssClasses(content);
@@ -415,6 +417,35 @@ namespace PasteItCleaned.Plugin.Cleaners
 
             if (!hasDefaultFont && nodeStyleAttr != null && !nodeStyleAttr.Value.ToLower().Contains("font-size"))
                 nodeStyleAttr.Value = "font-size: 12pt; " + nodeStyleAttr.Value;*/
+        }
+
+
+
+        protected HtmlDocument RemoveDefaultLibreOfficeStyles(HtmlDocs docs)
+        {
+            var content = this.GetOuterHtml(docs.Html);
+            var styles = this.ParseCssClasses(content);
+
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+            {
+                RemoveDefaultLibreOfficeStylesNode(styles, node);
+            }
+
+            return docs.Html;
+        }
+
+        private void RemoveDefaultLibreOfficeStylesNode(Dictionary<string, Dictionary<string, string>> styles, HtmlNode node)
+        {
+            if (node.HasChildNodes)
+                foreach (HtmlNode n in node.ChildNodes)
+                    RemoveDefaultLibreOfficeStylesNode(styles, n);
+
+            var nodeStyleAttr = this.FindOrCreateAttr(node, "style");
+
+            // Removing FONT-SIZE=x-small
+
+            if (nodeStyleAttr != null && nodeStyleAttr.Value.ToLower().Contains("font-size: x-small;"))
+                nodeStyleAttr.Value = nodeStyleAttr.Value.Replace("font-size: x-small;", "");
         }
 
 
@@ -591,6 +622,16 @@ namespace PasteItCleaned.Plugin.Cleaners
 
                     if (!string.IsNullOrWhiteSpace(faceAttr.Value))
                         styleAttr.Value += string.Format("font-family: {0}; ", faceAttr.Value);
+                }
+
+                var colorAttr = this.FindOrCreateAttr(n, "color");
+
+                if (colorAttr != null)
+                {
+                    var styleAttr = this.FindOrCreateAttr(n, "style");
+
+                    if (!string.IsNullOrWhiteSpace(colorAttr.Value))
+                        styleAttr.Value += string.Format("color: {0}; ", colorAttr.Value);
                 }
             }
         }
@@ -1043,6 +1084,9 @@ namespace PasteItCleaned.Plugin.Cleaners
             sanitizer.Tag("br").AllowAttributes("style").AllowAttributes("class");
             sanitizer.Tag("hr").AllowAttributes("style").AllowAttributes("class");
 
+            sanitizer.Tag("colgroup").AllowAttributes("style").AllowAttributes("class").AllowAttributes("span");
+            sanitizer.Tag("col").AllowAttributes("style").AllowAttributes("class").AllowAttributes("span");
+
             sanitizer.Tag("head").Remove();
             sanitizer.Tag("style").Remove();
             sanitizer.Tag("script").Remove();
@@ -1080,7 +1124,7 @@ namespace PasteItCleaned.Plugin.Cleaners
                 else
                     sanitizer.Tag("span").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
 
-                sanitizer.Tag("div").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("div").AllowAttributes("style").AllowAttributes("class");//.RemoveEmpty();
                 sanitizer.Tag("blockquote").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
                 sanitizer.Tag("pre").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
                 sanitizer.Tag("sub").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
@@ -1105,7 +1149,7 @@ namespace PasteItCleaned.Plugin.Cleaners
                 sanitizer.Tag("tfoot").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
                 sanitizer.Tag("th").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
                 sanitizer.Tag("tr").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
-                sanitizer.Tag("td").AllowAttributes("style,class,colspan,rowspan").RemoveEmpty();
+                sanitizer.Tag("td").AllowAttributes("style").AllowAttributes("class").AllowAttributes("colspan").AllowAttributes("rowspan").RemoveEmpty();
 
                 sanitizer.Tag("ol").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
                 sanitizer.Tag("ul").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
@@ -1128,7 +1172,7 @@ namespace PasteItCleaned.Plugin.Cleaners
                 else
                     sanitizer.Tag("span").RemoveEmpty();
 
-                sanitizer.Tag("div").RemoveEmpty();
+                sanitizer.Tag("div");//.RemoveEmpty();
                 sanitizer.Tag("blockquote").RemoveEmpty();
                 sanitizer.Tag("pre").RemoveEmpty();
                 sanitizer.Tag("sub").RemoveEmpty();
@@ -1210,7 +1254,14 @@ namespace PasteItCleaned.Plugin.Cleaners
                 sanitizer.Tag("li").AllowAttributes("style").AllowAttributes("class");
             }
 
-            string sanitized = sanitizer.Sanitize(this.GetOuterHtml(docs.Html));
+            var content = this.GetOuterHtml(docs.Html);
+
+            content = content.Replace("&#160;", " ");
+            content = content.Replace("&nbsp;", " ");
+            content = content.Replace("  ", " ");
+            content = content.Replace("> <", "><");
+
+            string sanitized = sanitizer.Sanitize(content);
             
             return this.ParseWithHtmlAgilityPack(sanitized);
         }
@@ -1282,7 +1333,29 @@ namespace PasteItCleaned.Plugin.Cleaners
                     ConvertFontHeadersForOpenOfficeNode(n);
 
                 if (n.Name.ToLower() == "font")
+                {
+                    var sizeAttr = this.FindOrCreateAttr(n, "size");
+                    var styleAttr = this.FindOrCreateAttr(n, "style");
+
+                    if (sizeAttr.Value == "1")
+                        styleAttr.Value += "font-size: 6pt;";
+                    else if (sizeAttr.Value == "2")
+                        styleAttr.Value += "font-size: 10pt;";
+                    else if (sizeAttr.Value == "3")
+                        styleAttr.Value += "font-size: 12pt;";
+                    else if (sizeAttr.Value == "4")
+                        styleAttr.Value += "font-size: 14pt;";
+                    else if (sizeAttr.Value == "5")
+                        styleAttr.Value += "font-size: 18pt;";
+                    else if (sizeAttr.Value == "6")
+                        styleAttr.Value += "font-size: 22pt;";
+                    else if (sizeAttr.Value == "7")
+                        styleAttr.Value += "font-size: 26pt;";
+                    else if (sizeAttr.Value == "8")
+                        styleAttr.Value += "font-size: 30pt;";
+
                     n.ParentNode.ReplaceChild(HtmlNode.CreateNode(n.OuterHtml.Replace("<font", "<span").Replace("</font>", "</span>")), n);
+                }
             }
         }
 
@@ -1470,7 +1543,7 @@ namespace PasteItCleaned.Plugin.Cleaners
 
         protected string RemoveUselessTags(string content)
         {
-            var pattern = @"<(meta|link|/?o:|/?v:|/?style|/?title|/?std|/?head|/?html|/?body|/?script|/?col|/?colgroup|/?form|/?input|/?textarea|/?select|/?button|/?temp|/?picture|/?def|!\[)[^>]*?>";
+            var pattern = @"<(meta|link|/?o:|/?v:|/?style|/?title|/?std|/?head|/?html|/?body|/?script|/?form|/?input|/?textarea|/?select|/?button|/?temp|/?picture|/?def|!\[)[^>]*?>";
 
             content = content.Replace("<font", "<span");
             content = content.Replace("</font>", "</span>");

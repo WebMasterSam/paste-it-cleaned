@@ -1,8 +1,8 @@
 ﻿using PasteItCleaned.Core.Models;
 
-namespace PasteItCleaned.Plugin.Cleaners.OpenOffice
+namespace PasteItCleaned.Plugin.Cleaners.Google
 {
-    public class OpenOfficeBaseCleaner : HtmlCleaner
+    public class GoogleBaseCleaner : HtmlCleaner
     {
         public override string Clean(string html, string rtf, Config config, bool keepStyles)
         {
@@ -12,12 +12,7 @@ namespace PasteItCleaned.Plugin.Cleaners.OpenOffice
             var rtfDoc = base.ParseWithRtfPipe(rtf);
 
             htmlDoc = base.SafeExec(base.AddInlineStyles, htmlDoc, rtfDoc, config);
-            htmlDoc = base.SafeExec(base.ConvertFontHeadersForOpenOffice, htmlDoc, rtfDoc, config);
             htmlDoc = base.SafeExec(base.ConvertAttributesToStyles, htmlDoc, rtfDoc, config);
-            htmlDoc = base.SafeExec(base.ConvertAttributesSizeToStyles, htmlDoc, rtfDoc, config);
-            htmlDoc = base.SafeExec(base.AddDefaultOpenAndLibreOfficeStyles, htmlDoc, rtfDoc, config);
-            htmlDoc = base.SafeExec(base.UnifyHeaders, htmlDoc, rtfDoc, config);
-            //htmlDoc = base.SafeExec(base.RemoveUselessNestedTextNodes, htmlDoc, rtfDoc, config);
             htmlDoc = base.SafeExec(base.RemoveClassAttributes, htmlDoc, rtfDoc, config);
             htmlDoc = base.SafeExec(base.RemoveUselessStyles, htmlDoc, rtfDoc, config);
 

@@ -18,6 +18,9 @@ using PasteItCleaned.Core.Services;
 using PasteItCleaned.Core.Helpers;
 using PasteItCleaned.Core.Models;
 using PasteItCleaned.Plugin.Cleaners.OpenOffice.All;
+using PasteItCleaned.Plugin.Cleaners.LibreOffice.All;
+using PasteItCleaned.Plugin.Cleaners.Google.Sheets;
+using PasteItCleaned.Plugin.Cleaners.Google.Docs;
 
 namespace PasteItCleaned.Plugin.Controllers
 {
@@ -147,6 +150,9 @@ namespace PasteItCleaned.Plugin.Controllers
                 Cleaners.Add(new OfficeWordCleaner());
                 Cleaners.Add(new OfficePowerPointCleaner());
                 Cleaners.Add(new OpenOfficeAllCleaner());
+                Cleaners.Add(new LibreOfficeAllCleaner());
+                Cleaners.Add(new GoogleDocsCleaner());
+                Cleaners.Add(new GoogleSheetsCleaner());
                 Cleaners.Add(new WebCleaner());
                 Cleaners.Add(new RtfCleaner());
             }

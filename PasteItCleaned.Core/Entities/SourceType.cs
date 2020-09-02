@@ -13,6 +13,12 @@
 
         OpenOffice = 20,
 
+        LibreOffice = 30,
+
+        Google = 40,
+        GoogleSheets = 41,
+        GoogleDocs = 42,
+
         Web = 99,
 
         Other = 99999
