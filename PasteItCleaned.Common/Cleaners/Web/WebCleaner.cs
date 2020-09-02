@@ -19,26 +19,25 @@ namespace PasteItCleaned.Plugin.Cleaners.Web
         {
             var cleaned = html;
 
-            if (config.RemoveIframes)
-                cleaned = base.SafeExec(base.RemoveIframes, cleaned);
-
             var htmlDoc = base.ParseWithHtmlAgilityPack(cleaned);
             var rtfDoc = base.ParseWithRtfPipe(rtf);
 
+            htmlDoc = base.SafeExec(base.ConvertFontHeaders, htmlDoc, rtfDoc, config);
+
             if (config.EmbedExternalImages)
-                htmlDoc = base.SafeExec(this.EmbedExternalImages, htmlDoc, rtfDoc);
+                htmlDoc = base.SafeExec(this.EmbedExternalImages, htmlDoc, rtfDoc, config);
 
             if (config.RemoveTagAttributes)
-                htmlDoc = base.SafeExec(this.RemoveUselessAttributes, htmlDoc, rtfDoc);
+                htmlDoc = base.SafeExec(this.RemoveUselessAttributes, htmlDoc, rtfDoc, config);
 
             if (config.RemoveClassNames)
             {
-                htmlDoc = base.SafeExec(base.AddInlineStyles, htmlDoc, rtfDoc);
-                htmlDoc = base.SafeExec(this.RemoveClassAttributes, htmlDoc, rtfDoc);
+                htmlDoc = base.SafeExec(base.AddInlineStyles, htmlDoc, rtfDoc, config);
+                htmlDoc = base.SafeExec(this.RemoveClassAttributes, htmlDoc, rtfDoc, config);
             }
 
-            htmlDoc = base.SafeExec(base.RemoveEmptyAttributes, htmlDoc, rtfDoc);
-            htmlDoc = base.SafeExec(base.RemoveUselessTags, htmlDoc, rtfDoc);
+            htmlDoc = base.SafeExec(base.UnifyHeaders, htmlDoc, rtfDoc, config);
+            htmlDoc = base.SafeExec(base.ConvertAttributesToStyles, htmlDoc, rtfDoc, config);
 
             return base.Clean(base.GetOuterHtml(htmlDoc), rtf, config, keepStyles);
         }

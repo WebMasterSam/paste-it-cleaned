@@ -9,12 +9,13 @@ using PasteItCleaned.Core.Entities;
 using PasteItCleaned.Plugin.Helpers;
 using PasteItCleaned.Core.Models;
 using System;
+using Vereyon.Web;
 
 namespace PasteItCleaned.Plugin.Cleaners
 {
     public class HtmlCleaner : BaseCleaner
     {
-        private string[] ValideAttributes = { "style", "colspan", "rowspan", "src", "class", "href", "target", "border", "cellspacing", "cellpadding", "valign", "align" };
+        private string[] ValidAttributes = { "style", "colspan", "rowspan", "src", "class", "href", "target", "border", "cellspacing", "cellpadding" };
 
         public override SourceType GetSourceType()
         {
@@ -26,14 +27,18 @@ namespace PasteItCleaned.Plugin.Cleaners
             var htmlDoc = this.ParseWithHtmlAgilityPack(html);
             var rtfDoc = this.ParseWithRtfPipe(rtf);
 
-            htmlDoc = base.SafeExec(this.RemoveLocalAnchors, htmlDoc, rtfDoc);
+            htmlDoc = base.SafeExec(this.RemoveLocalAnchors, htmlDoc, rtfDoc, config);
 
             if (!keepStyles)
-                htmlDoc = base.SafeExec(this.RemoveAllStyles, htmlDoc, rtfDoc);
+                htmlDoc = base.SafeExec(this.RemoveAllStyles, htmlDoc, rtfDoc, config);
 
-            //if (config.GetConfigValue("removeEmptyTags", true))
+            if (config.RemoveSpanTags)
+                htmlDoc = base.SafeExec(this.RemoveSpanTags, htmlDoc, rtfDoc, config);
 
-            //if (config.GetConfigValue("removeSpanTags", true))
+            htmlDoc = base.SafeExec(this.RemoveUselessStyles, htmlDoc, rtfDoc, config);
+            htmlDoc = base.SafeExec(this.RemoveUselessAttributes, htmlDoc, rtfDoc, config);
+            htmlDoc = base.SafeExec(this.RemoveEmptyAttributes, htmlDoc, rtfDoc, config);
+            htmlDoc = base.SafeExec(this.SanitizeHtmlWithHtmlSanitizer, htmlDoc, rtfDoc, config);
 
             var cleaned = this.GetOuterHtml(htmlDoc);
 
@@ -77,7 +82,12 @@ namespace PasteItCleaned.Plugin.Cleaners
 
         protected HtmlDocument ParseWithHtmlAgilityPack(string content)
         {
-            var htmlDoc = new HtmlDocument();
+            var htmlDoc = new HtmlDocument()
+            {
+                OptionFixNestedTags = true,
+                OptionCheckSyntax = true,
+                OptionAutoCloseOnEnd = true
+            };
             var parseableContent = content;
 
             //parseableContent = parseableContent.Replace("↵", Environment.NewLine);
@@ -141,7 +151,7 @@ namespace PasteItCleaned.Plugin.Cleaners
                     var valid = false;
 
                     if (!string.IsNullOrWhiteSpace(attr.Value))
-                        foreach (var att in ValideAttributes)
+                        foreach (var att in ValidAttributes)
                             if (attr.Name.Trim().ToLower() == att)
                                 valid = true;
 
@@ -177,33 +187,35 @@ namespace PasteItCleaned.Plugin.Cleaners
 
                     if (!valid)
                         n.Attributes.Remove(attr);
+                    else
+                        attr.Value = attr.Value.Trim();
                 }
             }
         }
 
 
-        protected HtmlDocument RemoveUselessTags(HtmlDocs docs)
-        {
-            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
-                RemoveUselessTagsNode(node);
+        //protected HtmlDocument RemoveUselessTags(HtmlDocs docs)
+        //{
+        //    foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+        //        RemoveUselessTagsNode(node);
 
-            return docs.Html;
-        }
+        //    return docs.Html;
+        //}
 
-        private void RemoveUselessTagsNode(HtmlNode node)
-        {
-            foreach (HtmlNode n in node.ChildNodes)
-            {
-                if (n.HasChildNodes)
-                    RemoveUselessTagsNode(n);
+        //private void RemoveUselessTagsNode(HtmlNode node)
+        //{
+        //    foreach (HtmlNode n in node.ChildNodes)
+        //    {
+        //        if (n.HasChildNodes)
+        //            RemoveUselessTagsNode(n);
 
-                if (n.Name.ToLower() == "style")
-                    n.ParentNode.ReplaceChild(HtmlNode.CreateNode(""), n);
+        //        if (n.Name.ToLower() == "style")
+        //            n.ParentNode.ReplaceChild(HtmlNode.CreateNode(""), n);
 
-                if (n.Name.ToLower() == "head")
-                    n.ParentNode.ReplaceChild(HtmlNode.CreateNode(""), n);
-            }
-        }
+        //        if (n.Name.ToLower() == "head")
+        //            n.ParentNode.ReplaceChild(HtmlNode.CreateNode(""), n);
+        //    }
+        //}
 
 
         protected HtmlDocument RemoveClassAttributes(HtmlDocs docs)
@@ -258,7 +270,11 @@ namespace PasteItCleaned.Plugin.Cleaners
                     if (attr.Name.Trim().ToLower() == "style")
                     {
                         var newStyles = new StringBuilder();
-                        var modifiers = attr.Value.Replace("&quot;", "\"").Split(";");
+                        var modifiers = new List<string>(attr.Value.Replace("&quot;", "\"").Split(";"));
+                        var addedModifiers = new List<string>();
+                        var keptModifiers = new List<string>();
+
+                        modifiers.Reverse();
 
                         foreach (string modifier in modifiers)
                         {
@@ -266,13 +282,25 @@ namespace PasteItCleaned.Plugin.Cleaners
                             {
                                 var modifierName = modifier.Split(":")[0].Trim();
                                 var modifierValue = modifier.Split(":")[1].Trim();
+                                var completeModifier = string.Format("{0}: {1}; ", modifierName, modifierValue);
 
                                 if (IsModifierValid(modifierName, modifierValue))
-                                    newStyles.AppendFormat("{0}: {1}; ", modifierName, modifierValue);
+                                {
+                                    if (!addedModifiers.Contains(modifierName.Trim().ToLower()))
+                                    {
+                                        addedModifiers.Add(modifierName.Trim().ToLower());
+                                        keptModifiers.Add(completeModifier);
+                                    }
+                                }
                             }
                         }
 
-                        attr.Value = newStyles.ToString();
+                        keptModifiers.Reverse();
+
+                        foreach (string completeModifier in keptModifiers)
+                            newStyles.Append(completeModifier);
+
+                        attr.Value = newStyles.ToString().Trim();
                     }
                 }
             }
@@ -319,6 +347,74 @@ namespace PasteItCleaned.Plugin.Cleaners
                     }
                 }
             }
+        }
+
+
+        protected HtmlDocument AddDefaultOpenOfficeStyles(HtmlDocs docs)
+        {
+            var content = this.GetOuterHtml(docs.Html);
+            var styles = this.ParseCssClasses(content);
+
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+            {
+                AddDefaultOpenOfficeStylesNode(styles, node);
+                RewriteSomeStylesNode(node);
+            }
+
+            return docs.Html;
+        }
+
+        private void AddDefaultOpenOfficeStylesNode(Dictionary<string, Dictionary<string, string>> styles, HtmlNode node)
+        {
+            var validTags = new List<string>(new string[] { "p", "h1", "h2", "h3", "h4", "h5", "h6", "label", "div" });
+
+            if (node.HasChildNodes)
+                foreach (HtmlNode n in node.ChildNodes)
+                    AddDefaultOpenOfficeStylesNode(styles, n);
+
+            var nodeStyleAttr = this.FindOrCreateAttr(node, "style");
+
+            // Adding FONT-FAMILY
+
+            var current = node;
+            var hasDefaultFont = false;
+
+            while (current.Name != "#document")
+            {
+                var styleAttr = this.FindOrCreateAttr(current, "style");
+
+                if (current != node && styleAttr != null && styleAttr.Value.Contains("font-family"))
+                {
+                    hasDefaultFont = true;
+                    break;
+                }
+
+                current = current.ParentNode;
+            }
+
+            if (!hasDefaultFont && nodeStyleAttr != null && validTags.Contains(node.Name.ToLower()) && !nodeStyleAttr.Value.ToLower().Contains("font-family"))
+                nodeStyleAttr.Value = "font-family: Times New Roman, serif; " + nodeStyleAttr.Value;
+
+            // Adding FONT-SIZE
+
+            /*current = node;
+            hasDefaultFont = false;
+
+            while (current.Name != "#document")
+            {
+                var styleAttr = this.FindOrCreateAttr(current, "style");
+
+                if (current != node && styleAttr != null && styleAttr.Value.Contains("font-size"))
+                {
+                    hasDefaultFont = true;
+                    break;
+                }
+
+                current = current.ParentNode;
+            }
+
+            if (!hasDefaultFont && nodeStyleAttr != null && !nodeStyleAttr.Value.ToLower().Contains("font-size"))
+                nodeStyleAttr.Value = "font-size: 12pt; " + nodeStyleAttr.Value;*/
         }
 
 
@@ -435,6 +531,9 @@ namespace PasteItCleaned.Plugin.Cleaners
                 if (n.HasChildNodes)
                     ConvertAttributesToStylesNode(n);
 
+                // We add the size attributes to objects other than cells everywhere.
+                // There is another method to apply size styles everywhere (no avoiding cells).
+
                 var widthAttr = this.FindOrCreateAttr(n, "width");
                 var heightAttr = this.FindOrCreateAttr(n, "height");
 
@@ -450,6 +549,80 @@ namespace PasteItCleaned.Plugin.Cleaners
                         if (!string.IsNullOrWhiteSpace(heightAttr.Value))
                             styleAttr.Value += string.Format("height: {0}; ", this.GetSize(heightAttr.Value));
                     }
+                }
+
+                // We apply different attributes to styles everytime we see them
+
+                var alignAttr = this.FindOrCreateAttr(n, "align");
+
+                if (alignAttr != null)
+                {
+                    var styleAttr = this.FindOrCreateAttr(n, "style");
+
+                    if (!string.IsNullOrWhiteSpace(alignAttr.Value))
+                        styleAttr.Value += string.Format("text-align: {0}; ", alignAttr.Value);
+                }
+
+                var valignAttr = this.FindOrCreateAttr(n, "valign");
+
+                if (valignAttr != null)
+                {
+                    var styleAttr = this.FindOrCreateAttr(n, "style");
+
+                    if (!string.IsNullOrWhiteSpace(valignAttr.Value))
+                        styleAttr.Value += string.Format("vertical-align: {0}; ", valignAttr.Value);
+                }
+
+                var bgColorAttr = this.FindOrCreateAttr(n, "bgcolor");
+
+                if (bgColorAttr != null)
+                {
+                    var styleAttr = this.FindOrCreateAttr(n, "style");
+
+                    if (!string.IsNullOrWhiteSpace(bgColorAttr.Value))
+                        styleAttr.Value += string.Format("background-color: {0}; ", bgColorAttr.Value);
+                }
+
+                var faceAttr = this.FindOrCreateAttr(n, "face");
+
+                if (faceAttr != null)
+                {
+                    var styleAttr = this.FindOrCreateAttr(n, "style");
+
+                    if (!string.IsNullOrWhiteSpace(faceAttr.Value))
+                        styleAttr.Value += string.Format("font-family: {0}; ", faceAttr.Value);
+                }
+            }
+        }
+
+
+        protected HtmlDocument ConvertAttributesSizeToStyles(HtmlDocs docs)
+        {
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+                ConvertAttributesSizeToStylesNode(node);
+
+            return docs.Html;
+        }
+
+        private void ConvertAttributesSizeToStylesNode(HtmlNode node)
+        {
+            foreach (HtmlNode n in node.ChildNodes)
+            {
+                if (n.HasChildNodes)
+                    ConvertAttributesSizeToStylesNode(n);
+
+                var widthAttr = this.FindOrCreateAttr(n, "width");
+                var heightAttr = this.FindOrCreateAttr(n, "height");
+
+                if (widthAttr != null && heightAttr != null)
+                {
+                    var styleAttr = this.FindOrCreateAttr(n, "style");
+
+                    if (!string.IsNullOrWhiteSpace(widthAttr.Value))
+                        styleAttr.Value += string.Format("width: {0}; ", this.GetSize(widthAttr.Value));
+
+                    if (!string.IsNullOrWhiteSpace(heightAttr.Value))
+                        styleAttr.Value += string.Format("height: {0}; ", this.GetSize(heightAttr.Value));
                 }
             }
         }
@@ -855,6 +1028,195 @@ namespace PasteItCleaned.Plugin.Cleaners
         }
 
 
+
+        protected HtmlDocument SanitizeHtmlWithHtmlSanitizer(HtmlDocs docs)
+        {
+            var sanitizer = HtmlSanitizer.SimpleHtml5DocumentSanitizer();
+
+            sanitizer.RemoveComments = true;
+
+            sanitizer.Tag("em").Rename("i");
+            sanitizer.Tag("strong").Rename("b");
+            sanitizer.Tag("strike").Rename("s");
+            sanitizer.Tag("center").Rename("p").SetAttribute("align", "center");
+
+            sanitizer.Tag("br").AllowAttributes("style").AllowAttributes("class");
+            sanitizer.Tag("hr").AllowAttributes("style").AllowAttributes("class");
+
+            sanitizer.Tag("head").Remove();
+            sanitizer.Tag("style").Remove();
+            sanitizer.Tag("script").Remove();
+
+            sanitizer.Tag("meta").Remove();
+            sanitizer.Tag("link").Remove();
+            sanitizer.Tag("title").Remove();
+            sanitizer.Tag("std").Remove();
+            sanitizer.Tag("form").Remove();
+            sanitizer.Tag("input").Remove();
+            sanitizer.Tag("textarea").Remove();
+            sanitizer.Tag("select").Remove();
+            sanitizer.Tag("button").Remove();
+            sanitizer.Tag("temp").Remove();
+            sanitizer.Tag("picture").Remove();
+            sanitizer.Tag("def").Remove();
+
+            if (docs.Config.RemoveIframes)
+                sanitizer.Tag("iframe").Remove();
+
+            if (docs.Config.RemoveEmptyTags && docs.Config.RemoveTagAttributes)
+            {
+                sanitizer.Tag("code").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("big").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("small").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("p").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("b").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("s").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("i").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("u").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("a").AllowAttributes("style").AllowAttributes("class").AllowAttributes("href").AllowAttributes("target").RemoveEmpty();
+
+                if (docs.Config.RemoveSpanTags)
+                    sanitizer.Tag("span").AllowAttributes("style").AllowAttributes("class").RemoveEmpty().NoAttributes(SanitizerOperation.FlattenTag);
+                else
+                    sanitizer.Tag("span").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+
+                sanitizer.Tag("div").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("blockquote").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("pre").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("sub").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("sup").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("label").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+
+                sanitizer.Tag("img").AllowAttributes("style").AllowAttributes("class").AllowAttributes("src").RemoveEmpty();
+
+                if (!docs.Config.RemoveIframes)
+                    sanitizer.Tag("iframe").AllowAttributes("style").AllowAttributes("class").AllowAttributes("src").RemoveEmpty();
+
+                sanitizer.Tag("h1").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("h2").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("h3").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("h4").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("h5").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("h6").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+
+                sanitizer.Tag("table").AllowAttributes("style").AllowAttributes("class").AllowAttributes("border").AllowAttributes("cellspacing").AllowAttributes("cellpadding").RemoveEmpty();
+                sanitizer.Tag("thead").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("tbody").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("tfoot").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("th").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("tr").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("td").AllowAttributes("style,class,colspan,rowspan").RemoveEmpty();
+
+                sanitizer.Tag("ol").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("ul").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+                sanitizer.Tag("li").AllowAttributes("style").AllowAttributes("class").RemoveEmpty();
+            }
+            else if (docs.Config.RemoveEmptyTags && !docs.Config.RemoveTagAttributes)
+            {
+                sanitizer.Tag("code").RemoveEmpty();
+                sanitizer.Tag("big").RemoveEmpty();
+                sanitizer.Tag("small").RemoveEmpty();
+                sanitizer.Tag("p").RemoveEmpty();
+                sanitizer.Tag("b").RemoveEmpty();
+                sanitizer.Tag("s").RemoveEmpty();
+                sanitizer.Tag("i").RemoveEmpty();
+                sanitizer.Tag("u").RemoveEmpty();
+                sanitizer.Tag("a").RemoveEmpty();
+
+                if (docs.Config.RemoveSpanTags)
+                    sanitizer.Tag("span").RemoveEmpty().NoAttributes(SanitizerOperation.FlattenTag);
+                else
+                    sanitizer.Tag("span").RemoveEmpty();
+
+                sanitizer.Tag("div").RemoveEmpty();
+                sanitizer.Tag("blockquote").RemoveEmpty();
+                sanitizer.Tag("pre").RemoveEmpty();
+                sanitizer.Tag("sub").RemoveEmpty();
+                sanitizer.Tag("sup").RemoveEmpty();
+                sanitizer.Tag("label").RemoveEmpty();
+
+                sanitizer.Tag("img").RemoveEmpty();
+
+                if (!docs.Config.RemoveIframes)
+                    sanitizer.Tag("iframe").RemoveEmpty();
+
+                sanitizer.Tag("h1").RemoveEmpty();
+                sanitizer.Tag("h2").RemoveEmpty();
+                sanitizer.Tag("h3").RemoveEmpty();
+                sanitizer.Tag("h4").RemoveEmpty();
+                sanitizer.Tag("h5").RemoveEmpty();
+                sanitizer.Tag("h6").RemoveEmpty();
+
+                sanitizer.Tag("table").RemoveEmpty();
+                sanitizer.Tag("thead").RemoveEmpty();
+                sanitizer.Tag("tbody").RemoveEmpty();
+                sanitizer.Tag("tfoot").RemoveEmpty();
+                sanitizer.Tag("th").RemoveEmpty();
+                sanitizer.Tag("tr").RemoveEmpty();
+                sanitizer.Tag("td").RemoveEmpty();
+
+                sanitizer.Tag("ol").RemoveEmpty();
+                sanitizer.Tag("ul").RemoveEmpty();
+                sanitizer.Tag("li").RemoveEmpty();
+            }
+            else
+            {
+                sanitizer.Tag("b").Rename("strong");
+
+                sanitizer.Tag("code").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("big").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("small").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("p").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("b").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("s").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("i").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("u").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("a").AllowAttributes("style").AllowAttributes("class").AllowAttributes("href").AllowAttributes("target");
+
+                if (docs.Config.RemoveSpanTags)
+                    sanitizer.Tag("span").AllowAttributes("style").AllowAttributes("class").NoAttributes(SanitizerOperation.FlattenTag);
+                else
+                    sanitizer.Tag("span").AllowAttributes("style").AllowAttributes("class");
+
+                sanitizer.Tag("div").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("blockquote").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("pre").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("sub").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("sup").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("label").AllowAttributes("style").AllowAttributes("class");
+
+                sanitizer.Tag("img").AllowAttributes("style").AllowAttributes("class").AllowAttributes("src");
+
+                if (!docs.Config.RemoveIframes)
+                    sanitizer.Tag("iframe").AllowAttributes("style").AllowAttributes("class").AllowAttributes("src");
+
+                sanitizer.Tag("h1").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("h2").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("h3").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("h4").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("h5").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("h6").AllowAttributes("style").AllowAttributes("class");
+
+                sanitizer.Tag("table").AllowAttributes("style").AllowAttributes("class").AllowAttributes("border").AllowAttributes("cellspacing").AllowAttributes("cellpadding");
+                sanitizer.Tag("thead").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("tbody").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("tfoot").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("th").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("tr").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("td").AllowAttributes("style").AllowAttributes("class").AllowAttributes("colspan").AllowAttributes("rowspan");
+
+                sanitizer.Tag("ol").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("ul").AllowAttributes("style").AllowAttributes("class");
+                sanitizer.Tag("li").AllowAttributes("style").AllowAttributes("class");
+            }
+
+            string sanitized = sanitizer.Sanitize(this.GetOuterHtml(docs.Html));
+            
+            return this.ParseWithHtmlAgilityPack(sanitized);
+        }
+
+
+
         protected HtmlDocument ConvertFontHeaders(HtmlDocs docs)
         {
             foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
@@ -898,6 +1260,176 @@ namespace PasteItCleaned.Plugin.Cleaners
         }
 
 
+
+        protected HtmlDocument ConvertFontHeadersForOpenOffice(HtmlDocs docs)
+        {
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+                ConvertFontHeadersForOpenOfficeNode(node);
+
+            return docs.Html;
+        }
+
+        private void ConvertFontHeadersForOpenOfficeNode(HtmlNode node)
+        {
+            var childNodes = new List<HtmlNode>();
+
+            foreach (HtmlNode n in node.ChildNodes)
+                childNodes.Add(n);
+
+            foreach (HtmlNode n in childNodes)
+            {
+                if (n.HasChildNodes)
+                    ConvertFontHeadersForOpenOfficeNode(n);
+
+                if (n.Name.ToLower() == "font")
+                    n.ParentNode.ReplaceChild(HtmlNode.CreateNode(n.OuterHtml.Replace("<font", "<span").Replace("</font>", "</span>")), n);
+            }
+        }
+
+
+
+        protected HtmlDocument UnifyHeaders(HtmlDocs docs)
+        {
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+                UnifyHeadersNode(node);
+
+            return docs.Html;
+        }
+
+        private void UnifyHeadersNode(HtmlNode node)
+        {
+            var childNodes = new List<HtmlNode>();
+            var headerTags = new List<string>(new string[] { "h1", "h2", "h3", "h4", "h5", "h6" });
+
+            if (headerTags.Contains(node.Name.ToLower()))
+            {
+                var nodeStyleAttr = this.FindOrCreateAttr(node, "style");
+
+                var current = node;
+                var newStyles = "";
+
+                while (current.Name != "#document")
+                {
+                    var styleAttr = this.FindOrCreateAttr(current, "style");
+
+                    // Adding child styles to new styles
+                    newStyles = styleAttr.Value + newStyles;
+
+                    if (current != node && headerTags.Contains(current.Name.ToLower()))
+                    {
+                        var allStyles = styleAttr.Value + newStyles;
+
+                        nodeStyleAttr.Value = allStyles;
+                        node.Name = current.Name;
+
+                        current.ParentNode.ReplaceChild(HtmlNode.CreateNode(node.OuterHtml), current);
+                        break;
+                    }
+
+                    current = current.ParentNode;
+                }
+            }
+
+            foreach (HtmlNode n in node.ChildNodes)
+                childNodes.Add(n);
+
+            foreach (HtmlNode n in childNodes)
+                UnifyHeadersNode(n);
+        }
+
+
+
+        //protected HtmlDocument RemoveUselessNestedTextNodes(HtmlDocs docs)
+        //{
+        //    var finalTopTags = new List<string>(new string[] { "p" });
+
+        //    foreach (string tag in finalTopTags)
+        //        foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+        //            RemoveUselessNestedTextNodesNode(node, tag);
+
+        //    return docs.Html;
+        //}
+
+        //private void RemoveUselessNestedTextNodesNode(HtmlNode node, string tag)
+        //{
+        //    var childNodes = new List<HtmlNode>();
+
+        //    if (node.Name.ToLower() == tag.ToLower())
+        //    {
+        //        if (node.HasChildNodes && node.ChildNodes.Count == 1)
+        //        {
+        //            var nodeStyleAttr = this.FindOrCreateAttr(node, "style");
+        //        }
+
+        //        /*
+
+        //        var current = node;
+        //        var newStyles = "";
+
+        //        while (current.Name != "#document")
+        //        {
+        //            var styleAttr = this.FindOrCreateAttr(current, "style");
+
+        //            // Adding child styles to new styles
+        //            newStyles = styleAttr.Value + newStyles;
+
+        //            if (current != node && current.Name.ToLower() == tag)
+        //            {
+        //                var allStyles = styleAttr.Value + newStyles;
+
+        //                nodeStyleAttr.Value = allStyles;
+        //                node.Name = current.Name;
+
+        //                current.ParentNode.ReplaceChild(HtmlNode.CreateNode(node.OuterHtml), current);
+        //                break;
+        //            }
+
+        //            current = current.ParentNode;
+        //        }*/
+        //    }
+
+        //    foreach (HtmlNode n in node.ChildNodes)
+        //        childNodes.Add(n);
+
+        //    foreach (HtmlNode n in childNodes)
+        //        RemoveUselessNestedTextNodesNode(n, tag);
+        //}
+
+
+
+        protected HtmlDocument RemoveSpanTags(HtmlDocs docs)
+        {
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+                RemoveSpanTagsNode(node);
+
+            return docs.Html;
+        }
+
+        private void RemoveSpanTagsNode(HtmlNode node)
+        {
+            var childNodes = new List<HtmlNode>();
+            var removableTags = new List<string>(new string[] { "span" });
+
+            if (removableTags.Contains(node.Name.ToLower()))
+            {
+                if (node.ParentNode.ChildNodes.Count == 1)
+                {
+                    var styleAttr = this.FindOrCreateAttr(node, "style");
+                    var parentStyleAttr = this.FindOrCreateAttr(node.ParentNode, "style");
+
+                    parentStyleAttr.Value += styleAttr.Value;
+                    styleAttr.Remove();
+                }
+            }
+
+            foreach (HtmlNode n in node.ChildNodes)
+                childNodes.Add(n);
+
+            foreach (HtmlNode n in childNodes)
+                RemoveSpanTagsNode(n);
+        }
+
+
         protected HtmlDocument RemoveLocalAnchors(HtmlDocs docs)
         {
             foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
@@ -929,16 +1461,16 @@ namespace PasteItCleaned.Plugin.Cleaners
         }
 
 
-        protected string RemoveIframes(string content)
-        {
-            var pattern = @"<(iframe|!\[)[^>]*?>";
+        //protected string RemoveIframes(string content)
+        //{
+        //    var pattern = @"<(iframe|!\[)[^>]*?>";
 
-            return Regex.Replace(content, pattern, "", RegexOptions.Singleline);
-        }
+        //    return Regex.Replace(content, pattern, "", RegexOptions.Singleline);
+        //}
 
         protected string RemoveUselessTags(string content)
         {
-            var pattern = @"<(meta|link|/?o:|/?v:|/?style|/?title|/?div|/?std|/?head|/?html|/?body|/?script|/?col|/?colgroup|/?form|/?input|/?textarea|/?select|/?button|/?temp|/?picture|/?def|!\[)[^>]*?>";
+            var pattern = @"<(meta|link|/?o:|/?v:|/?style|/?title|/?std|/?head|/?html|/?body|/?script|/?col|/?colgroup|/?form|/?input|/?textarea|/?select|/?button|/?temp|/?picture|/?def|!\[)[^>]*?>";
 
             content = content.Replace("<font", "<span");
             content = content.Replace("</font>", "</span>");
@@ -1228,6 +1760,15 @@ namespace PasteItCleaned.Plugin.Cleaners
                 {
                     var className = classe.Groups["name"].Value;
                     var classContent = classe.Groups["class"].Value;
+
+                    if (!string.IsNullOrWhiteSpace(classContent))
+                        classContent = classContent.Trim();
+                    else
+                        classContent = "";
+
+                    if (!classContent.EndsWith(";"))
+                        classContent = classContent + ";";
+
                     var modifiers = Regex.Matches(classContent, patternStyle, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Multiline);
 
                     foreach (Match modifier in modifiers)

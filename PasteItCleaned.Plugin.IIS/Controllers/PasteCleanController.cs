@@ -17,6 +17,7 @@ using PasteItCleaned.Plugin.Localization;
 using PasteItCleaned.Core.Services;
 using PasteItCleaned.Core.Helpers;
 using PasteItCleaned.Core.Models;
+using PasteItCleaned.Plugin.Cleaners.OpenOffice.All;
 
 namespace PasteItCleaned.Plugin.Controllers
 {
@@ -145,6 +146,7 @@ namespace PasteItCleaned.Plugin.Controllers
                 Cleaners.Add(new OfficeExcelCleaner());
                 Cleaners.Add(new OfficeWordCleaner());
                 Cleaners.Add(new OfficePowerPointCleaner());
+                Cleaners.Add(new OpenOfficeAllCleaner());
                 Cleaners.Add(new WebCleaner());
                 Cleaners.Add(new RtfCleaner());
             }

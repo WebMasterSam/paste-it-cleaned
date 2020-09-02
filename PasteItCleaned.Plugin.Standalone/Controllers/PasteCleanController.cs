@@ -13,6 +13,7 @@ using PasteItCleaned.Plugin.Cleaners.Web;
 using PasteItCleaned.Plugin.Controllers.Entities;
 using PasteItCleaned.Core.Models;
 using PasteItCleaned.Core.Helpers;
+using PasteItCleaned.Plugin.Cleaners.OpenOffice.All;
 
 namespace PasteItCleaned.Plugin.Controllers
 {
@@ -49,9 +50,8 @@ namespace PasteItCleaned.Plugin.Controllers
                 config.RemoveClassNames = ConfigHelper.GetAppSetting("Features.RemoveClassNames") == "true";
                 config.RemoveIframes = ConfigHelper.GetAppSetting("Features.RemoveIframes") == "true";
                 config.RemoveSpanTags = ConfigHelper.GetAppSetting("Features.RemoveSpanTags") == "true";
-
-                //config.RemoveEmptyTags = ConfigHelper.GetAppSetting("Features.RemoveEmptyTags") == "true";
-                //config.RemoveTagAttributes = ConfigHelper.GetAppSetting("Features.RemoveTagAttributes") == "true";
+                config.RemoveEmptyTags = ConfigHelper.GetAppSetting("Features.RemoveEmptyTags") == "true";
+                config.RemoveTagAttributes = ConfigHelper.GetAppSetting("Features.RemoveTagAttributes") == "true";
 
                 EnsureCleaners();
 
@@ -87,6 +87,7 @@ namespace PasteItCleaned.Plugin.Controllers
                 Cleaners.Add(new OfficeExcelCleaner());
                 Cleaners.Add(new OfficeWordCleaner());
                 Cleaners.Add(new OfficePowerPointCleaner());
+                Cleaners.Add(new OpenOfficeAllCleaner());
                 Cleaners.Add(new WebCleaner());
                 Cleaners.Add(new RtfCleaner());
             }

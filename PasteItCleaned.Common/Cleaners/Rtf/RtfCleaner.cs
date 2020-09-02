@@ -20,20 +20,20 @@ namespace PasteItCleaned.Plugin.Cleaners.Office.Word
             var rtfDoc = base.ParseWithRtfPipe(rtf);
             var htmlDoc = rtfDoc;
 
-            htmlDoc = base.SafeExec(base.ConvertFontHeaders, htmlDoc, rtfDoc);
-            htmlDoc = base.SafeExec(base.ConvertAttributesToStyles, htmlDoc, rtfDoc);
-            htmlDoc = base.SafeExec(base.ConvertFontFamilies, htmlDoc, rtfDoc);
-            htmlDoc = base.SafeExec(base.RemoveClassAttributes, htmlDoc, rtfDoc);
-            htmlDoc = base.SafeExec(base.RemoveUselessStyles, htmlDoc, rtfDoc);
-            htmlDoc = base.SafeExec(base.RemoveMarginStylesAttr, htmlDoc, rtfDoc);
-            htmlDoc = base.SafeExec(base.EmbedInternalImages, htmlDoc, rtfDoc);
+            htmlDoc = base.SafeExec(base.ConvertFontHeaders, htmlDoc, rtfDoc, config);
+            htmlDoc = base.SafeExec(base.ConvertAttributesToStyles, htmlDoc, rtfDoc, config);
+            htmlDoc = base.SafeExec(base.ConvertFontFamilies, htmlDoc, rtfDoc, config);
+            htmlDoc = base.SafeExec(base.RemoveClassAttributes, htmlDoc, rtfDoc, config);
+            htmlDoc = base.SafeExec(base.RemoveUselessStyles, htmlDoc, rtfDoc, config);
+            htmlDoc = base.SafeExec(base.RemoveMarginStylesAttr, htmlDoc, rtfDoc, config);
+            htmlDoc = base.SafeExec(base.EmbedInternalImages, htmlDoc, rtfDoc, config);
 
             if (config.EmbedExternalImages)
-                htmlDoc = base.SafeExec(base.EmbedExternalImages, htmlDoc, rtfDoc);
+                htmlDoc = base.SafeExec(base.EmbedExternalImages, htmlDoc, rtfDoc, config);
 
-            htmlDoc = base.SafeExec(base.RemoveEmptyAttributes, htmlDoc, rtfDoc);
-            htmlDoc = base.SafeExec(base.RemoveUselessAttributes, htmlDoc, rtfDoc);
-            htmlDoc = base.SafeExec(base.RemoveUselessTags, htmlDoc, rtfDoc);
+            htmlDoc = base.SafeExec(base.RemoveEmptyAttributes, htmlDoc, rtfDoc, config);
+            htmlDoc = base.SafeExec(base.RemoveUselessAttributes, htmlDoc, rtfDoc, config);
+            //htmlDoc = base.SafeExec(base.RemoveUselessTags, htmlDoc, rtfDoc, config);
 
             var cleaned = base.GetOuterHtml(htmlDoc);
 

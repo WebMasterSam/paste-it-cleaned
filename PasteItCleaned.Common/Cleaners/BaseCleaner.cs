@@ -36,11 +36,11 @@ namespace PasteItCleaned.Plugin.Cleaners
             }
         }
 
-        protected HtmlDocument SafeExec(Func<HtmlDocs, HtmlDocument> act, HtmlDocument html, HtmlDocument rtf)
+        protected HtmlDocument SafeExec(Func<HtmlDocs, HtmlDocument> act, HtmlDocument html, HtmlDocument rtf, Config config)
         {
             try
             {
-                return act.Invoke(new HtmlDocs(html, rtf));
+                return act.Invoke(new HtmlDocs(html, rtf, config));
             }
             catch (Exception ex)
             {
