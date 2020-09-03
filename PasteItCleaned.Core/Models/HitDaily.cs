@@ -38,6 +38,21 @@ namespace PasteItCleaned.Core.Models
         [Column("count_rtf")]
         public int CountRtf { get; set; }
 
+        [Column("count_openoffice")]
+        public int CountOpenOffice { get; set; }
+
+        [Column("count_libreoffice")]
+        public int CountLibreOffice { get; set; }
+
+        [Column("count_google")]
+        public int CountGoogle { get; set; }
+
+        [Column("count_google_sheets")]
+        public int CountGoogleSheets { get; set; }
+
+        [Column("count_google_docs")]
+        public int CountGoogleDocs { get; set; }
+
         [Column("count_other")]
         public int CountOther { get; set; }
 

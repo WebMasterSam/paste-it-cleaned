@@ -27,10 +27,15 @@ namespace PasteItCleaned.Backend.Data.Repositories
                 case "web": return rows.Sum(m => m.CountWeb);
                 case "word": return rows.Sum(m => m.CountWord);
                 case "rtf": return rows.Sum(m => m.CountRtf);
+                case "openoffice": return rows.Sum(m => m.CountOpenOffice);
+                case "libreoffice": return rows.Sum(m => m.CountLibreOffice);
+                case "google": return rows.Sum(m => m.CountGoogle);
+                case "googlesheets": return rows.Sum(m => m.CountGoogleSheets);
+                case "googledocs": return rows.Sum(m => m.CountGoogleDocs);
                 case "other": return rows.Sum(m => m.CountOther);
             }
 
-            return rows.Sum(m => m.CountExcel + m.CountImage + m.CountPowerPoint + m.CountText + m.CountWeb + m.CountWord + m.CountRtf + m.CountOther);
+            return rows.Sum(m => m.CountExcel + m.CountImage + m.CountPowerPoint + m.CountText + m.CountWeb + m.CountWord + m.CountRtf + m.CountOpenOffice + m.CountLibreOffice + m.CountGoogle + m.CountGoogleSheets + m.CountGoogleDocs + m.CountOther);
         }
 
         public void DeleteByDate(DateTime priorTo)
