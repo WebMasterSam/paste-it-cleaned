@@ -41,6 +41,11 @@ namespace PasteItCleaned.Backend.Services
                 case "web": hitDaily.CountWeb++; break;
                 case "word": hitDaily.CountWord++; break;
                 case "rtf": hitDaily.CountRtf++; break;
+                case "openoffice": hitDaily.CountOpenOffice++; break;
+                case "libreoffice": hitDaily.CountLibreOffice++; break;
+                case "google": hitDaily.CountGoogle++; break;
+                case "googlesheets": hitDaily.CountGoogleSheets++; break;
+                case "googledocs": hitDaily.CountGoogleDocs++; break;
                 case "other": hitDaily.CountOther++; break;
             }
 
