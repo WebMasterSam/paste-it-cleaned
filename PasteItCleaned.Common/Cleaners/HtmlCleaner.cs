@@ -96,6 +96,11 @@ namespace PasteItCleaned.Plugin.Cleaners
             parseableContent = Regex.Replace(parseableContent, "\\<\\!DOCTYPE.+?\\>", "");
             parseableContent = Regex.Replace(parseableContent, "\\<meta.+?\\>", "");
 
+            var styles = Regex.Matches(parseableContent, "style=\".+\"", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Multiline);
+
+            foreach (Match match in styles)
+                parseableContent = parseableContent.Replace(match.Value, match.Value.Replace("&quot;", "'"));
+
             htmlDoc.LoadHtml(parseableContent);
 
             return htmlDoc;
@@ -272,7 +277,7 @@ namespace PasteItCleaned.Plugin.Cleaners
                     if (attr.Name.Trim().ToLower() == "style")
                     {
                         var newStyles = new StringBuilder();
-                        var modifiers = new List<string>(attr.Value.Replace("&quot;", "\"").Split(";"));
+                        var modifiers = new List<string>(attr.Value.Replace("&quot;", "").Split(";"));
                         var addedModifiers = new List<string>();
                         var keptModifiers = new List<string>();
 
@@ -284,7 +289,7 @@ namespace PasteItCleaned.Plugin.Cleaners
                             {
                                 var modifierName = modifier.Split(":")[0].Trim();
                                 var modifierValue = modifier.Split(":")[1].Trim();
-                                var completeModifier = string.Format("{0}: {1}; ", modifierName, modifierValue);
+                                var completeModifier = string.Format("{0}: {1}; ", modifierName, modifierValue.TrimEnd(','));
 
                                 if (IsModifierValid(modifierName, modifierValue))
                                 {
@@ -1103,6 +1108,8 @@ namespace PasteItCleaned.Plugin.Cleaners
             sanitizer.Tag("temp").Remove();
             sanitizer.Tag("picture").Remove();
             sanitizer.Tag("def").Remove();
+
+            sanitizer.Tag("temp").RemoveEmpty().NoAttributes(SanitizerOperation.FlattenTag);
 
             if (docs.Config.RemoveIframes)
                 sanitizer.Tag("iframe").Remove();
