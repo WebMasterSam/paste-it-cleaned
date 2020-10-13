@@ -77,8 +77,14 @@ namespace PasteItCleaned.Plugin.Controllers
         private string Clean(string html, string rtf, Config config, string ip, string referer, string userAgent, int hash, bool keepStyles)
         {
             foreach (BaseCleaner cleaner in Cleaners)
+            {
                 if (cleaner.CanClean(html, rtf))
-                    return cleaner.Clean(html, rtf, config, keepStyles);
+                {
+                    var cleaned = cleaner.Clean(html, rtf, config, keepStyles);
+
+                    return cleaned;
+                }
+            }
 
             return html;
         }
