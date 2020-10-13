@@ -23,6 +23,7 @@ namespace PasteItCleaned.Plugin.Cleaners.Web
             var rtfDoc = base.ParseWithRtfPipe(rtf);
 
             htmlDoc = base.SafeExec(base.ConvertFontHeaders, htmlDoc, rtfDoc, config);
+            htmlDoc = base.SafeExec(base.ConvertAttributesToStyles, htmlDoc, rtfDoc, config);
 
             if (config.EmbedExternalImages)
                 htmlDoc = base.SafeExec(this.EmbedExternalImages, htmlDoc, rtfDoc, config);

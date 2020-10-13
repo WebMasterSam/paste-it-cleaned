@@ -896,8 +896,8 @@ namespace PasteItCleaned.Plugin.Cleaners
                 foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
                     ConvertBulletListsNodeCreateUlOl(node);
 
-            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
-                CleanBulletListsNode(node);
+            /*foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+                CleanBulletListsNode(node);*/
 
             return docs.Html;
         }
@@ -908,6 +908,23 @@ namespace PasteItCleaned.Plugin.Cleaners
 
             foreach (HtmlNode n in node.ChildNodes)
                 childNodes.Add(n);
+
+            /*
+                <p class="MsoNormal" style='text-indent: -18pt; mso-list: l0 level1 lfo1; background: white; mso-style-unhide: no; mso-style-qformat: yes; margin: 11pt 0cm 0cm 36pt; line-height: 115%; mso-pagination: widow-orphan; font-size: 11pt; font-family: arial,sans-serif; mso-fareast-font-family: arial; mso-ansi-language: #000c; mso-level-number-format: bullet; mso-level-text: -; mso-level-tab-stop: none; mso-level-number-position: left; text-decoration: none; text-underline: none;'>
+                    <![if !supportLists]>
+                    <span lang="EN-CA" style='font-family: calibri,sans-serif; mso-fareast-font-family: calibri; mso-ansi-language: en-ca;' class="">
+                        <span style='mso-list: ignore; margin: initial initial initial 0px;' class="">
+                            -<span style='font: 7pt times new roman;' class="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        </span>
+                    </span>
+                    <span lang="EN-CA" style='font-family: calibri,sans-serif; mso-fareast-font-family: calibri; color: black; mso-color-alt: windowtext; mso-ansi-language: en-ca;' class="">
+                        Creating and maintaining the Software;
+                    </span>
+                    <span lang="EN-CA" style='font-family: calibri,sans-serif; mso-fareast-font-family: calibri; mso-ansi-language: en-ca;' class="">
+                        <o:p class="" style=""></o:p>
+                    </span>
+                </p>
+            */
 
             foreach (HtmlNode n in childNodes)
             {
@@ -925,12 +942,15 @@ namespace PasteItCleaned.Plugin.Cleaners
                         var patternLevel = @"level(?<level>[0-9])";
                         var patternSupportLists = @"<\!\[if \!supportLists\]>(?<comment>.+?)<\!\[endif\]>";
                         var patternText = @"<\!\[endif\]>(?<text>.+)";
+
                         var matchLevel = Regex.Match(msoList, patternLevel, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Multiline);
                         var matchSupportLists = Regex.Match(n.InnerHtml, patternSupportLists, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Multiline);
                         var matchText = Regex.Match(n.InnerHtml, patternText, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Multiline);
+
                         var level = (matchLevel.Success && matchLevel.Groups["level"] != null) ? matchLevel.Groups["level"].Value : "1";
                         var supportLists = (matchSupportLists.Success && matchSupportLists.Groups["comment"] != null) ? matchSupportLists.Groups["comment"].Value.ToLower() : "";
                         var text = (matchText.Success && matchText.Groups["text"] != null) ? matchText.Groups["text"].Value : n.InnerHtml;
+
                         var listStyleType = "disc";
                         var listType = "ul";
                         var msoLevelText = this.GetValue(modifiers, "mso-level-text", "");
@@ -952,6 +972,12 @@ namespace PasteItCleaned.Plugin.Cleaners
                         
                         var liNodeHtml = string.Format("<li temp-level='{0}' temp-list-style-type='{1}' temp-list-type='{2}' style='{3}'>{4}</li>", level, listStyleType, listType, styleAttr.Value, text);
                         var liNode = HtmlNode.CreateNode(liNodeHtml);
+
+                        if (liNode.InnerHtml.StartsWith("<![if !supportLists]>"))
+                        {
+                            liNode.ChildNodes.RemoveAt(0);
+                            liNode.ChildNodes.RemoveAt(0);
+                        }
 
                         n.ParentNode.ReplaceChild(liNode, n);
                     }
@@ -1079,9 +1105,10 @@ namespace PasteItCleaned.Plugin.Cleaners
         {
             var sanitizer = HtmlSanitizer.SimpleHtml5DocumentSanitizer();
 
-            sanitizer.RemoveComments = true;
+            sanitizer.RemoveComments = false;
 
             sanitizer.Tag("em").Rename("i");
+            sanitizer.Tag("font").AllowAttributes("style").Rename("span");
             sanitizer.Tag("strong").Rename("b");
             sanitizer.Tag("strike").Rename("s");
             sanitizer.Tag("center").Rename("p").SetAttribute("align", "center");
