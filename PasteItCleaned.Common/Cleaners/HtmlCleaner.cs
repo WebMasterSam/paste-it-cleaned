@@ -10,6 +10,8 @@ using PasteItCleaned.Plugin.Helpers;
 using PasteItCleaned.Core.Models;
 using System;
 using Vereyon.Web;
+using PasteItCleaned.Plugin.Rtf;
+using PasteItCleaned.Plugin.Rtf.NRtfTree.Core;
 
 namespace PasteItCleaned.Plugin.Cleaners
 {
@@ -25,7 +27,7 @@ namespace PasteItCleaned.Plugin.Cleaners
         public override string Clean(string html, string rtf, Config config, bool keepStyles)
         {
             var htmlDoc = this.ParseWithHtmlAgilityPack(html);
-            var rtfDoc = this.ParseWithRtfPipe(rtf);
+            var rtfDoc = this.ParseRtf(rtf);
 
             htmlDoc = base.SafeExec(this.RemoveLocalAnchors, htmlDoc, rtfDoc, config);
 
@@ -38,6 +40,7 @@ namespace PasteItCleaned.Plugin.Cleaners
             htmlDoc = base.SafeExec(this.RemoveUselessStyles, htmlDoc, rtfDoc, config);
             htmlDoc = base.SafeExec(this.RemoveUselessAttributes, htmlDoc, rtfDoc, config);
             htmlDoc = base.SafeExec(this.RemoveEmptyAttributes, htmlDoc, rtfDoc, config);
+            htmlDoc = base.SafeExec(this.RemoveInvisibleTags, htmlDoc, rtfDoc, config);
             htmlDoc = base.SafeExec(this.SanitizeHtmlWithHtmlSanitizer, htmlDoc, rtfDoc, config);
 
             var cleaned = this.GetOuterHtml(htmlDoc);
@@ -106,30 +109,105 @@ namespace PasteItCleaned.Plugin.Cleaners
             return htmlDoc;
         }
 
-        protected HtmlDocument ParseWithRtfPipe(string content)
+        protected HtmlDocument ParseRtf(string content)
         {
             var htmlDoc = new HtmlDocument();
+            var html = ParseRtfUsingRtfPipe(content);
 
+            if (string.IsNullOrWhiteSpace(html))
+                html = ParseRtfUsingSautinSoft(content);
+
+            if (string.IsNullOrWhiteSpace(html))
+                html = ParseRtfUsingRtfTree(content);
+
+            if (string.IsNullOrWhiteSpace(html))
+                html = ParseRtfUsingRichTextStripper(content);
+
+            htmlDoc.LoadHtml(html);
+
+            return htmlDoc;
+        }
+
+        protected string ParseRtfUsingRtfPipe(string content)
+        {
             if (!string.IsNullOrWhiteSpace(content))
             {
                 try
                 {
-                    var html = RtfPipe.Rtf.ToHtml(new RtfPipe.RtfSource(new StringReader(content)));
-
-                    htmlDoc.LoadHtml(html);
+                    return RtfPipe.Rtf.ToHtml(new RtfPipe.RtfSource(new StringReader(content)));
                 }
-                catch
+                catch (Exception ex)
                 {
-                    SautinSoft.RtfToHtml r = new SautinSoft.RtfToHtml();
-                    var html = r.ConvertString(content);
-                    var htmlWithoutTrial = html.Replace("</div><div style=\"text-align:center;\">The unlicensed version of &laquo;RTF to HTML .Net&raquo;.<br><a href=\"https://www.sautinsoft.com/products/rtf-to-html/order.php\">Get the full featured version!</a></div>", "").Replace("TRIAL", "");
-
-                    htmlDoc.LoadHtml(htmlWithoutTrial);
+                    return string.Empty;
                 }
             }
 
-            return htmlDoc;
+            return string.Empty;
         }
+
+        protected string ParseRtfUsingSautinSoft(string content)
+        {
+            if (!string.IsNullOrWhiteSpace(content))
+            {
+                try
+                {
+                    SautinSoft.RtfToHtml r = new SautinSoft.RtfToHtml();
+
+                    var html = r.ConvertString(content);
+                    var htmlWithoutTrial = html.Replace("<div style=\"text-align:center;\">The unlicensed version of &laquo;RTF to HTML .Net&raquo;.<br><a href=\"https://www.sautinsoft.com/products/rtf-to-html/order.php\">Get the full featured version!</a></div>", "").Replace("TRIAL", "");
+
+                    return htmlWithoutTrial;
+                }
+                catch (Exception ex)
+                {
+                    return string.Empty;
+                }
+            }
+
+            return string.Empty;
+        }
+
+        protected string ParseRtfUsingRichTextStripper(string content)
+        {
+            if (!string.IsNullOrWhiteSpace(content))
+            {
+                try
+                {
+                    return "<html><body>" + RichTextStripper.StripRichTextFormat(content) + "</body></html>";
+                }
+                catch (Exception ex)
+                {
+                    return string.Empty;
+                }
+            }
+
+            return string.Empty;
+        }
+
+        protected string ParseRtfUsingRtfTree(string content)
+        {
+            if (!string.IsNullOrWhiteSpace(content))
+            {
+                try
+                {
+                    RtfTree arbol = new RtfTree();
+
+                    arbol.LoadRtfText(content);
+
+                    return "<html><body>" + arbol.Text + "</body></html>";
+                }
+                catch (Exception ex)
+                {
+                    return string.Empty;
+                }
+            }
+
+            return string.Empty;
+        }
+
+
+
+
 
         protected string GetOuterHtml(HtmlDocument doc)
         {
@@ -1109,6 +1187,7 @@ namespace PasteItCleaned.Plugin.Cleaners
 
             sanitizer.Tag("em").Rename("i");
             sanitizer.Tag("font").AllowAttributes("style").Rename("span");
+            sanitizer.Tag("cite").AllowAttributes("style").Rename("span");
             sanitizer.Tag("strong").Rename("b");
             sanitizer.Tag("strike").Rename("s");
             sanitizer.Tag("center").Rename("p").SetAttribute("align", "center");
@@ -1537,6 +1616,36 @@ namespace PasteItCleaned.Plugin.Cleaners
         }
 
 
+
+
+        protected HtmlDocument RemoveInvisibleTags(HtmlDocs docs)
+        {
+            foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
+                RemoveInvisibleTagsNode(node);
+
+            return docs.Html;
+        }
+
+        private void RemoveInvisibleTagsNode(HtmlNode node)
+        {
+            var childNodes = new List<HtmlNode>();
+            var styleAttr = this.FindOrCreateAttr(node, "style");
+
+            if (styleAttr.Value.ToLower().Contains("visibility: hidden;"))
+                node.Remove();
+            else if (styleAttr.Value.ToLower().Contains("display: none;"))
+                node.Remove();
+            else
+            {
+                foreach (HtmlNode n in node.ChildNodes)
+                    childNodes.Add(n);
+
+                foreach (HtmlNode n in childNodes)
+                    RemoveInvisibleTagsNode(n);
+            }
+        }
+
+
         protected HtmlDocument RemoveLocalAnchors(HtmlDocs docs)
         {
             foreach (HtmlNode node in docs.Html.DocumentNode.ChildNodes)
@@ -1838,12 +1947,30 @@ namespace PasteItCleaned.Plugin.Cleaners
 
         private bool IsModifierValid(string name, string value)
         {
+            // Remove webkit and other browser specific styles
+            if (name.ToLower().StartsWith("-")) return false;
+
+            // Remove any MS specific styles (Word)
             if (name.ToLower().StartsWith("mso-")) return false;
+
+            // Remove styles we don't want to see in the final results
             if (name.ToLower() == "color" && value.ToLower() == "windowtext") return false;
             if (name.ToLower().StartsWith("page-break")) return false;
             if (name.ToLower().StartsWith("tab-stops")) return false;
             if (name.ToLower().StartsWith("letter-spacing")) return false;
             if (name.ToLower().StartsWith("text-indent")) return false;
+
+            // Remove absolute/relative positionning
+            if (name.ToLower().Equals("z-index")) return false;
+            if (name.ToLower().Equals("position")) return false;
+            if (name.ToLower().Equals("top")) return false;
+            if (name.ToLower().Equals("right")) return false;
+            if (name.ToLower().Equals("bottom")) return false;
+            if (name.ToLower().Equals("left")) return false;
+
+            // Remove styles that doesn't change nothing
+            if (value.ToLower() == "initial") return false;
+            if (value.ToLower() == "inherit") return false;
 
             return true;
         }

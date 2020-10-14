@@ -9,7 +9,7 @@ namespace PasteItCleaned.Plugin.Cleaners.LibreOffice
             var cleaned = base.SafeExec(base.RemoveVmlComments, html);
 
             var htmlDoc = base.ParseWithHtmlAgilityPack(cleaned);
-            var rtfDoc = base.ParseWithRtfPipe(rtf);
+            var rtfDoc = base.ParseRtf(rtf);
 
             htmlDoc = base.SafeExec(base.AddInlineStyles, htmlDoc, rtfDoc, config);
             htmlDoc = base.SafeExec(base.ConvertFontHeadersForOpenOffice, htmlDoc, rtfDoc, config);

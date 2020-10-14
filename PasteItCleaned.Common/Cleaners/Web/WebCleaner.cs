@@ -20,7 +20,7 @@ namespace PasteItCleaned.Plugin.Cleaners.Web
             var cleaned = html;
 
             var htmlDoc = base.ParseWithHtmlAgilityPack(cleaned);
-            var rtfDoc = base.ParseWithRtfPipe(rtf);
+            var rtfDoc = base.ParseRtf(rtf);
 
             htmlDoc = base.SafeExec(base.ConvertFontHeaders, htmlDoc, rtfDoc, config);
             htmlDoc = base.SafeExec(base.ConvertAttributesToStyles, htmlDoc, rtfDoc, config);

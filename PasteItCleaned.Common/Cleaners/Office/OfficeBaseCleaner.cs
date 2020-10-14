@@ -9,7 +9,7 @@ namespace PasteItCleaned.Plugin.Cleaners.Office
             var cleaned = base.SafeExec(base.RemoveVmlComments, html);
 
             var htmlDoc = base.ParseWithHtmlAgilityPack(cleaned);
-            var rtfDoc = base.ParseWithRtfPipe(rtf);
+            var rtfDoc = base.ParseRtf(rtf);
 
             htmlDoc = base.SafeExec(base.AddInlineStyles, htmlDoc, rtfDoc, config); // For lists, it's necessary to do a first pass to add inline styles before converting to LI
             htmlDoc = base.SafeExec(base.AddVShapesTags, htmlDoc, rtfDoc, config);

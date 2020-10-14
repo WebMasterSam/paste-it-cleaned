@@ -17,7 +17,7 @@ namespace PasteItCleaned.Plugin.Cleaners.Office.Word
 
         public override string Clean(string html, string rtf, Config config, bool keepStyles)
         {
-            var rtfDoc = base.ParseWithRtfPipe(rtf);
+            var rtfDoc = base.ParseRtf(rtf);
             var htmlDoc = rtfDoc;
 
             htmlDoc = base.SafeExec(base.ConvertFontHeaders, htmlDoc, rtfDoc, config);
