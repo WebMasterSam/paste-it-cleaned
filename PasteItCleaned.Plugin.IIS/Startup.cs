@@ -20,6 +20,10 @@ using PasteItCleaned.Backend.Data;
 using PasteItCleaned.Backend.Services;
 using PasteItCleaned.Backend.Core.Middleware.Logging;
 using PasteItCleaned.Plugin.Localization;
+using System.Runtime.InteropServices;
+using Microsoft.AspNetCore.Diagnostics;
+using Newtonsoft.Json;
+using Microsoft.AspNetCore.Http;
 
 namespace PasteItCleaned.IIS
 {
@@ -63,6 +67,11 @@ namespace PasteItCleaned.IIS
 
             services.AddLogging(logging => logging.AddConsole());
 
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                services.AddLogging(logging => logging.AddDebug().AddConsole().AddEventLog());
+            else
+                services.AddLogging(logging => logging.AddDebug().AddConsole());
+
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddTransient<IApiKeyService, ApiKeyService>();
             services.AddTransient<IClientService, ClientService>();
@@ -100,6 +109,16 @@ namespace PasteItCleaned.IIS
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseExceptionHandler(a => a.Run(async context =>
+            {
+                var feature = context.Features.Get<IExceptionHandlerPathFeature>();
+                var exception = feature.Error;
+                var result = JsonConvert.SerializeObject(new { error = exception.Message });
+
+                context.Response.ContentType = "application/json";
+
+                await context.Response.WriteAsync(result);
+            }));
             app.UseRequestResponseLogging();
             app.UseSwagger();
             app.UseSwaggerUI(c =>

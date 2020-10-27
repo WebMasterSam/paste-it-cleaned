@@ -115,6 +115,7 @@ namespace PasteItCleaned.Plugin.Controllers
             {
                 Console.WriteLine(ex.Message);
                 Console.WriteLine(ex.StackTrace);
+                Log.LogError(ex.Message + Environment.NewLine + ex.StackTrace);
 
                 _errorService.Create(new Error { ClientId = clientId, CreatedOn = DateTime.UtcNow, Message = ex.Message, StackTrace = ex.StackTrace});
             }

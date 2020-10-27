@@ -114,8 +114,8 @@ namespace PasteItCleaned.Plugin.Cleaners
             var htmlDoc = new HtmlDocument();
             var html = ParseRtfUsingRtfPipe(content);
 
-            if (string.IsNullOrWhiteSpace(html))
-                html = ParseRtfUsingSautinSoft(content);
+            //if (string.IsNullOrWhiteSpace(html))
+                //html = ParseRtfUsingSautinSoft(content);
 
             if (string.IsNullOrWhiteSpace(html))
                 html = ParseRtfUsingRtfTree(content);
@@ -147,7 +147,9 @@ namespace PasteItCleaned.Plugin.Cleaners
 
         protected string ParseRtfUsingSautinSoft(string content)
         {
-            if (!string.IsNullOrWhiteSpace(content))
+            // Deactivated, it was a test, seems to work good but has some pitfalls also.
+
+            /*if (!string.IsNullOrWhiteSpace(content))
             {
                 try
                 {
@@ -162,7 +164,7 @@ namespace PasteItCleaned.Plugin.Cleaners
                 {
                     return string.Empty;
                 }
-            }
+            }*/
 
             return string.Empty;
         }
