@@ -12,6 +12,7 @@ using System;
 using Vereyon.Web;
 using PasteItCleaned.Plugin.Rtf;
 using PasteItCleaned.Plugin.Rtf.NRtfTree.Core;
+using PasteItCleaned.Core.Helpers;
 
 namespace PasteItCleaned.Plugin.Cleaners
 {
@@ -1949,6 +1950,10 @@ namespace PasteItCleaned.Plugin.Cleaners
 
         private bool IsModifierValid(string name, string value)
         {
+            var stripFontFamily = ConfigHelper.GetAppSetting<bool>("Behavior.StripFontFamily");
+            var hardClean = ConfigHelper.GetAppSetting<bool>("Behavior.HardClean");
+            var defaultFontSize = ConfigHelper.GetAppSetting("Behavior.DefaultFontSize");
+
             // Remove webkit and other browser specific styles
             if (name.ToLower().StartsWith("-")) return false;
 
@@ -1969,6 +1974,41 @@ namespace PasteItCleaned.Plugin.Cleaners
             if (name.ToLower().Equals("right")) return false;
             if (name.ToLower().Equals("bottom")) return false;
             if (name.ToLower().Equals("left")) return false;
+
+            // Remove Font Family if necessary (behavior in appSettings)
+            if (stripFontFamily && name.ToLower().Equals("font-family")) return false;
+
+            // Remove useless styles (hard clean)
+            if (hardClean && name.ToLower().Equals("background") && value.ToLower().Equals("transparent")) return false;
+            if (hardClean && name.ToLower().Equals("color") && value.ToLower().Equals("#000000")) return false;
+
+            if (hardClean && name.ToLower().Equals("font-style") && value.ToLower().Equals("normal")) return false;
+            if (hardClean && name.ToLower().Equals("font-variant-ligatures") && value.ToLower().Equals("normal")) return false;
+            if (hardClean && name.ToLower().Equals("font-variant-caps") && value.ToLower().Equals("normal")) return false;
+            if (hardClean && name.ToLower().Equals("font-weight") && value.ToLower().Equals("400")) return false;
+
+            if (hardClean && name.ToLower().Equals("text-align") && value.ToLower().Equals("start")) return false;
+            if (hardClean && name.ToLower().Equals("text-align") && value.ToLower().Equals("left")) return false;
+            if (hardClean && name.ToLower().Equals("text-transform") && value.ToLower().Equals("none")) return false;
+
+            if (hardClean && name.ToLower().Equals("white-space") && value.ToLower().Equals("normal")) return false;
+            if (hardClean && name.ToLower().Equals("word-spacing") && value.ToLower().Equals("0px")) return false;
+            if (hardClean && name.ToLower().Equals("ine-height")) return false;
+
+            if (hardClean && name.ToLower().Equals("outline") && value.ToLower().Equals("0px")) return false;
+            if (hardClean && name.ToLower().Equals("padding") && value.ToLower().Equals("0px")) return false;
+            if (hardClean && name.ToLower().Equals("vertical-align") && value.ToLower().Equals("baseline")) return false;
+
+            if (hardClean && name.ToLower().Equals("margin") && value.ToLower().Equals("0px 0px 0px 0px")) return false;
+            if (hardClean && name.ToLower().Equals("border") && value.ToLower().Equals("0px")) return false;
+            if (hardClean && name.ToLower().Equals("border-collapse") && value.ToLower().Equals("collapse")) return false;
+            if (hardClean && name.ToLower().Equals("border-spacing") && value.ToLower().Equals("0px")) return false;
+
+            if (hardClean && name.ToLower().Equals("orphans")) return false;
+            if (hardClean && name.ToLower().Equals("widows")) return false;
+
+            // Remove defaults
+            if (name.ToLower().Equals("font-size") && value.ToLower().Equals(defaultFontSize)) return false;
 
             // Remove styles that doesn't change nothing
             if (value.ToLower() == "initial") return false;

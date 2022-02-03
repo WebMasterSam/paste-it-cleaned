@@ -6,6 +6,7 @@ en modifiant ce fichier MSBuild. Pour en savoir plus à ce sujet, visitez https:
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <TimeStampOfAssociatedLegacyPublishXmlFile />
-    <_PublishTargetUrl>C:\Work\GitHub\paste-it-cleaned\PasteItCleaned.Plugin.IIS\bin\Release\netcoreapp2.1\publish\</_PublishTargetUrl>
+    <_PublishTargetUrl>C:\Work\Github\paste-it-cleaned\PasteItCleaned.Plugin.IIS\bin\Release\netcoreapp2.1\publish\</_PublishTargetUrl>
+    <History>True|2022-01-30T22:45:30.8068735Z;True|2022-01-30T17:30:56.3436728-05:00;False|2022-01-30T17:26:53.8111180-05:00;</History>
   </PropertyGroup>
 </Project>
